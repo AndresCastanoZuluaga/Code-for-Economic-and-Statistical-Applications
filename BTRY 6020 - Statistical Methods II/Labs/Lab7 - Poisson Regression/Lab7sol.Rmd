@@ -1,0 +1,200 @@
+---
+title: "Lab 7 - Poisson Regression"
+output:
+  pdf_document: default
+  html_document:
+    highlight: pygments
+    theme: cerulean
+  word_document: default
+---
+-----
+
+
+
+
+#Lightning Mining Data
+
+The data set `lightning.csv` has data on lightning strikes in different regions in the North Central Plains in Texas. Mining is done for Copper Ore in the region, and miners in the area often tell the story of lighting around the mines.  They say that the lightning is attracted to the copper which causes more lightning strikes around the mine. 
+
+A geologist found this claim interesting, as it relates to an electromagnetic method known as magnetotellurics for inferring the earth's subsurface of electrical materials.  So, she decided to test this. 
+
+She obtained estimates of copper ore density in mines (`COD`), and the size of the top-down surface area that was susceptible to lightning strikes (`MineSize`).  She also chose a few separate areas that were known to not have any magnetic material in the surrounding area, and these had `COD` = 0.  Over 2 years, she recorded the number of lightning strikes over each area on nights where the was a thunderstorm in the area for the spring-summer storm season.
+
++------------------+------------------------------------------------+
+|   Variable       |         Description                            |
++==================+================================================+
+|   `Strikes`      | number of lightning strikes per storm          |
++------------------+------------------------------------------------+
+|   `COD`          | copper density in corresponding mine           |
++------------------+------------------------------------------------+
+|  `MineID`        | name of each mining site                       |         
++------------------+------------------------------------------------+ 
+|  `MineSize`      | size of each mine                              |
++------------------+------------------------------------------------+
+
+
+Since our data is a count of lightning strikes with no upper bound, we can model this with a poisson regresion. 
+
+
+
+Since our data is a count of lightning strikes with no upper bound, we can model this with a poisson regresion. 
+
+1. Fit a poisson regression, predicting the response, `Strikes`, with predictor copper density, `COD`.
+
+```{r}
+Lightning = read.csv("Lightning.csv")
+
+#fit poisson GLM
+light.glm = glm(Strikes~COD, family = poisson, data = Lightning)
+summary(light.glm)
+```
+
+2. Run a goodness-of-fit test for this mode, then obtain the overdispersion parameter using the quasipoisson fit.
+
+The residual deviance is 59.601, which under the null has a $\chi^2$ distribution with 63 degres of freedom.  The good-ness of fit test statistic is
+
+```{r}
+1-pchisq(59.601,63)
+```
+
+Therefore we do not have evidence of a poor fit.
+
+Overdispersion parameter is obtained via
+
+```{r}
+light.Qglm = glm(Strikes~COD, family = quasipoisson, data = Lightning)
+summary(light.Qglm)
+```
+
+The overdispersion parameter is 0.9120407, which is consistent with our goodness-of-fit test.
+
+3. Do the assumptions hold for this model? What about the sampling scheme could have us worried about the assumptions holding?
+
+Independence is potentially an issue due to the sampling scheme, however the overdispersion parameter not being large implies that there was not a significant correlation between poisson events. 
+
+Also, the deviance residuals are within an appropriate range in the original model.  
+
+We can also investigate the linearity assumption further, by plotting the count data.
+
+```{r}
+plot(Lightning$COD, log(Lightning$Strikes))
+```
+
+Linearity appears to be a reasonable assumption.
+
+4. Even if the assumptions don't hold, take a look at the Wald-test pvalue for the COD in the `family = poisson` model.  Interpret this slope within the context of the current model and make a preliminary conclusion.
+
+The Wald test gives a p-value = 0.00143.  Therefore, in this model, we have significant evidence that copper mines with higher copper densities tend to attract some lightning strikes.  
+
+In this model, we predict that the rate of lightning strikes increases by a factor of $e^{0.65483} = 1.925$ for every unit increase in the density variable. 
+
+5. If a mine has twice as much available surface area to be struck with lightning, we would expect the twice as many lightning strikes.  In order to account for this in our model, use the offset parameter to include `MineSize` in the glm fit.  
+
+```{r}
+light.glmW = glm(Strikes~COD, family = poisson, data = Lightning, offset = log(MineSize))
+summary(light.glmW)
+```
+
+6. Write out the fitted model.
+
+Our fitted model is
+
+$log(E(Strikes)) = 1.06015 - 0.12577COD + log(MineSize)$
+
+7. Make final conclusions for the offset model.
+
+After including the mine sizes in our dataset, we don't have evidence of that the rate of lightning strikes is associated with Copper Ore density at the 0.05 significance level.  Therefore, the increased rate of lightning strikes we were fitting in our model appear to be more a function of mine-size than a copper density relationship. 
+
+Note that the geologist may know of a true magnetic field effect here corresponding to the magnetotulleric methods, however she now has evidence that the effect that this magnetic field has on lightning strikes must be weak, and is probably not a concern for miners.
+
+
+
+
+#let-7c miRNA data
+
+In this example, data was collected for both males and females with and without breast cancer.  We are looking to test if the mutations in the micro RNA gene let-7c are associated with post-transcriptional regulation of breast cancer.  Not having a significant increase in mutation rate would not imply regulation of breast cancer, however a significant increase in mutation rate against the population would at least imply that this gene is significantly associated with the regulation of gene expression in the presence of breast cancer.  We wish to find not only if there is a significant difference in mutation rate when breast cancer is present, but also if this change in mutation rate is different for males and females.
+
+A single-nucleotide polymorphism (SNP) is a relatively common mutation in a gene.  In the dataset `br7cSNP.csv` 100 SNPs were sequenced and the SNP was labeled 0 if the SNP was the same as the reference gene, and 1 otherwise. Data was collected for 100 people. The data appears as follows
+
++------------------+------------------------------------------------+
+|   Variable       |         Description                            |
++==================+================================================+
+|   `Sub`          | Subject ID                                     |
++------------------+------------------------------------------------+
+|   `MF`           | 0 for male, 1 for female                       |
++------------------+------------------------------------------------+
+|   `BCan`         | 0 if breast cancer was not present, 1 otherwise|
++------------------+------------------------------------------------+
+|   `SNP"i"`       | 0 if mutation did not occur, 1 otherwise       |         
++------------------+------------------------------------------------+ 
+
+1. Load in the data set
+
+```{r}
+br7cSNP = read.csv("br7cSNP.csv")
+#look at data set first 5 rows and 5 columns of data set
+br7cSNP[1:5, 1:5]
+```
+
+2. What is an appropriate distribution for SNP1 across subjects for a male without breast cancer?
+
+Since `SNP1` is a either a mutation or not, and we can assume these mutations are independent across genes, we can conclude that $SNP1 \sim Binomial(1, p)$ for some mutation probability $p$.
+
+3. Create a column in your dataset called `MutCount` that gives the total number of mutations across SNPs for each person. 
+
+```{r}
+br7cSNP$MutCount = rowSums(br7cSNP[,3:102])
+plot(br7cSNP$MutCount, pch = br7cSNP$MF, col = br7cSNP$BCan+1, ylab = "MutCount")
+```
+
+4. Assuming SNP mutations are independnet, why is it appropriate to treat `MutCount` as either a Binomial or Poisson random variable? Why is it important to assume that SNP mutations are independent?
+
+Since the number of mutations is very low for the binomial distribution, we are modelling rare events, therefore the poisson distribution provides a useful approximation.  Therefore, you can work with the 3 variable dataset of `BCan`, `MF` and `MutCount` instead of the original 102 variable dataset.
+
+A binomial distribution is a count of independent events so if the counts are not independent we could no longer conclude that distribution.
+
+5. Fit Poisson GLM acounting for `MF` and `Bcan`. Do the assumptions hold? Was an interaction included in your model fit? Why or why not?  
+
+Fitting the GLM
+
+```{r}
+miRNAglm = glm(MutCount ~ MF*BCan, family = 'poisson', data = br7cSNP)
+summary(miRNAglm)
+#gof test
+1-pchisq(116.13, 96)
+plot(cooks.distance(miRNAglm))
+```
+
+By looking at the cook's distance, no points are found to be influential, and the GOF test appears to imply an adequate fit. 
+
+The interaction is was included because one of our research questions is if the change in mutation rate is different for Males and Females, which cannot be ascertained from a non-interaction model.
+
+
+6. Are either of `MF` or `Bcan` significant?
+
+To test this we run an likelihood ratio test against the null model. First we fit the null model, and then test if our full model significantly explains more of the noise in our observations.
+
+```{r}
+miRNAglmSMALL = glm(MutCount ~ 1, family = 'poisson', data = br7cSNP)
+anova(miRNAglmSMALL, miRNAglm, test = 'LRT')
+```
+
+We have evidence that either `MF` or `BCan` is significant in our model.
+
+7. Why is the hypothesis test in question 6 not exactly what we want to know from our data set? Run the appropriate hypothesis tests for our dataset, and make conclusions. 
+
+This hypothesis test could be significant simply if the mutation rate between males and females is significantly different, which would not be a significant finding given our research interests. 
+
+If we can show the following hypotheses, then we will have shown that the mutation rate is different for males and females, and the mutation rate increases for both males and females. 
+
+1) $H_a:$ `MF:BCan` $> 0$, i.e. if the change in mutation rate is different in Males and Females
+2) $H_a:$ `BCan` $>0$,  i.e. if the mutation rate increases for Males
+
+
+For testing 1), the pvalue can be obtained by hand for the one-sided test, although *since the estimate is positive* the pvalue can be obtained by halving the p-value from the summary table. This gives a pvalue for this test as 0.010527/2 = 0.0052635.
+
+For testing 2), similarly as for test 1), the pvalue is obtained as 0.000289/2 = 0.0001445
+
+Therefore we can conclude that the let-7c gene is associated with breast cancer, and the effect changes between males and females.  
+
+[Note that because we are doing multiple tests here, a multiple testing correction should be included.]

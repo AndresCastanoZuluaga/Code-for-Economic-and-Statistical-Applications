@@ -1,0 +1,84 @@
+---
+title: "Symbols"
+output:
+  pdf_document: default
+  html_document: default
+date: "February 4, 2017"
+---
+
+This document contains symbols that could be possibly helpful and will be updated as needed with each homework.  If there are other symbols you wish to use, feel free to ask on Piazza or ask a TA.
+
+Google is also a very useful resource.  Also, here is a "cheat sheet" that you may find helpful http://www.calvin.edu/~rpruim/courses/m343/F12/RStudio/LatexExamples.html.
+
+Compare the output (the html file) of this document to the rmd file to see how the symbols are created.
+
+##Subcscripts and Superscripts
+To do a subscript on any symbol, put an underscore \_ after it, and then open and close braces after the symbol, \{\}.  Anything you put in the braces will be subscripted. Note: if you only want subscript one thing, you don't need the braces. 
+
+E.g. $X_{subscript}$
+
+For superscripts, instead do a caret \^.
+
+E.g. $X^{superscript}$
+
+##Fractions
+
+If you want to do a fracion, then type `\frac` and then put the numerator in braces \{\} and the denominator in braces \{\}.  
+
+E.g. $\frac{numerator}{denominator}$
+
+##Collection of Symbols and Scenarios
+
+**List of symbols**
+
+$Y_i$, $X_i$, $\beta_0$, $\beta_1$, $\hat\beta_0$, $\hat\beta_1$, $b_0$, $b_1$, $\epsilon_i$, $\sim N(\mu, \sigma^2)$, $t_{n-2, \alpha/2}$, $\alpha$, $\pm$, $H_0$, $H_a$, $log(Y_i)$, $\le$, $\ge$, $\mu_{Y|X=c}$, $e^x$
+
+**Response and Explanatory Variables**
+
+response: $Y_i$
+
+explanatory: $X_i$
+
+**Population and Estimated intercept or slope**
+
+intercept: $\beta_0$ is estimated as $\hat\beta_0$ or $b_0$
+
+slope: $\beta_1$ is estimated as $\hat\beta_1$ or $b_1$
+
+**Error term**
+
+error for observation $i$: $\epsilon_i$ 
+
+**Specify a distribution**
+
+To specify the distribution of any variable as normal with mean $\mu$ and variance $\sigma^2$ use: $\sim N(\mu, \sigma^2)$
+
+E.g. in a linear regression $Y_i \sim N(\beta_0 + \beta_1X_i, \sigma^2)$, since the mean is given by the regression equation.
+
+**Critical value for Simple Linear Regression**
+
+$t_{n-2, \alpha/2}$.  Note, replace $n$ with the number of observations in your data set, and $\alpha$ with the significance level. 
+
+**Plus or minus symbol**
+
+$\pm$.  This could be useful when writing out confidence intervals.
+
+**Hypothesis testing**
+
+Null hypothesis: $H_0: \beta_1 = 0$, or $H_0: \beta \le 0$ or $H_0: \beta \ge 0$ (depending on two-sided or one-sided test). Note, switch the values $\beta_1$ and $0$ in accorandance with the null hypothesis you're testing.
+
+Alternative Hypothesis: $H_a: \beta_1 \neq 0$ or $H_a: \beta_1 > 0$ or $H_a: \beta_1 < 0$ (depending on two-sided or one-sided test)
+
+
+**Mean of $Y$ conditional on a specific value for $X$**
+
+$\mu_{Y|X=c}$, for some specific value of $c$. 
+
+**Log transformation**
+
+Nothing special here.  To represent the log transform of $Y_i$, simply write $log(Y_i)$
+
+**Taking the exponent**
+
+Just a superscript here.  $e^{x}$ or $exp(x)$ for taking the exponent of $x$. (braces unnecessary with only one superscript)
+

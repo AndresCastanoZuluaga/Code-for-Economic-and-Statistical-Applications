@@ -1,0 +1,136 @@
+---
+title: "Lab 10 - Two Way ANOVA"
+output:
+  pdf_document: default
+  html_document: default
+date: "April 17, 2017"
+---
+
+In this lab we go over Two-Way Balanced and Unbalanced ANOVA in R. 
+
+The data come from a study on hospitalization of patients with kidney failure. These patients are commonly treated on dialysis machines that filter toxic substances from the blood. The appropriate "dose"; for effective treatment depends, among other things, on duration of dialysis treatment and weight gain between treatments as a result of fluid buildup. Duration was categorized into two groups, short (less than four hours) and long (four or more hours) coded as 1 and 2 respectively. Average weight gain was categorized into slight, moderate, and severe coded as 1, 2, and 3 respectively. The response variable of interest is the number of days hospitalized due to subsequent kidney disease. Prior analysis indicated that transforming the number of hospital days to LOG=LOG(DAYS+1) made the data more normal, and equalized the variance.
+
+To study the effects of duration of dialysis treatment and weight gain on the number of days hospitalized due to disease, a random sample of 10 patients per group who had undergone treatment at a large dialysis facility was obtained. This full data set has equal numbers of observations in each cell, so the design is balanced. The unbalanced design is obtained by dropping the last two patients in the long duration and severe weight gain category, and is done purely for illustrative reasons. In a real study, experimental units might be missing (due to causes unrelated to treatment, such as moving out of the area), or might be dropped because they are outliers. In an observational study such as this one, unequal sample sizes may also occur because not enough experimental units are available in some treatment groups.
+    
+a) Fit an interaction Two-Way ANOVA model. Check to see that for both the balanced and unbalanced designs, the fitted values are just the cell means.
+
+First load in the data, and get unbalanced data as described above.
+
+```{r}
+#balanced data
+library(readr)
+l10datBAL = read_csv("KidneyDatSp17.csv")
+l10datBAL$Duration = as.factor(l10datBAL$Duration)
+l10datBAL$WeightGain = as.factor(l10datBAL$WeightGain)
+l10datBAL$logDays = log(l10datBAL$DaysHosp + 1)
+
+#unbalanced data
+l10datUNB = l10datBAL[-c(59, 60),]
+```
+
+We can get cell means (i.e. the mean for each combination of duration and weight gain) as follows
+
+```{r}
+library(dplyr)
+group_by(l10datBAL, Duration, WeightGain) %>% summarise(count = n(), mean = mean(logDays))
+
+group_by(l10datUNB, Duration, WeightGain) %>% summarise(count = n(), mean = mean(logDays))
+```
+
+`dplyr` is a useful package made by Hadley Wickam.  It, along with `ggplot2`, can be very useful packages, although they can also be a course unto themself.  Specifically, do not worry too much about the `%>%` symbol -- you will only need to change variable names for this code.
+
+Now we do the ANOVA fits.  If we save the fitted values in our dataset, then we can obtain the cell means with similar code to what was used above.
+
+```{r}
+#run the two way ANOVA
+aovIBAL = aov(logDays~WeightGain * Duration, data = l10datBAL)
+aovIUNB = aov(logDays~WeightGain * Duration, data = l10datUNB)
+
+#save the fitted values
+l10datBAL$fittedI = aovIBAL$fitted.values
+l10datUNB$fittedI = aovIUNB$fitted.values
+
+#get cells
+group_by(l10datBAL, Duration, WeightGain) %>% summarise(count = n(), mean = mean(fittedI))
+
+group_by(l10datUNB, Duration, WeightGain) %>% summarise(count = n(), mean = mean(fittedI))
+```
+
+Comparing this to the table above, we see that the fitted values are just the cell means. 
+
+
+b) Now fit just the main effects model.  Notice that for the balanced design, the type I and type III sums of squares are the same, but for the unbalanced design, they differ. Why is this?
+
+We fit the main effects model and obtain the Type I and Type III sum of squares for both models
+
+```{r}
+#fit models
+aovBAL = aov(logDays~WeightGain + Duration, data = l10datBAL)
+aovUNB = aov(logDays~WeightGain + Duration, data = l10datUNB)
+
+#Type I vs Type III Balanced
+library(car) #needed for Anova function
+anova(aovBAL)
+Anova(aovBAL, type = 'III')
+
+#Type I vs Type III Unbalanced
+anova(aovUNB)
+Anova(aovUNB, type = 'III')
+```
+
+In a balanced design, the treatments in a two way Anova are orthogonal (i.e. knowing the category for one treatment doesn't tell you anything about the other treatment.  In this case, there knowing the WeightGain group of a patient does not tell me anything about the duration of dyalysis).  Thus, we see the same factoring out as was seen in the contrasts for HW6.
+
+
+c) In the balanced data, which effects are significant? What is the appropriate reduced model for this data?  Do this by first testing for an interaction, and then testing for individual effects if no interaction is present. Since any of these results would be scientifically significant, be sure to test for multiple tests.
+
+
+Use Type III SS as we are interested in the effect of each variable *in the presence of* the other variables. 
+
+```{r}
+Anova(aovIBAL, type = 'III')
+```
+Here we see that the interaction is not significant, so we will look at the significance of Duration and Weight gain in a main effects model. 
+
+In the main effects model we have
+
+```{r}
+Anova(aovBAL, type = 'III')
+```
+In this case both WeightGain is significant at the 0.05/3 significance level (note the Bonferonni correction), however Duration is not significant at this level. 
+
+Since Duration is fairly close to being significant, an appropriate model for this data would be `logDays ~ WeightGain + Duration`, however we cannot yet conclude that Duration is significant.
+
+
+d) Regardless of the model chosen in part C, continue with the interaction model.  Estimate main effects and interactions for the balanced model for each factor level and each treatment.  How would you get confidence intervals or perform tests for the indvidual main effects and interaction effects?
+
+The `aov` function we are using is an ANOVA specific version of the `lm` function.  If we try to get the coefficient and standard error estimates in our usual way, we get
+
+```{r}
+summary(aovIBAL)
+```
+
+Which is not what we want.  In order to get the summary information from the `aov` object, we do
+
+```{r}
+summary.lm(aovIBAL)
+```
+
+From here, obtaining confidence intervals and performing tests on individual parameters is completed as usual.
+
+e) Construct the ANOVA table for the reduced model.
+
+```{r}
+Anova(aovBAL, type = 'III')
+```
+
+g) Contrasts can be completed as they are done in One-Way Anova. Create a contrast for testing Slight WeightGain against Moderate to Severe WeightGain, and Moderate WeightGain against  Severe WeightGain. 
+
+```{r}
+Con1 = c(-1, 1/2, 1/2)
+Con2 = c(0, 1/2, -1/2)
+Cons = cbind(Con1, Con2)
+aovCONBAL = aov(logDays~C(WeightGain, Con1, 1) + C(WeightGain, Con2, 1) + Duration, data = l10datBAL)
+summary(aovCONBAL)
+```
+
+

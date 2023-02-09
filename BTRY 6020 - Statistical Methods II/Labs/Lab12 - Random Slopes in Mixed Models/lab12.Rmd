@@ -1,0 +1,85 @@
+---
+title: "Lab 12 - Random Slopes in Mixed Models"
+output:
+  pdf_document: default
+  html_document: default
+date: "May 8, 2017"
+---
+
+In this lab we go through a mixed model analysis where the slope is random.  This will cover:
+
+1) Interpretation of random interactions
+
+2) Including random interactions in a mixed model in R
+
+3) Visualizing random effects
+
+**Note**: you will not be tested on random interactions, and will not need to fit them on the final.
+
+
+# Politeness Data
+
+In this analysis we will be adapting the analysis and data as given in *A very basic tutorial for performing
+linear mixed effects analyses* (Winter, 2013). In this data, a subject was given a question to ask (called a `scenario`) and was asked to ask the question in a formal and informal setting (called `attitude`).  The pitch of their voice was measured in order to understand the effect of `attidue` on pitch.  The data has the following structure:
+
+**Response**
+
+`frequency` -- average pitch of the subject's question that they ask
+
+**Predictors**
+
+`subject` -- the unique subject ID
+
+`gender` -- the gender of the subject
+
+`scenario` -- the question that was asked by the subject (e.g. asking for a favor)
+
+`attitude` -- whether the subject was asked to ask their question formally/politely (`pol`) or informally (`inf`)
+
+This data set is a subset of the full dataset that was used in *The Phonetic Profile of Korean Formality* (Winter and Grawunder 2012). 
+
+
+Run the following code to load the data
+
+```{r}
+#note that this code reads the data from an online source
+politeness= read.csv("http://www.bodowinter.com/tutorial/politeness_data.csv")
+head(politeness)
+
+#our data has an incomplete observation
+which(!complete.cases(politeness))
+#we'll get rid of this observation
+l12dat = politeness[-39,]
+
+#lastly, let's make sure factor variables are treated as such
+l12dat$subject = as.factor(l12dat$subject)
+l12dat$gender = as.factor(l12dat$gender)
+l12dat$scenario = as.factor(l12dat$scenario)
+l12dat$attitude = as.factor(l12dat$attitude)
+```
+
+1. If we fit `frequency ~ subject + gender + scenario + attitude`, which predictors should be treated as random effects?
+
+
+
+2. Take a look at the data (through a plot) to make sure we need to account for subject in order to account for extra variability in our dataset.
+
+
+3. Write out the mixed model where `subject`, `scenario` are random effects, and `gender`, `attitude` are fixed effects.  Fit the model in R.
+
+
+
+4.  Under this model, does the estimated difference in `frequency` between attitudes change with subject?
+
+
+
+5. Visually show the model fit of this dataset.  This is for pedagogical purposes, in general you don't need to plot your model fit.
+
+
+What if we thought that not only does the frequency change with subject, but the change in frequency between attitudes also changes between subject?  We can include that by changing `(1|subject)` to `(1 + attitude|subject)` in the model specification.  This is analagous to an interaction term. It is saying, "subject changes the overall mean (the intercept), **and** the attitude effect".
+
+6.  Fit the model described above.
+
+
+
+7. Under this model, does the estimated difference in `frequency` between attitudes change with subject? In what way does it change?

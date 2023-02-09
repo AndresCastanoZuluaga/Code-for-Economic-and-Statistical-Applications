@@ -1,0 +1,72 @@
+---
+title: "Lab 11 - Randomized Complete Block Designs"
+output:
+  pdf_document: default
+  html_document: default
+date: "April 28, 2017"
+---
+
+In this lab we will cover
+
+1) Desigining a Randomized Complete Block Factorial Experiment
+
+2) Running the RCB analysis
+
+Note, in this lab we will be fitting a mixed effects model for the first time.  That is to say, our model will have both fixed and random effect. 
+
+
+# Part I - Designing a Randomized Complete Block Factorial Experiment
+
+Suppose a researcher wants to design a factorial experiment consisting of a factor, `Poison` (3 levels: P1, P2, and P3), and a factor, `Medication` (4 levels: M1, M2, M3, and M4). Say 48 volunteers were selected from 4 different hospitals (12 volunteers from each hospital).  
+Note that these 48 volunteers were not randomly sampled from the entire population (why?), but they were randomly sampled within Hospital.  Therefore we treat each hospital as a random block effect.
+
+In this part of the lab we design the experiment with 4 blocks for a 3x4 factorial experiment, assuming each treatment is replicated once per block. How would you make a randomized plan for this design? 
+
+We can use the `fac.layout()` function (similar to how it was used in lab 9) to randomize the treatments within each block with slightly different arguments.  The steps are as follows:
+
+1. Define the number of blocks, `b`, the number of treatments, `t`, and the total number of observations, `n`.
+
+
+
+2. Create lists of the elements that will not be randomized. In addition to the subjects, for a RCBD, the blocks will also not be randomized.  Note the number of subjects here (`t`) corresponds to the number of subjects *per block*.
+
+
+
+3.  Again we will create a data frame of the 48 treatment combinations in standard order.  For this study, for each subject we want to randomly assign each subject a `Block`, `Poison` and `Medication` level where each combination is used exactly once. 
+
+
+
+4. Now, we can use the `fac.layout()` function to randomly assign treatments to the subjects in each block where each of the 12 treatments appears exactly once in each block.
+
+
+
+
+#Part II - Doing an RCB analysis
+
+## Question 2 (50 points)
+
+The security department at a university campus is concerned about the level of bike theft and the possibility of this being due to organized criminal activity. To try and determine whether there were patterns of theft over the week, they monitored traffic on campus to determine how many non-affiliated cars (without campus parking stickers) were entering campus but not using campus facilities (ie, stopping for very short periods). These were broken down by day of the week and measured over 12 randomly selected weeks in the year. 
+
+The data for this question is in CampusCars.csv.
+
+
+
+a) (5 points) Should we regard week as being a random effect? Argue one way or the other. 
+
+
+
+b) (10 points) Write down an appropriate statistical model for these data.  What is the design of this model?
+
+
+
+c) (5 points) Conduct an analysis of variance model to determine whether there are differences in days of the week. Report your null hypotheses, statistics and conclusions. 
+
+
+d) (10 points) Conduct a Tukey HSD proceedure to test for differences between the effects of different week days. Summarize in just a few words which days are different from eachother. 
+
+
+
+e) (10 points) How much variation is due to differences between weeks as opposed to differences between days within a week? What is the estimate of week-to-week variation? Provide an interpretation in terms of what you would expect to observe if you repeated this experiment. 
+
+
+

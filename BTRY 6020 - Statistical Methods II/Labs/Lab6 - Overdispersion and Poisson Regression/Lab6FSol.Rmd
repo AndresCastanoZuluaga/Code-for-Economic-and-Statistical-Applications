@@ -1,0 +1,129 @@
+---
+title: "Lab 6 - Overdispersion and Poisson Regression"
+output:
+  pdf_document: default
+  html_document:
+    highlight: pygments
+    theme: cerulean
+  word_document: default
+---
+-----
+
+# Lab Goals
+
+In this lab we will explore the overdispersion parameter, and poisson regression models for count data in R.  In particular, we will examine:
+
+  1. Calculating the overdispersion parameter
+
+  2. Goodness of fit testing
+    
+  3. Poisson Regression
+    
+
+
+# Skin Cancer Data
+
+The data set *minn.csv* includes Binomial data for the prevalence of skin cancer by age for a random sample of women from Minnesota.  Here we will fit a logistic regression model to look at the relationship between `age` and the probability of developing skin cancer. `age` was originally a categorical variable.  However, to look at the relationship between increasing age and skin cancer, women in each category are assigned the average age for that category.  The variables in the data are summarized here.
+
++------------------+------------------------------------------------+
+|   Variable       |         Description                            
++==================+================================================+
+|   `age`          |  average age of women in the age group         
++------------------+------------------------------------------------+
+|   `Cases`        |  number of women with skin cancer              
++------------------+------------------------------------------------+
+|  `Pop`           | total number of women from the age group       
++------------------+------------------------------------------------+
+
+
+
+Load the data into the console and into this R Markdown document using the code chunk below.
+
+```{r}
+minn <- read.csv("minn.csv")
+```
+
+## Model Selection
+
+First we will look at the data by plotting the log odds of developing skin cancer by `age`.
+
+```{r}
+prob = minn$Cases/minn$Pop
+logodds = log(prob/(1-prob))
+plot(minn$age,logodds)
+```
+
+1. Does the relationship between the log odds of developing skin cancer and age seem to be linear?  *No, there appears to be a quadratic relationship between the log odds of developing skin cancer and age.*
+
+
+Next we will fit a logistic regression model for this study without a quadratic term.
+
+```{r}
+cancer.glm=glm(cbind(Cases,Pop-Cases)~age,family=binomial,data=minn)
+summary(cancer.glm)
+```
+
+2.  Based on the model fit, what is the estimated multiplicative effect on the odds of developing cancer of each additional 5 years of age? *The additive effect on the log odds for each additional 5 years of age is* $5 \times 0.064 = 0.32$. *Thus the multiplicative effect on the odds of developing cancer of an additional 5 years of age is* $e^{0.32} = 1.38$.  Determine a 95% confidence interval for this multiplicative effect.  *Using the Wald statistic an approximate confidence interval for the additive effect on the log odds is* $(0.32 - 1.96 \times \sqrt{(25* 0.0025^2)}, 0.32 + 1.96 \times \sqrt{(25* 0.0025^2)}) = (0.2955,0.3445)$.  *Exponentiating each endpoint, a 95% confidence interval for the multiplicative effect on the odds is (1.344,1.411).*
+
+```{r}
+0.32-1.96*sqrt(25*0.0025^2)
+0.32+1.96*sqrt(25*0.0025^2)
+
+exp(0.2955)
+exp(0.3445)
+```
+```
+
+Now we will fit the model with the quadratic term.
+
+```{r}
+cancer2.glm=glm(cbind(Cases,Pop-Cases)~age+I(age*age),family=binomial,data=minn)
+summary(cancer2.glm)
+```
+
+3. Determine the likelihood ratio statistic and reference distribution for testing whether the parameter for the quadratic term is significantly different from 0. *From above: Residual deviance (reduced model) - Residual deviance (full model) = 44.102-8.3238 = 35.7782.  The reference distribution is a chi-square distribution with 1 degree of freedom.*
+
+4. Perform the likelihood ratio test from (2) using the `anova()` function.  What is the p-value for this test? $2.211 \times 10^{-9}$
+
+```{r}
+anova(cancer.glm,cancer2.glm,test="LRT")
+```
+
+5. What is the p-value from the Wald test for determining whether the parameter for the quadratic term is significantly different from 0? $3.93 \times 10^{-8}$ Does it match the p-value from the LRT? *No* If not, why?  *The LRT and the Wald test are two different tests for the same hypothesis.  Both use approximate distributions for the test statistic under the null hypothesis where the approximation gets better as sample size increases.  These tests have better agreement as sample size increases.*
+
+## Overdispersion 
+
+We should also check our final model for overdispersion.  Overdispersion is present when the variability in the observations is more than we would expect for binomial data. A goodness-of-fit test can be used to determine whether overdispersion is present in the model (however it may also indicate other problems with the model).  One test statistic that can be used for the goodness-of-fit test is the deviance of the model.   
+
+1. Using the output from `summary(cancer2.glm)`, what is the goodness-of-fit test statistic? *residual deviance=*  $8.3238$   
+
+
+The null hypothesis of this test is that the model fits the data well.  Large values of the goodness-of-fit test indicate the model does not fit the data well.  The reference distribution for this test is a chi-square distribution with degrees of freedom equal to the residual degrees of freedom.  Here we will calculate the p-value for this test.
+
+```{r}
+1-pchisq(8.3238,(8-3))
+```
+
+2. Does there appear to be a problem with overdispersion in the model?  *No, the p-value of this test is much larger than any significance level we would normally consider.*
+
+3. If overdispersion is present in the model, one way to adjust the model for overdispersion is to multiply each of the standard errors by the square root of the estimated *overdispersion parameter*.  If you set `family=quasibinomial` in the `glm()` function, the standard errors of each estimated parameter will be adjusted for overdispersion.  How are the p-values for the Wald tests affected by this adjustment? *The p-values are all higher reflecting the extra variability associated with the estimated parameters due to overdispersion.*
+
+
+```{r}
+cancerquas.glm=glm(cbind(Cases,Pop-Cases)~age+I(age*age),family=quasibinomial,data=minn)
+summary(cancerquas.glm)
+```
+
+Again, you could also run this as...
+
+```{r}
+cancerquas2.glm=glm(Cases/Pop~age+I(age*age),weights=Pop,family=quasibinomial,data=minn)
+summary(cancerquas2.glm)
+```
+
+
+4. The summary includes the estimated *overdispersion parameter*.  What is this value? *1.355*
+
+
+
+

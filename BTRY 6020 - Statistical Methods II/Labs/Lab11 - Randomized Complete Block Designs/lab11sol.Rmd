@@ -1,0 +1,196 @@
+---
+title: "Lab 11 - Randomized Complete Block Designs"
+output:
+  pdf_document: default
+  html_document: default
+date: "April 28, 2017"
+---
+
+In this lab we will cover
+
+1) Desigining a Randomized Complete Block Factorial Experiment
+
+2) Running the RCB analysis
+
+Note, in this lab we will be fitting a mixed effects model for the first time.  That is to say, our model will have both fixed and random effect. 
+
+
+# Part I - Designing a Randomized Complete Block Factorial Experiment
+
+Suppose a researcher wants to design a factorial experiment consisting of a factor, `Poison` (3 levels: P1, P2, and P3), and a factor, `Medication` (4 levels: M1, M2, M3, and M4). Say 48 volunteers were selected from 4 different hospitals (12 volunteers from each hospital).  
+Note that these 48 volunteers were not randomly sampled from the entire population (why?), but they were randomly sampled within Hospital.  Therefore we treat each hospital as a random block effect.
+
+In this part of the lab we design the experiment with 4 blocks for a 3x4 factorial experiment, assuming each treatment is replicated once per block. How would you make a randomized plan for this design? 
+
+We can use the `fac.layout()` function (similar to how it was used in lab 9) to randomize the treatments within each block with slightly different arguments.  The steps are as follows:
+
+**NOTE: At the end of the lab, the solution to this question goes through randomly assigning block as well as as treatment.  Since each volunteer was selected from a hospital, we cannot randomly assign Hospital/Block in our case**
+
+1. Define the number of blocks, `b`, the number of treatments, `t`, and the total number of observations, `n`.
+
+```{r}
+# Number of blocks
+b=4
+
+# Number of unique treatments
+t=12
+
+# Total number of observations
+n=b*t
+```
+
+2. Create lists of the elements that will not be randomized. In addition to the subjects, for a RCBD, the blocks will also not be randomized.  Note the number of subjects here (`t`) corresponds to the number of subjects *per block*.
+
+```{r}
+# Creates list of factors that should not be randomized
+# we have 4 different hospitals, so 4 blocks, with 12 volunteers per hospital
+unrandomized.unit = list(Blocks = c("B1", "B2", "B3", "B4"), Units = 12)
+```
+
+3.  Again we will create a data frame of the 48 treatment combinations in standard order.  For this study, for each subject we want to randomly assign each subject a `Block`, `Poison` and `Medication` level where each combination is used exactly once. 
+
+```{r}
+library(dae)
+
+# Creates data frame of the 48 treatments in the standard order. times = 4 because there are 4 blocks
+treatments2 = fac.gen(list(Poison=c("P1","P2","P3"), Medication = c("M1","M2","M3","M4")),times = 4)
+```
+
+4. Now, we can use the `fac.layout()` function to randomly assign treatments to the subjects in each block where each of the 12 treatments appears exactly once in each block.
+
+```{r}
+# Randomizes the 12 treatments within each block
+treatments2.randomized = fac.layout(unrandomized=unrandomized.unit,randomized=treatments2)
+```
+
+Here is the result of the randomization.  The last three columns indicate the `Block`, `Poison` and `Medication` level randomly assigned to the subjects listed in column 3.
+
+```{r}
+treatments2.randomized
+```
+
+
+#Part II - Doing an RCB analysis
+
+## Question 2 (50 points)
+
+The security department at a university campus is concerned about the level of bike theft and the possibility of this being due to organized criminal activity. To try and determine whether there were patterns of theft over the week, they monitored traffic on campus to determine how many non-affiliated cars (without campus parking stickers) were entering campus but not using campus facilities (ie, stopping for very short periods). These were broken down by day of the week and measured over 12 randomly selected weeks in the year. 
+
+The data for this question is in CampusCars.csv.
+
+
+
+a) (5 points) Should we regard week as being a random effect? Argue one way or the other. 
+
+Weeks are chosen randomly through the year, and as such could reasonably be treated as a random effect.  However, if researcher is specifically interested in the weeks that were selected (e.g. weeks were selected associated with different holidays), then a fixed effect analysis would be more appropriate.
+
+b) (10 points) Write down an appropriate statistical model for these data.  What is the design of this model?
+
+This is a randomized blocks design. An appropriate model is
+$$
+y_{ij} = \mu + d_i + w_j + \epsilon_{ij}
+$$
+*where $d_i$ represents the effect of the $i$th day and $w_j$ is the random effect of the $j$th week. 
+
+
+c) (5 points) Conduct an analysis of variance model to determine whether there are differences in days of the week. Report your null hypotheses, statistics and conclusions. 
+
+First, loading in the data and fit the model with and without the Day variable. 
+
+```{r}
+cars = read.csv('CampusCars.csv',head=TRUE)
+cars$Week = as.factor(cars$Week)
+
+library('lme4')
+mod = lmer(Cars ~ Day + (1|Week),data=cars, REML = F)
+modR = lmer(Cars ~ (1|Week),data=cars, REML = F)
+```
+
+Then we can test between the two models with the `anova` function.
+
+```{r}
+anova(mod, modR)
+```
+
+Note that, in order to ensure we are appropriately accounting for the random effects we need to set `REML = F` when fitting the models, and we directly compare to a reduced model.  This completes a *likelihood ratio test*
+
+Here our null hypothesis is that there are no differences between days of the week: $d_i = 0$ for all $i$. The Chisq statistic for this test is 133.11 and we reject the null hypothesis and conclude that the number of suspicious vehicles on campus changes with week day.
+
+
+d) (10 points) Conduct a Tukey HSD proceedure to test for differences between the effects of different week days. Summarize in just a few words which days are different from eachother. 
+
+To do TukeyHSD with a mixed model, we used the `glht` function from the `multcomp` package. `glht` stands for "General Linear Hypothesis Test" and `multcomp` stands for "Multiple Comparison".
+
+The use of the function is:
+`summary(glht(YOUR MODEL, linfct=mcp(YOUR FIXED FACTOR="Tukey")))`
+
+```{r,echo=TRUE}
+library(multcomp)
+summary(glht(mod, linfct = mcp(Day = 'Tukey')))
+```
+
+Monday and Friday have different means from all other days.  We do not have evidence that Tuesday, Wednesday and Thursdya have different means from eachother, however they are different from Monday and Friday.
+
+
+
+e) (10 points) How much variation is due to differences between weeks as opposed to differences between days within a week? What is the estimate of week-to-week variation? Provide an interpretation in terms of what you would expect to observe if you repeated this experiment. 
+
+```{r,echo=TRUE}
+summary(mod)
+```
+About
+```{r,echo=TRUE}
+4.6736/(4.6737+0.5486)
+```
+percent of variability is due to differences between weeks. This means that in a new analysis we could expect that we would expect to see average observations over a week differ from each other by a standard deviation of about 2.16 cars, but the variability within a week (after accounting for day effects) would have have standard deviation only 0.74.
+
+
+
+
+
+
+
+##Part 1 example with randomly assigned blocks
+1. Define the number of blocks, `b`, the number of treatments, `t`, and the total number of observations, `n`.
+
+```{r}
+# Number of blocks
+b=4
+
+# Number of unique treatments
+t=12
+
+# Total number of observations
+n=b*t
+```
+
+2. Create lists of the elements that will not be randomized. In addition to the subjects, for a RCBD, the blocks will also not be randomized.  Note the number of subjects here (`t`) corresponds to the number of subjects *per block*.
+
+```{r}
+# Creates list of factors that should not be randomized
+unrandomized.unit = list(Subject = 48)
+```
+
+3.  Again we will create a data frame of the 48 treatment combinations in standard order.  For this study, for each subject we want to randomly assign each subject a `Block`, `Poison` and `Medication` level where each combination is used exactly once. 
+
+```{r}
+library(dae)
+
+# Creates data frame of the 48 treatments in the standard order
+treatments2 = fac.gen(list(Block = c("B1","B2","B3","B4"),Poison=c("P1","P2","P3"), Medication = c("M1","M2","M3","M4")),times = 1)
+```
+
+4. Now, we can use the `fac.layout()` function to randomly assign treatments to the subjects in each block where each of the 12 treatments appears exactly once in each block.
+
+```{r}
+# Randomizes the 12 treatments within each block
+treatments2.randomized = fac.layout(unrandomized=unrandomized.unit,randomized=treatments2)
+```
+
+Here is the result of the randomization.  The last three columns indicate the `Block`, `Poison` and `Medication` level randomly assigned to the subjects listed in column 3.
+
+```{r}
+treatments2.randomized
+```
+
+
