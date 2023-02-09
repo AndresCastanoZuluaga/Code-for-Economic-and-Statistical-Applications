@@ -1,0 +1,56 @@
+---
+title: "Lab 2 - Introduction to Data and Descriptive Statistics in R"
+output:
+  html_document:
+    highlight: pygments
+    theme: cerulean
+  pdf_document: default
+  word_document: default
+---
+
+----
+
+# NAME: Andres Mauricio Castano
+# FECHA: 31/08/2016 
+
+
+----
+
+## Setting-up the Stata Engine 
+
+```{r, echo=FALSE, message=FALSE}
+require(knitr)
+statapath <- "/Applications/Stata/StataMP.app/Contents/MacOS/"
+opts_chunk$set(engine="stata", engine.path=statapath, comment="")
+```
+
+To avoid that the data is presented with adornement, we just run the above code chunk
+```{r, echo=FALSE, message=FALSE}
+require(knitr)
+opts_chunk$set(engine="stata", comment="")
+```
+
+
+```{r}
+sysuse auto 
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

@@ -1,0 +1,56 @@
+---
+title: "Lab6"
+author: "Andres Castano"
+date: "9/28/2016"
+output: html_document
+---
+
+This dataset consists of observations from 276 speed dates. It was obtained from the blackboard site for BTRY 6010.
+
+
+```{r}
+SpeedDating <- read.csv("~/Dropbox/CORNELL/Fall 2016/BTRY6010/Labs/Lab6/SpeedDating.csv")
+View(SpeedDating)
+read.csv("SpeedDating.csv")
+library("Hmisc")
+describe(SpeedDating)
+```
+
+```{r}
+SpeedDating$PartnerYesF[SpeedDating$DecisionM==0]
+SpeedDating$PartnerYesM[SpeedDating$DecisionF==0]
+boxplot(SpeedDating$PartnerYesF[SpeedDating$DecisionM==0], SpeedDating$PartnerYesM[SpeedDating$DecisionF==0], ylim = c(1,10), names = c("Female Guess", "Male Guess"))
+```
+
+
+```{r}
+SpeedDating$PartnerYesF[SpeedDating$DecisionM==1]
+SpeedDating$PartnerYesM[SpeedDating$DecisionF==1]
+boxplot(SpeedDating$PartnerYesF[SpeedDating$DecisionM==1], SpeedDating$PartnerYesM[SpeedDating$DecisionF==1], 
+        ylim = c(1,10), 
+        names = c("Female Guess", "Male Guess"))
+```
+
+
+```{r}
+plot(SpeedDating$AttractiveF,SpeedDating$IntelligentF)
+plot(jitter(SpeedDating$AttractiveF),jitter(SpeedDating$IntelligentF))
+plot(jitter(SpeedDating$AttractiveF),jitter(SpeedDating$IntelligentF), main = "Female Assesment of men", ylim = c(1,10), xlim = c(1,10), 
+ylab= "Intillegence", xlab = "Attractiveness", col = 1 + SpeedDating$DecisionF)
+```
+
+
+```{r}
+plot(SpeedDating$AttractiveM,SpeedDating$IntelligentM)
+plot(jitter(SpeedDating$AttractiveM),jitter(SpeedDating$IntelligentM))
+plot(jitter(SpeedDating$AttractiveM),jitter(SpeedDating$IntelligentM), main = "Female Assesment of men"
+, ylim = c(1,10)
+     , xlim = c(1,10)
+     , ylab= "Intillegence"
+     , xlab = "Attractiveness"
+     , col = 1 + SpeedDating$DecisionM
+     , legend = c("Does not want 2nd date", "Does want 2nd date")
+     , col = 1:2, pch = 1)
+```
+
+

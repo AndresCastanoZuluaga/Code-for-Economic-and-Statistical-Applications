@@ -1,0 +1,188 @@
+---
+title: 'Lab 3: For Loops, If Statements, and Monte Carlo Simulation'
+output: html_document
+---
+
+
+## Lab Goals
+
+The purpose of this lab is to learn about `for` loops, `if` statements, and general "logical operations" in R.  Knowing these topics will greatly increase the power of what you can do in R.  You will find these topics useful when working with data and when performing computer "experiments" that are called "Monte Carlo simulations."  In fact, in this lab we will see our first examples of Monte Carlo simulations.
+
+### The `for` loop in R
+
+Sometimes when you are programming, you will want to repeat a similar task many times.  For example, suppose you want to calculate $n!=n\times(n-1)\times(n-2)\times\cdots\times1$ for all values of $n$ up to 50.  We know that to get from, say, $9!$ to $10!$, you just need to multiply $9!$ by 10.  Likewise, $n!$ is just $n\times (n-1)!$ So one could do the following:
+```{r, eval=FALSE}
+fact <- 1 
+print(paste0("1! is ", fact))
+fact <- 2 * fact
+print(paste0("2! is ", fact))
+fact <- 3 * fact 
+print(paste0("3! is ", fact))
+fact <- 4 * fact 
+print(paste0("4! is ", fact))
+# and so on!!
+```
+In the above `paste0` combines its arguments into a string.  Then `print` outputs this string to the console (or adds it to the Rmarkdown output).
+
+But this is very tedius!  Clearly there's a pattern that we want to repeat.  Fortunately, computers are good at repeating tedius tasks.  The `for` loop is a way of getting R to repeat something for you over and over.
+
+```{r, eval=FALSE}
+fact <- 1
+for (i in 1:50) {
+  fact <- i * fact
+  print(paste0(i, "! is ", fact))
+}
+```
+
+In words, the code above starts with `fact` assigned as 1.  It then enters the `for` loop.  The line `for (i in 1:50)` says that we will repeat whatever is between `{` and `}`.  In particular, we will first do it with `i` equal to 1, then with `i` equal to 2, etc, and (finally) with `i` equal to 50.
+
+So the code above is equivalent to 
+```{r, eval=FALSE}
+fact <- 1
+i <- 1
+fact <- i * fact
+print(paste0(i, "! is ", fact))
+i <- 2
+fact <- i * fact
+print(paste0(i, "! is ", fact))
+i <- 3
+fact <- i * fact
+print(paste0(i, "! is ", fact))
+# etc... until we get to i being 50
+```
+
+
+### Logical statements and the `if` statement
+
+Sometimes we want R to do something only in certain cases.
+An `if` statement is a way of specifying that a block of code should only be run if a given logical statement is true.  A logical statement is something that returns either `TRUE` or `FALSE`.  Such statements involve logical operators.  Here is a table of logical operators in R.
+
+Operator   Description     
+--------   -----------
+   `<`	   less than            
+   `<=`    less than or equal to
+   `>`     greater than        
+   `>=`    greater than or equal to
+   `==`    exactly equal to 
+  `!=`     not equal to 
+  `!x`     not x      
+  `x | y`  x OR y     
+  `x & y`  x AND y    
+
+Here are some examples of how R evaluates these operators.
+
+```{r,eval=FALSE}
+x <- 3
+y <- 6
+z <- 6
+
+x < y
+y < x
+x == y # notice the "double equals" is used for logical statements
+!(x == y)
+y == z
+y <= z
+y >= z
+
+(x < y) & (y < (x + 1))
+(x < y) | (y < (x + 1))
+```
+
+Question: Why do you think `==` is used above (for example, `x == y`)? Check in the console what would happen if we used the single equals sign.
+
+The syntax of an `if` statement is as follows
+
+`if (logical statement) {commands}`.
+
+Suppose we want to print "Yes" if the third element of this vector is less than 10.
+
+```{r, eval=FALSE}
+a <- c(2, 5, 6, 88, 3, 20)
+```
+
+We can do so with an `if` statement as follows:
+```{r, eval=FALSE}
+if (a[3] < 10) {
+  print("Yes")
+}
+```
+
+Sometimes we will want to run some alternate code when the condition does not hold.  For this, we can add `else` to the `if` statement as follows:
+```{r, eval=FALSE}
+if (a[3] < 10) {
+  print("Yes")
+} else {
+  print("No")
+}
+```
+
+We can try this for the fourth element of `a` to see what happens when the condition does not hold.
+
+```{r, eval=FALSE}
+if (a[4] < 10) {
+  print("Yes")
+} else {
+  print("No")
+}
+```
+
+#### Problem 1
+
+Suppose we want to print "Yes" or "No" for each element in the vector `a`.  Write a `for` loop that does this.
+
+
+### Yahtzee
+
+There's a game played with five dice called Yahtzee.  There are a lot of rules involved, but for the sake of this lab all you need to know is that you roll the five dice and you "get a Yahtzee" if all five dice have the same value.
+
+R has many functions that can be used to "simulate" random occurrences.  One of these functions is called `sample`.  The following code simulates rolling five six-sided dice.
+
+```{r, eval=FALSE}
+sample(1:6, 5, replace = TRUE)
+```
+
+Just like when rolling dice, each time we do it, we get a different answer:
+
+```{r, eval=FALSE}
+sample(1:6, 5, replace = TRUE)
+sample(1:6, 5, replace = TRUE)
+```
+
+#### Problem 2
+
+Write a code chunk that
+
+  a) simulates the rolling of five dice and assigns the result to a variable named `dice_rolls`.  
+  b) Then write a logical expression that is `TRUE` if `dice_rolls` is a Yahtzee (that is, if all five dice are equal in value to each other) and is `FALSE` otherwise.
+
+Note: There are many ways to do part b.  One approach is to check that each die equals the first die (and use `&`).  Another approach is to check if the standard deviation is 0.  Try writing out both approaches for practice.
+
+#### Problem 3
+
+We are curious to know approximately what fraction of the time one gets all five dice equaling each other.  To answer this question, we want to repeat Problem 2 a very large number of times (say one hundred thousand times) and count how many times we get Yahtzees.  We can use a `for` loop to do this.
+
+```{r, eval=FALSE}
+number_of_simulations <- 100000
+number_of_yahtzees <- 0 
+for (i in 1:number_of_simulations) {
+  dice_rolls <- sample(1:6, 5, replace = TRUE)
+  if (sd(dice_rolls) == 0) { # checks if they are all equal to each other
+    number_of_yahtzees <- number_of_yahtzees + 1
+  }
+}
+number_of_yahtzees
+number_of_yahtzees / number_of_simulations # proportion of Yahtzees
+```
+
+Approximately what proportion of the time does one expect to get a Yahtzee?
+
+Note: We have just performed a **Monte Carlo simulation**! This refers to using a (pseudo)random number generator to observe the fraction of the time an event occurs.  This is a useful technique that will allow us to answer many questions related to probability and statistics.
+
+#### Problem 4
+
+Suppose you roll only two dice.  Write a code chunk to see approximately what fraction of the time  the two rolled dice are equal.
+
+#### Problem 5
+
+Suppose you roll two dice.  Write a code chunk to see approximately what fraction of the time are neither of the two dice are equal to 6.
+

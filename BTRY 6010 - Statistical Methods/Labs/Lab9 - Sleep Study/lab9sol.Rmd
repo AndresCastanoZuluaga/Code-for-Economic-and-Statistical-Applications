@@ -1,0 +1,117 @@
+---
+title: "Lab 9 Solution"
+author: "Name"
+date: "Date"
+output: html_document
+---
+
+We will analyze data from a sleep study in which several variables related to sleeping habits, cognitive ability, alcohol use, and mental health were recorded for a random sample of students.  The source of the `SleepStudy` data is "Onyper, S., Thatcher, P., Gilbert, J., and Gradess, S., Class Start Times, Sleep and Academic Performance in College: A Path Analysis, *Chronobiology International*, April 2002; 29(3): 318-335."
+
+```{r,tidy=TRUE}
+SleepStudy <- read.table("SleepStudy.csv", header=TRUE, quote="\"")
+```
+
+We will begin by taking a look at the data before we perform any analysis.
+
+```{r}
+dim(SleepStudy)
+library(Hmisc)
+describe(SleepStudy)
+```
+
+## Investigation of the Variables in `SleepStudy`
+
+### `ClassYear` and `NumEarlyClass`
+
+`ClassYear` is the year the student is in college with level 1 corresponding to the first year through level 4 corresponding to seniors.
+
+`NumEarlyClass` is the number of early classes the student has in a week.
+
+```{r}
+table(SleepStudy$ClassYear)
+```
+
+```{r}
+EarlyByClass <- table(SleepStudy$NumEarlyClass, SleepStudy$ClassYear)
+PropEbyC <- prop.table(EarlyByClass, margin=2)
+par(mar = c(5.1, 4.1, 4.1, 7.1), xpd = TRUE)
+barplot(EarlyByClass, col = 2:7, width = 2)
+legend("topright", inset = c(-0.25, 0), fill = 2:7, 
+       legend = rownames(EarlyByClass))
+```
+
+It appears that the further a student is in school, the less early classes he/she is willing to take.
+
+### `Drinks` and `AlcoholUse`
+
+`Drinks` is the number of alcoholic drinks the student has per week.
+
+`AlcoholUse` is a categorical variable where the student indicated his/her level of alcohol use.  The levels of `AlcoholUse` are `Abstain`, `Light`, `Moderate`, and `Heavy`.
+
+```{r}
+par(mar = c(5, 5, 4, 2) + 0.1)
+boxplot(Drinks~AlcoholUse, data = SleepStudy, horizontal = TRUE, las = 1,
+        main = 'Drinks per Week by Alcohol Use')
+```
+
+Some notable observations from this plot are
+
+  i) A student who indicated that he/she abstains from alcohol has a drink a week.
+  
+  ii) One of the students who indicated his/her alcohol use was light has more drinks per week than all of the students who characterized their drinking as heavy.
+  
+  iii) One of the students who indicated his/her alcohol use was moderate has as many drinks per week as all of the students who characterized their drinking as heavy.
+  
+## Examining the Differences in Sleep Patterns on Weekdays Versus Weekend Days
+
+`WeekdaySleep`  is the number of hours the student sleeps on average per night on the weekdays.
+
+`WeekendSleep`  is the number of hours the student sleeps on average per night on the weekends.
+
+```{r}
+SleepStudy$Differences = SleepStudy$WeekendSleep - SleepStudy$WeekdaySleep
+smean=mean(SleepStudy$Differences)
+n=dim(SleepStudy)[1]
+SE=sqrt((var(SleepStudy$Differences)/n))
+crit=qnorm(.975)
+Upper = smean + SE*crit
+Lower = smean - SE*crit
+Lower
+Upper
+```
+
+We are 95% confident that the mean difference of the average number of hours slept per night on the weekdays versus the weekends is in the interval (0.144,0.5584).
+
+The upper endpoint of this confidence interval is about 0.56.  This indicates with 95% confidence on average students at most sleep only a little more than a half hour more per day on the weekend versus the weekdays.
+
+```{r}
+t.test(SleepStudy$Differences)
+```
+
+## Comparing the Mean GPA for This College to the National Average
+
+`GPA` is the student's grade point average.
+
+Here we will test whether the mean GPA for the college these students were sampled from is equal to the national average of 3.0.
+
+The null hypothesis of this test is $H_0: \mu = 3$.  The alternative hypothesis is $H_a: \mu \neq 3$.
+
+The p-value of this test is $2P(\bar X_{253} > |\bar x_{253}|$ given $H_0 \text { is true})$
+
+```{r}
+SE = sd(SleepStudy$GPA) / sqrt(n)
+2*(1-pnorm(abs(mean(SleepStudy$GPA)), 3, SE))
+```
+
+
+This p-value is close to 0.  So, since $0 < 0.01$, we reject the null hypothesis that the mean GPA for the college from which this sample was taken is equal to the mean GPA for all U.S. colleges.
+
+
+```{r}
+result = t.test(SleepStudy$GPA, mu = 3, conf.level = 0.99)
+result$p.value
+```
+
+
+
+

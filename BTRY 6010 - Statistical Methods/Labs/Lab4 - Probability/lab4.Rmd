@@ -1,0 +1,210 @@
+---
+title: 'Lab 4: Probability'
+output: html_document
+---
+
+
+### Problem 1
+
+There is a 50% chance of an expectant mother having a girl.  The Smith sisters: Anna, Mary, and Rebecca are all due at the end of the month.
+
+  a) What is the sample space for the gender of Mary's child?
+  
+  b) What is the joint sample space for the genders of all three sisters' children?
+  
+  c) What is the probability that all three children will be boys? Determine this in two ways.  
+    i)  By using the multiplication rule for independent events. (Let $G$ be the event that Anna has a boy, $H$ be the event that Mary has a boy, and $J$ be the event that Rebecca has a boy.)
+    ii) By using the joint sample space defined in (b).
+    
+  d) What is the probability of event $K$: Mary and Rebecca have children of different genders?
+  
+  e) What is the probability of event $L$: at least 2 of the 3 children are girls?
+  
+  f) Consider the following events:
+  
+    $A$: Exactly two boys are born
+    
+    $B$: Mary and Anna have boys
+    
+    $C$: Exactly 1 child is a girl
+    
+    $D$: All three sisters have boys
+    
+    $E$. Rebecca has a girl
+    
+  
+    i. Are $A$ & $B$ independent? Mutually exclusive? Prove.
+    ii. Are $B$ & $E$ independent? Mutually exclusive? Prove.
+    iii. Are $E$ & $D$ independent? Mutually exclusive? Prove.
+    iv. Are $B$ & $C$ independent? Mutually exclusive? Prove.
+  
+ 
+### Problem 2
+
+In the Easy Win lotto, the winning number is determined by picking 3 different balls from separate boxes.  Each box contains balls labeled either 1, 2, or 3, where it is equally likely that any given numbered ball is chosen from each box.  
+
+  a) How many different winning numbers can be chosen for the Easy Win lotto?
+
+  b) Let events
+
+  $D$ = Two of the three selected numbers are 3s
+ 
+  $H$ = Sum of the winning numbers is smaller than or equal to 7
+  
+  $T$ = Sum of the winning numbers is greater than 3
+  
+Consider the following Venn diagram:  
+  
+![venn](images.jpeg)  
+  
+  i. How many elements are there in $H\cap T$? Which letters in the diagram correspond to $H\cap T$? 
+  
+  ii. List the elements in g. What is g in set notation? 
+  
+  iii. What is $P(H)$? 
+  
+  iv. What is $P((H$ and $T)^C)$? 
+  
+  
+  
+ c) What is the complement to event 
+  
+  $J$: the winning number contains at least 2 distinct numbers
+   
+   
+  d) From (c), what is $P(J)$?
+
+
+### Problem 3
+
+A 2010 Pew Research poll asked 1,306 Americans “From what you’ve read and heard, is there solid evidence that the average temperature on earth has been getting warmer over the past few decades, or not?” The table below shows the distribution of responses by party and ideology, where the counts have been replaced with relative frequencies.
+
+Political Party/Ideology Key:
+
+  Cons = Conservative
+  
+  Rep = Republican 
+  
+  Lib = Liberal 
+  
+  Dem = Democrat
+  
+  Mod = Moderate
+
+
++-------------+-----------+-----------+-----------+
+|             |  Warming  |   Not     |  Don't    |
+|             |           | Warming   |  Know     |
++=============+===========+===========+===========+
+| Cons Rep    |  0.11     |  0.2      |   0.02    |
++-------------+-----------+-----------+-----------+
+| Mod/Lib Rep |  0.06     |  0.06     |  0.01     |
++-------------+-----------+-----------+-----------+
+| Mod/Cons Dem|  0.25     |  0.07     |  0.02     |
++-------------+-----------+-----------+-----------+
+| Lib Dem     |  0.18     |  0.01     |  0.01     |
++-------------+-----------+-----------+-----------+
+
+  a) What is the probability that a randomly selected respondent believes that the earth is not warming?
+  
+  b) What is the probability that a randomly selected respondent is a moderate?
+  
+  c) What is the probability that a randomly selected respondent believes the earth is warming given that he/she is a moderate?
+  
+  d) What is the probability that a randomly selected respondent believes the earth is warming or is a liberal Democrat?
+  
+  e) What is the probability that a randomly selected respondent believes the earth is warming given that he/she is a conservative Republican?
+  
+  f) Is whether or not a respondent believes in global warming independent of his/her party and ideology? Explain your reasoning.
+
+  
+### Problem 4
+
+The fraction of people to have a certain disease in a population is 0.01.  A diagnostic test is available to test for the disease.  For a healthy person, the chance of being misdiagnosed using the diagnostic test is 0.05.  For someone with the disease, the chance of the test indicating the disease is not present is 0.20.  Suppose the test is performed on a randomly selected individual from the population.
+
+  a) What is the probability that the test shows a positive result (i.e. the test indicates the person has the disease)?
+  
+  b) What is the probability a person selected has the disease but is diagnosed as healthy?
+  
+  c) The *sensitivity* of a test is the probability that the test gives a positive result given the individual has the disease.  What is the *sensitiviy* of the diagnostic test?
+  
+  d) The *specificity* of a test is the probability the test comes out negative given the individual does not have the disease.  What is the *specificity* of this diagnostic test?
+  
+### Problem 5
+
+In this problem, we will calculate the probability of various poker hands.  We will perform Monte Carlo simulations to compute approximate probabilities of these hands.  The idea is that we will repeatedly "deal" a hand of five cards, and check what proportion of the time it is a certain poker hand.
+
+Let us start by representing the deck of cards as a data frame in R.  It will have 52 rows (one per card) and a column representing the value 
+
+```{r, eval = FALSE}
+# let's represent a deck as a data frame with columns "value" and "suit"
+deck <- data.frame(value = rep(c("Ace", 2:10, "Jack", "Queen", "King"), times = 4),
+                   suit = rep(c("Clubs", "Hearts", "Spades", "Diamonds"), each = 13),
+                   stringsAsFactors = FALSE)
+```
+
+Run this in the console and take a look at the data frame `deck`.  How does `rep` work?  What is the difference between the argument `times` and `each`?  (Our use of `stringsAsFactors = FALSE` is a bit technical, so we won't discuss it here.)
+
+a) When we shuffle a deck of cards thoroughly and deal the top five cards, what type of sampling is this?
+
+Here is code that chooses 5 random integers from 1 to 52 (without replacement) and selects these rows of the data frame `deck`. 
+
+```{r, eval = FALSE}
+hand <- deck[sample(1:52, 5, replace = FALSE), ] # draw 5 cards from deck
+```
+
+Run this in the console and take a look at the random `hand` generated.
+
+Most of the poker hands have to do with how many of the five cards have a certain value.  For example, "four-of-a-kind" means we got four of the same value (and one of a different value).  We will use `table` on the values of `hand` to record the frequencies.
+
+Now that we know how to generate random hands from a deck of cards, we can proceed with computing probabilities of poker hands.
+
+b) What is the probability of getting a four-of-a-kind? (e.g., four aces or four 2s, etc.)
+
+```{r, eval = FALSE}
+# let's choose a number of times to deal five random cards:
+num_simulations <- 1e5
+counter <- 0
+for (i in 1:num_simulations) {
+  hand <- deck[sample(1:52, 5, replace = FALSE), ] # draw 5 cards from deck
+  tab <- table(hand$value) # how many of each value?
+  tab_sorted <- as.numeric(sort(tab)) # put in a format easy to compare to
+  if (identical(tab_sorted, c(1, 4))) {
+    counter <- counter + 1
+  }
+}
+counter / num_simulations
+```
+
+c) What is the probability of getting a flush? (i.e., all five cards having same suit)
+
+```{r, eval = FALSE}
+num_simulations <- 1e5
+counter <- 0
+for (i in 1:num_simulations) {
+  hand <- deck[sample(1:52, 5, replace = FALSE), ]
+  tab <- table(hand$suit)
+  tab_sorted <- as.numeric(sort(tab))
+  if (identical(tab_sorted, 5)) {
+    counter <- counter + 1
+  }
+}
+counter / num_simulations
+```
+
+d) What is the probability of getting two pair? (e.g., 2, 2, 3, 10, 10)
+
+```{r, eval = FALSE}
+deck <- cbind(rep(1:13, times = 4), rep(c("C", "H", "S", "D"), each = 13))
+num_simulations <- 1e5
+counter <- 0
+for (i in 1:num_simulations) {
+  hand <- deck[sample(1:52, 5, replace = FALSE), ]
+  tab <- table(hand[, 1])
+  tab_sorted <- as.numeric(sort(tab))
+  if (identical(tab_sorted, c(1, 2, 2))) {
+    counter <- counter + 1
+  }
+}
+counter / num_simulations
+```

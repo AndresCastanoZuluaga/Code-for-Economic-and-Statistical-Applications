@@ -1,0 +1,86 @@
+---
+title: "Lab 6"
+output: pdf_document
+---
+
+This data set consists of observations from 276 speed dates.  It was obtained from the blackboard site for BTRY 6010. 
+
+The source of the `SpeedDating` data is "Gelman, A. and Hill, J., *Data analysis using regression and multilevel/hierarchical models*, Cambridge University Press: New York, 2007."
+
+```{r}
+SpeedDating <- read.csv("SpeedDating.csv")
+```
+
+We will start by looking at our data before we proceed with any other analysis.
+
+```{r}
+dim(SpeedDating)
+library(Hmisc)
+describe(SpeedDating)
+```
+
+*Note: the variable `Decision` is categorical.  R has read it in as a quantitative value.*
+
+```{r}
+table(SpeedDating$DecisionF, SpeedDating$DecisionM)
+```
+When `DecisionF` and `DecisionM` are both 0, neither participant wanted another date.  When `DecisionF` is 0 and `DecisionM` is 1, the female did not want another date, but the male did want another date.  When `DecisionF` is 1 and `DecisionM` is 0, the male did not want another date, but the female did want another date. When `DecisionF` and `DecisionM` are both 1, both participants wanted another date. 
+
+
+```{r,tidy=TRUE}
+onlyOne <- subset(SpeedDating, DecisionF + DecisionM == 1)
+SympMale = table(onlyOne$DecisionM) / nrow(onlyOne)
+barplot(SympMale,names.arg=c('F','M'), main = 'Who Desired the Second Date When One of Them Did Not?')
+```
+
+When only one partner was interested in another date, it was more often the male than the female.
+
+```{r,tidy=TRUE}
+boxplot(SpeedDating$PartnerYesF[SpeedDating$DecisionM == 0],
+        SpeedDating$PartnerYesM[SpeedDating$DecisionF == 0],
+        main="Guess about partner's opinion when answer is no",
+        ylim=c(0, 10),
+        names=c('Female Guess', 'Male Guess'))
+```
+
+This plot contains ratings on a scale of 1 to 10 by  females (on the left) and males (on the right) of how likely their "date" would want to see them again for observations where the date did not want to see them again.
+
+```{r,tidy=TRUE}
+boxplot(SpeedDating$PartnerYesF[SpeedDating$DecisionM == 1],
+        SpeedDating$PartnerYesM[SpeedDating$DecisionF == 1],
+        main="Guess about partner's opinion when answer is yes",
+        ylim=c(0,10),
+        names=c('Female Guess','Male Guess'))
+```
+
+This plot contains ratings on a scale of 1 to 10 by  females (on the left) and males (on the right) of how likely their "date" would want to see them again for observations where the date did want to see them again.
+
+Males and females were equally likely to detect when their partners wanted another date.  The distributions look identical.
+
+When the partner did not want another date, the median male's assessment of the situation is unchanged while the median female does notice that he is not interested in another date.  That said, the 3rd quartile of the male distribution does drop as much as that of the female distribution.
+
+
+```{r,tidy=TRUE}
+plot(jitter(SpeedDating$AttractiveF), 
+     jitter(SpeedDating$IntelligentF),
+     main="Female Assessment of Male", 
+     ylim=c(1,10), xlim=c(1,10),
+     col=1+SpeedDating$DecisionF, 
+     xlab="Attractiveness", ylab="Intelligence")
+legend("bottomright",
+       legend = c("Doesn't want 2nd date", "Does want 2nd date"), col=1:2, pch=1)
+```
+
+```{r,tidy=TRUE}
+plot(jitter(SpeedDating$AttractiveM),
+     jitter(SpeedDating$IntelligentM), 
+     main="Male Assessment of Female", 
+     ylim=c(1,10), xlim=c(1,10), 
+     col=1+SpeedDating$DecisionM, 
+     xlab="Attractiveness", ylab="Intelligence")
+legend("bottomright",
+       legend=c("Doesn't want 2nd date", "Does want 2nd date"), col=1:2, pch=1)
+```  
+
+Males tended to agree to a second date with partners they found highly attractive and intelligent.  Females are less predictable.  Compared to the males, they were more likely to be interested in a second date with someone they found intelligent, but not very attractive.  However, it is hard to generalize because we are only looking at two of the six attributes measured for each date.
+    

@@ -1,0 +1,347 @@
+---
+title: 'Lab 4: Probability'
+output: pdf_document
+---
+
+
+### Problem 1
+
+There is a 50% chance of an expectant mother having a girl.  The Smith sisters: Anna, Mary, and Rebecca are all due at the end of the month.
+
+  a) What is the sample space for the gender of Mary's child?
+
+*{M,F}*
+    
+  b) What is the joint sample space for the genders of all three sisters' children?
+  
+*{(M,M,M),(M,M,F),(M,F,M),(M,F,F),(F,M,M),(F,M,F),(F,F,M),(F,F,F)}*
+  
+  c) What is the probability that all three children will be boys? Determine this in two ways.  
+    i)  By using the multiplication rule for independent events. (Let $G$ be the event that Anna has a boy, $H$ be the event that Mary has a boy, and $J$ be the event that Rebecca has a boy.)
+
+$$
+P(G \cap H \cap J) = P(G \cap H)P(J) = P(G)P(H)P(J)
+$$
+
+```{r}
+.5*.5*.5
+```
+
+    ii) By using the joint sample space defined in (b).
+
+*P(M,M,M) = 1/(Total # in Sample Space)*
+    
+```{r}
+1/8
+```
+
+  d) What is the probability of event $K$: Mary and Rebecca have children of different genders?
+
+  
+*Looking at the sample space for all three women, 4 of the 8 outcomes correspond to this event.*
+
+```{r}
+PK=4/8
+PK
+```
+*You could also do this problem by just looking at the sample space of Mary and Rebecca alone (because the event does not depend on Anna's child.)* 
+
+  e) What is the probability of event $L$: at least 2 of the 3 children are girls?
+
+  *Again looking at the sample space, 4 simple events correspond to at least 2 of the three children being female, so*
+  
+```{r}
+PL=4/8
+```  
+
+  f) Consider the following events:
+  
+    A: Exactly two boys are born
+    
+    B: Mary and Anna have boys
+    
+    C: Exactly 1 child is a girl
+    
+    D: All three sisters have boys
+    
+    E. Rebecca has a girl
+    
+   *$P(A)$ = 3/8*         *$P(A$ and $B)$ = 1/8*
+   
+   *$P(B)$ = 2/8 = 1/4*   *$P(B$ and $E)$ = 1/8*
+   
+   *$P(C)$ = 3/8*         *$P(E$ and $D)$ = 0*
+   
+   *$P(D)$ = 1/8*         *$P(B$ and $C)$ = 1/8* 
+   
+   *$P(E)$ = 4/8 = 1/2*
+    
+  
+  i. Are A & B independent? *No, $P(A)P(B)$ = 3/32, $P(A$ and $B)$ = 1/8*
+  Mutually exclusive? *No, if they were mutually exclusive, the interesection would be 0.*
+  ii. Are B & E independent? *Yes, $P(B)P(E)$ = 1/8, $P(B$ and $E)$ = 1/8* Mutually exclusive?  *No*
+  iii. Are E & D independent? *No, $P(E)P(D)$ = 1/16, $P(E$ and $D)$ = 0* Mutually exclusive? *Yes.*
+  iv. Are B & C independent? 
+    *No, $P(B)P(C)$ = 3/32, $P(B$ and $C)$ = 1/8* Mutually Exclusive? *No.*
+  
+  
+ 
+### Problem 2
+
+In the Easy Win lotto, the winning number is determined by picking 3 different balls from separate boxes.  Each box contains balls labeled either 1, 2, or 3, where it is equally likely that any given numbered ball is chosen from each box.  
+
+  a) How many different winning numbers can be chosen for the Easy Win lotto?
+
+```{r}
+3*3*3
+```
+
+  b) Let events
+
+  $D$ = Two of the three selected numbers are 3s
+ 
+  $H$ = Sum of the winning numbers is smaller than or equal to 7
+  
+  $T$ = Sum of the winning numbers is greater than 3
+  
+Consider the following Venn diagram:  
+  
+![venn](images.jpeg)  
+  
+  i. How many elements are there in $H\cap T$? *22, $H^C$ contains 4 elements. Thus $H$ has 27-4 = 23 elements. The number of elements in H that are not in $T$ is 1.  So the number of elements in both is 22.*
+  Which letters in the diagram correspond to $H$ $\cap$ $T$? *e and g*
+  ii. List the elements in g. *{(3,3,1),(1,3,3),(3,1,3)}* What is g in set notation? *$D$ $\cap$ $H$ $\cap$ $T$*
+  
+  iii. What is $P(H)$? *$P(H)$ = 1 - $P(H^C)$ = 1-4/27 = 23/27*
+  
+  iv. What is $P((H$ and $T)^C)$? *From (i), $H$ $\cap$ $T$ has 22 elements.  So, (H and T$)^C$ has 5 elements. $P((H$ and $T)^C)$ = 5/27.*
+  
+  
+  c) What is the complement to event 
+  
+  $J$: the winning number contains at least 2 distinct numbers
+   
+   *$J^C$ : The winning number is either all 1s, 2s, or 3s.*
+   
+  d) From (c), what is $P(J)$?
+  
+  *$P(J)$ = 24/27*
+  
+
+
+### Problem 3
+
+A 2010 Pew Research poll asked 1,306 Americans “From what you’ve read and heard, is there solid evidence that the average temperature on earth has been getting warmer over the past few decades, or not?” The table below shows the distribution of responses by party and ideology, where the counts have been replaced with relative frequencies.
+
+Political Party/Ideology Key:
+
+  Cons = Conservative
+  
+  Rep = Republican 
+  
+  Lib = Liberal 
+  
+  Dem = Democrat
+  
+  Mod = Moderate
+
+
++-------------+-----------+-----------+-----------+
+|             |  Warming  |   Not     |  Don't    |
+|             |           | Warming   |  Know     |
++=============+===========+===========+===========+
+| Cons Rep    |  0.11     |  0.2      |   0.02    |
++-------------+-----------+-----------+-----------+
+| Mod/Lib Rep |  0.06     |  0.06     |  0.01     |
++-------------+-----------+-----------+-----------+
+| Mod/Cons Dem|  0.25     |  0.07     |  0.02     |
++-------------+-----------+-----------+-----------+
+| Lib Dem     |  0.18     |  0.01     |  0.01     |
++-------------+-----------+-----------+-----------+
+
+  a) What is the probability that a randomly selected respondent believes that the earth is not warming?
+
+*$P(NW)$ = $P(NW$ and $CR)$ + $P(NW$ and $MLR)$ + $P(NW$ and $MCD)$ + $P(NW$ and $LD)$*
+  
+```{r}
+PNW=.2+.06+.07+.01
+PNW
+```
+
+  b) What is the probability that a randomly selected respondent is a moderate?
+
+*$P(M)$ = $P(W$ and $MR)$ + $P(NW$ and $MR)$ + $P(DK$ and $MR)$ + $P(W$ and $MD)$ + $P(NW$ and $MD)$ + $P(DK$ and $MD)$*
+
+```{r}
+PM=.06+.06+.01+.25+.07+.02
+PM
+```
+    
+  c) What is the probability that a randomly selected respondent believes the earth is warming given that he/she is a moderate?
+
+*$P(W|M)$ = $P(W$ and $M)$/ $P(M)$ = $(P(W$ and $MR)$ + $P(W$ and $ML))$/$P(M)$*
+  
+```{r}
+PWGM=(.06+.25)/(.06+.06+.01+.25+.07+.02)
+PWGM
+```
+    
+  d) What is the probability that a randomly selected respondent believes the earth is warming or is a liberal Democrat?
+
+*$P(W$ or $LD)$ = $P(W)$ + $P(LD)$ - $P(W$ and $LD)$* 
+```{r}
+PWOLD=(.11+.06+.25+.18)+(.18+.01+.01) - .18
+PWOLD
+``` 
+    
+  e) What is the probability that a randomly selected respondent believes the earth is warming given that he/she is a conservative Republican?
+
+*$P(W|CR)$ = $P(W$ and $CR)$/$P(CR)$*
+```{r}
+PWGCR=.11/(.11+.2+.02)
+PWGCR
+```  
+    
+  f) Is whether or not a respondent believes in global warming independent of his/her party and ideology? Explain your reasoning.
+
+*If they are independent, the probability of any combination of political party and belief of global warming should be equal to the product of the probability of belonging to that political party and the probability of having that particular belief about global warming.  If you can find one example where this is not true, they are not independent.*
+  
+  *Here $P(NW$ and $CR)$ = .20* 
+
+  *$P(NW)P(CR)$ =*
+  
+```{r}
+(.20+.06+.07+.01)*(.11+.2+.02)
+``` 
+
+*So, we conclude that political party is not independent of belief about global warming.*
+  
+  
+### Problem 4
+
+The fraction of people to have a certain disease in a population is .01.  A diagnostic test is available to test for the disease.  For a healthy person, the chance of being misdiagnosed using the diagnostic test is .05.  For someone with the disease, the chance of the test indicating the disease is not present is .20.  Suppose the test is performed from a randomly selected individual from the population.
+
+  a) What is the probability the test shows a positive result (i.e. the test indicates the person has the disease)?
+  
+  *$P(P)$ = $P(P$ and $H)$ + $P(P$ and $D)$*
+  
+  *$P(P$ and $H)$ = $P(P|H)P(H)$ = .05(1-.01)*
+  
+  *$P(P$ and $D)$ = $P(P|D)P(D)$ = (1 - .2 ) $\times$.01*
+  
+```{r}
+PPAH = .05*(1-.01)
+PPAD = (1-.2)*.01
+PP = PPAH + PPAD
+PP
+``` 
+  
+  
+  b) What is the probability the person selected has the disease but is diagnosed as healthy?
+    
+  *$P(D$ and $N)$ = $P(N|D)P(D)$ =* 
+  
+```{r}
+PDAN = .2*.01
+PDAN
+```  
+  
+  c) The *sensitivity* of a test is the probability that the test gives a positive result given the individual has the disease.  What is the *sensitiviy* of the diagnostic test?
+  
+ *$P(P|D)$ = 1 - $P(N|D)$ =*
+  
+```{r}
+PPGD=1-.2
+PPGD
+``` 
+  
+  
+  d) The *specificity* of a test is the probability the test comes out negative given the individual does not have the disease.  What is the *specificity* of this diagnostic test?
+  
+  *$P(N|H)$ = 1 - $P(P|H)$ =*
+  
+  
+```{r}
+PNGH=1-.05
+PNGH
+```  
+    
+### Problem 5
+
+In this problem, we will calculate the probability of various poker hands.  We will perform Monte Carlo simulations to compute approximate probabilities of these hands.  The idea is that we will repeatedly "deal" a hand of five cards, and check what proportion of the time it is a certain poker hand.
+
+Let us start by representing the deck of cards as a data frame in R.  It will have 52 rows (one per card) and a column representing the value
+
+```{r, eval = TRUE}
+# let's represent a deck as a data frame with columns "value" and "suit"
+deck <- data.frame(value = rep(c("Ace", 2:10, "Jack", "Queen", "King"), times = 4),
+                   suit = rep(c("Clubs", "Hearts", "Spades", "Diamonds"), each = 13),
+                   stringsAsFactors = FALSE)
+```
+
+Run this in the console and take a look at the data frame `deck`.  How does `rep` work?  What is the difference between the argument `times` and `each`?  (Our use of `stringsAsFactors = FALSE` is a bit technical, so we won't discuss it here.)
+
+a) When we shuffle a deck of cards thoroughly and deal the top five cards, what type of sampling is this?
+
+Here is code that chooses 5 random integers from 1 to 52 (without replacement) and selects these rows of the data frame `deck`. 
+
+```{r, eval = TRUE}
+hand <- deck[sample(1:52, 5, replace = FALSE), ] # draw 5 cards from deck
+```
+
+Run this in the console and take a look at the random `hand` generated.
+
+Most of the poker hands have to do with how many of the five cards have a certain value.  For example, "four-of-a-kind" means we got four of the same value (and one of a different value).  We will use `table` on the values of `hand` to record the frequencies.
+
+Now that we know how to generate random hands from a deck of cards, we can proceed with computing probabilities of poker hands.
+
+b) What is the probability of getting a four-of-a-kind? (e.g., four aces or four 2s, etc.)
+
+```{r, eval = TRUE}
+set.seed(1) # adding this so we get the same number each time we run script
+# let's choose a number of times to deal five random cards:
+num_simulations <- 1e5
+counter <- 0
+for (i in 1:num_simulations) {
+  hand <- deck[sample(1:52, 5, replace = FALSE), ] # draw 5 cards from deck
+  tab <- table(hand$value) # how many of each value?
+  tab_sorted <- as.numeric(sort(tab)) # put in a format easy to compare to
+  if (identical(tab_sorted, c(1, 4))) &  {
+    counter <- counter + 1
+  }
+}
+counter / num_simulations
+```
+
+c) What is the probability of getting a flush? (i.e., all five cards having same suit)
+
+```{r, eval = TRUE}
+num_simulations <- 1e5
+counter <- 0
+for (i in 1:num_simulations) {
+  hand <- deck[sample(1:52, 5, replace = FALSE), ]
+  tab <- table(hand$suit)
+  tab_sorted <- as.numeric(sort(tab))
+  if (identical(tab_sorted, 5)) {
+    counter <- counter + 1
+  }
+}
+counter / num_simulations
+```
+
+d) What is the probability of getting two pair? (e.g., 2, 2, 3, 10, 10)
+
+```{r, eval = TRUE}
+deck <- cbind(rep(1:13, times = 4), rep(c("C", "H", "S", "D"), each = 13))
+num_simulations <- 1e5
+counter <- 0
+for (i in 1:num_simulations) {
+  hand <- deck[sample(1:52, 5, replace = FALSE), ]
+  tab <- table(hand[, 1])
+  tab_sorted <- as.numeric(sort(tab))
+  if (identical(tab_sorted, c(1, 2, 2))) {
+    counter <- counter + 1
+  }
+}
+counter / num_simulations
+```

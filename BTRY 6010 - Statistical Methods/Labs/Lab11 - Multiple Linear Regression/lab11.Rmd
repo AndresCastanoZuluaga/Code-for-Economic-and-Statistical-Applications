@@ -1,0 +1,234 @@
+---
+title: 'Lab 11: Multiple Linear Regression'
+output: html_document
+---
+
+
+## Lab Goals
+
+The goals of this lab are to:
+  
+  1) Analyze data using MLR
+    
+  2) Perform some basic inference for regression coefficients
+  
+  3) Look at some basic ways to compare models
+
+
+
+## Multiple Linear Regression
+
+A multiple linear regression model is used when more than one predictor variable is assumed to explain the variability in a response, Y.  If the assumptions for a MLR model are satisfied, the relationship between each observation, $Y_i$ and the predictors, $X_{i1}, ..., X_{ik}$ is specified as
+
+$Y_i = \beta_0 + \beta_1 X_{i1} + \beta_2 X_{i2}+...+\beta_k X_{ik} + \epsilon_{i}$  
+
+where
+  
+  1. $\beta_0$ is the intercept of the regression
+  
+  2. $\beta_j$ is the regression coefficient (or partial slope) associated with the $j$-th predictor 
+  
+  3. $\epsilon_i$ is the error term for observation $Y_i$
+  
+  4. $\epsilon_i \sim N(0,\sigma_{\epsilon})$ for all $i = 1,\dots,n$ and are mutually independent
+  
+
+## Speed Dating Data
+
+Between 2002 and 2004 a series of speed dating experiments were conducted at Columbia University.  Participants were students at Columbia's graduate and professional schools.  Each participant attended one speed dating session in which they met with each participant of the opposite sex for four minutes.  The data for this analysis contains the responses from 233 speed dates for either the male or the female on how they rated their date from 0 to 10 on the following attributes: *attractive*, *sincere*, *intelligent*, *fun*, *ambitious*, and *shared interests*. Here we will consider the ratings for each of these attributes along wih the *gender* of the participant giving the responses as predictors for a MLR model where the response (Y) is a rating on a scale from 0 to 10 of how much the participant liked their date.  The following table includes a description of each predictor.
+
++---------------------------+----------------------------------------+
+| Predictor                 |             Description                |
++===========================+========================================+
+| `gender`                  |   M = Male   F = Female                |
++---------------------------+----------------------------------------+
+| `attractive`              |   attractiveness on a scale of 0-10    |
++---------------------------+----------------------------------------+
+| `sincere`                 |   sincerity on a scale of 0-10         |
++---------------------------+----------------------------------------+
+| `intelligent`             |   intelligence on a scale of 0-10      |
++---------------------------+----------------------------------------+
+| `fun`                     |   how fun on a scale of 0-10           |
++---------------------------+----------------------------------------+
+| `ambitious `              |   how ambitious  on a scale of 0-10    |
++---------------------------+----------------------------------------+
+| `sharedinterests`         |   interests shared on a scale of 0-10  |
++---------------------------+----------------------------------------+
+
+
+Read the data into this lab document and use the `names()` function to determine the variable names of this dataset.
+  
+
+### Problem 1
+
+Initially we will consider a model that includes all of the predictors in the table above except for `intelligent` and `ambitious`. 
+
+Write out the model.  Include definitions of each predictor and regression coefficient.  Assume `F` is the first level of `gender`.  In R, the covariate for a binary predictor is 0 if the observation belongs to the first level of the predictor and 1 if the observation belongs to the second level of the predictor.
+  
+
+
+### Problem 2
+
+Here we will consider the model defined in Problem 1.
+
+  a) Before we fit the linear model in R, we want to make sure that `F` is defined as the first level of the categorical predictor, `gender`. If `M` is the first level of `gender`, as in the past, we can use the `factor()` function to re-order the levels.  The following code will list the levels of `gender`; change the ordering of the levels if it is necessary.
+
+
+```{r,eval=FALSE}
+levels(SpeedDating2$gender) 
+```
+
+  b) Using `like` as the response, the following code will fit the linear model using the `lm()` function and include a summary of the fit. 
+
+```{r,eval=FALSE}
+like.lm = lm(like~gender+attractive+sincere+fun+sharedinterests, data=SpeedDating2)
+summary(like.lm)
+```
+
+  c) Using this model, what is the equation that estimates the expected value of `like` given the 5 predictors?
+  
+ 
+
+  d) What is the estimated expected value of `like` when `gender=F` and all other predictors are zero?
+  
+  
+  
+  e) What is the value of $X_{i1}$ when `gender=F`?  What is the value of $X_{i1}$ when `gender=M`? 
+      
+     
+      
+  f) What is the estimated expected value of `like` when `gender=M` and all other predictors are zero?
+  
+ 
+  
+  g) What is the estimated expected value of `like` for a female respondant that rated the male a 7 for attractiveness, a 5 for sincerity, an 8 for fun, and a 0 for shared interests?
+  
+  
+  
+  h) What is the $R^2$ value for this model?  Interpret it in the context of this study. Would we expect the estimate in (g) to be very accurate based on this $R^2$ value?
+  
+ 
+  
+  i) A more specific way to characterize the variability in $E(Y)$ from part (g) is to use the `predict()` function.  In the following code chunk, the `predict()` function is first used to create a confidence interval for $E(Y)$ given the predictors from part (g).  Then, the `predict()` function is used to create a prediction interval for a new observation of `like` when the predictors are as specified in part (g).
+  
+```{r,eval=FALSE,tidy=TRUE}
+predict(like.lm,list(gender="F",attractive=7, sincere=5, fun=8, sharedinterests=0),interval = "conf")
+predict(like.lm,list(gender="F",attractive=7, sincere=5, fun=8, sharedinterests=0),interval = "pred")
+```
+
+  
+## Hypothesis Tests Found in the Summary Table
+
+The `summary()` function not only provides estimates for all regression coefficients in the model, $\beta_j, j=0,...,k$, but also tests $H_0: \beta_j = 0$ versus $H_a: \beta_j \neq 0$  for $j = 0,..,k$ assuming all other covariates listed are included in the model.
+
+For each of these hypothesis tests, the standardized test statistic is $\frac{\hat\beta_j}{\hat{se}(\hat\beta_j)}$.  Under the null hypothesis, this statistic has a t distribution with $n-p$ degrees of freedom where
+
+  1. $n$ = total number of observations, and
+  
+  2. $p$ = $k+1$ = total number of regression coefficients in the model including the intercept.
+  
+The summary table lists the realization of this statistic under `t-value`.  The p-value for the test is $2P(t_{n-p}>|\frac{\hat\beta_j}{\hat{se}(\hat\beta_j)}|)$ and is listed under `Pr(>|t|)`. 
+
+### Problem 4
+
+Assuming all predictors but `gender` are set at the same value, is there a significant difference in the expected value of `like` for males versus females?
+  
+ 
+  
+## Confidence Intervals
+
+100(1-$\alpha$)% confidence intervals for each regression coefficient, $\beta_j, j=0,...,k$, can be constructed in the typical way:
+
+**100(1-$\alpha$)% confidence interval for $\beta_j$** = $\hat \beta_j \pm t_{\alpha/2,n-p} \hat{se}(\hat\beta_j)$
+
+### Problem 5
+
+  Construct a 95% confidence interval for the partial slope of `sharedinterests` and interpret it in the context of the study. Use the `confint()` function to do this:
+  
+```{r,eval=FALSE}
+confint(like.lm)
+```
+
+## F-test for Comparing a Complete to a Reduced Model
+
+Suppose a MLR model is used to predict the response variable (Y) using k predictors.  We might want to compare this model to a *nested model* that includes only a subset of g of the original k predictors. So given the complete model
+
+$Y_i = \beta_0 + \beta_1 X_{i1} + \beta_2 X_{i2}+ ... + \beta_k X_{ik} + \epsilon_i$.
+
+Suppose we want to test whether the predictors $X_{ig+1},.., X_{ik}$ are significantly associated with the response variable (Y) given $X_{i1},.., X_{ig}$ are included in the model.  The null hypothesis for this test is
+
+$H_0: \beta_{g+1} = ....=\beta_{k}=0$  
+
+The alternative hypothesis for this test is that at least one of these regression coefficients is not equal to zero.
+
+Under the null hypothesis, $F^* = \frac{(SSE_{reduced}-SSE_{complete})/(k-g)}{MSE_{complete}} \sim F_{k-g,n-p}$ where
+
+  1. $SSE_{reduced}$ is the error sum of squares for the reduced model
+  
+  2. $SSE_{complete}$ is the error sum of squares for the complete model
+  
+  3. k = model degrees of freedom for the complete model
+  
+  4. g = model degrees of freedom for the reduced model
+  
+  5. $MSE_{complete}$ is the MSE for the complete model
+  
+  6. n = total number of observations
+  
+  7. p = number of regression coefficients in the complete model
+ 
+ For this test, $H_0$ is rejected if $F^* > F_{\alpha,k-g,n-p}$ (which is the $1-\alpha$ quantile of an F-distribution with $k-g$ and $n-p$ degrees of freedom).
+ 
+### Problem 6
+  
+Here we will consider adding the predictors, `intelligent` and `ambition`, to the MLR model for `like`.   The code below will fit the complete linear model in R.
+
+```{r,eval=FALSE,tidy=TRUE}
+complete.lm=lm(like~gender+attractive+sincere+fun+sharedinterests+intelligent+ambitious,data=SpeedDating2)
+```
+
+
+  a) The `anova()` function will perform an F test to compare the reduced and complete models.  Run the following code to perform this test.
+  
+```{r,eval=FALSE}
+anova(like.lm,complete.lm,test="F")
+```
+
+  b) What is the null hypothesis of the test run in (a)?
+  
+  
+  
+  c) What is the p-value of this test?  At a 0.05 significance level, should we reject the null hypothesis?
+  
+ 
+  
+  d) Based on (c) which is the preferred model (complete or reduced)?
+  
+ 
+
+### Problem 7
+
+Here we will do a quick check of the assumptions for this MLR model.
+
+  a) Does it seem reasonable to assume these observations are independent?
+  
+  
+  b) Create a scatterplot of the residuals by the fitted values.  Does the equal variance assumption seem reasonable?
+  
+  
+  c) Create a Q-Q plot of the residuals. Does the normality assumption seems reasonable?
+  
+
+  d) Based on your answers to (b) and (c), does it make sense to try and transform either the predictors or the response (or both)?  If so, what data transformation would you suggest?
+  
+  
+## More advanced topic (for those interested to try on their own): Interactions
+
+Based on our first lab in which we visualized this data set, we have reason to think that men and women should have a different partial slope for `attractive`.  This is referred to as there being an "interaction" between the variables `gender` and `attractive`.  Here is an example in which we add two interactions.  Observe that both are highly significant:
+
+```{r,eval=FALSE}
+like.lm2 = lm(like ~ . + gender:attractive + gender:fun, data=SpeedDating2)
+summary(like.lm2)
+```
+
+In BTRY6020/ILRST6200 you'll learn more about interaction models and how to interpret them.  From this output, we find that a unit increase in `attractive` has a statistically significantly different effect on `like` for men versus women.  In particular, we estimate that the partial slope on `attractiveness` is larger by 0.415 for men than for women.  There is also a difference in the slope of `fun` between men and women.  We estimate the partial slope on `fun` to be 0.257 higher for women than for men.
