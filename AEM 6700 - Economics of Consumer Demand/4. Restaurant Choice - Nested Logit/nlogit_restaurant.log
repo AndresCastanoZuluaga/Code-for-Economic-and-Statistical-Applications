@@ -1,0 +1,1028 @@
+-------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  /Users/Andres/Dropbox/CORNELL/Fall 2016/AEM 6700 Economics of Consumer Demand/
+> In Class assignments/4. Restaurant Choice/nlogit_restaurant.log
+  log type:  text
+ opened on:  15 Nov 2016, 15:42:51
+
+. *import delimited restaurant_nlogit.xls
+. *save nlogit_restaurant, replace
+. 
+. use nlogit_restaurant, clear
+
+. 
+. describe
+
+Contains data from nlogit_restaurant.dta
+  obs:         2,100                          
+ vars:             8                          27 Oct 2016 14:24
+ size:        67,200                          
+-------------------------------------------------------------------------------------------
+              storage   display    value
+variable name   type    format     label      variable label
+-------------------------------------------------------------------------------------------
+family_id       float   %9.0g                 family ID
+restaurant      float   %12.0g     names      choices of restaurants
+income          float   %9.0g                 household income
+cost            float   %9.0g                 average meal cost per person
+kids            float   %9.0g                 number of kids in the household
+rating          float   %9.0g                 ratings in local restaurant guide
+distance        float   %9.0g                 distance between home and restaurant
+chosen          float   %9.0g                 0 no 1 yes
+-------------------------------------------------------------------------------------------
+Sorted by:  family_id
+
+. 
+. list family_id restaurant chosen kids rating distance in 1/21, sepby(fam) abbrev(10)
+
+     +--------------------------------------------------------------+
+     | family_id     restaurant   chosen   kids   rating   distance |
+     |--------------------------------------------------------------|
+  1. |         1      Freebirds        1      1        0   1.245553 |
+  2. |         1     MamasPizza        0      1        1    2.82493 |
+  3. |         1     CafeEccell        0      1        2    4.21293 |
+  4. |         1    LosNortenos        0      1        3   4.167634 |
+  5. |         1     WingsNmore        0      1        2   6.330531 |
+  6. |         1   Christophers        0      1        4   10.19829 |
+  7. |         1        MadCows        0      1        5   5.601388 |
+     |--------------------------------------------------------------|
+  8. |         2      Freebirds        0      3        0   4.162657 |
+  9. |         2     MamasPizza        0      3        1   2.865081 |
+ 10. |         2     CafeEccell        0      3        2   5.337799 |
+ 11. |         2    LosNortenos        1      3        3   4.282864 |
+ 12. |         2     WingsNmore        0      3        2   8.133914 |
+ 13. |         2   Christophers        0      3        4   8.664631 |
+ 14. |         2        MadCows        0      3        5   9.119597 |
+     |--------------------------------------------------------------|
+ 15. |         3      Freebirds        1      3        0   2.112586 |
+ 16. |         3     MamasPizza        0      3        1   2.215329 |
+ 17. |         3     CafeEccell        0      3        2   6.978715 |
+ 18. |         3    LosNortenos        0      3        3   5.117877 |
+ 19. |         3     WingsNmore        0      3        2   5.312941 |
+ 20. |         3   Christophers        0      3        4   9.551273 |
+ 21. |         3        MadCows        0      3        5   5.539806 |
+     +--------------------------------------------------------------+
+
+. 
+. nlogitgen type = restaurant(fast: Freebirds | MamasPizza, ///
+>     family: CafeEccell | LosNortenos| WingsNmore, fancy: Christophers | MadCows)
+new variable type is generated with 3 groups
+label list lb_type
+lb_type:
+           1 fast
+           2 family
+           3 fancy
+
+. nlogittree restaurant type, choice(chosen)
+
+tree structure specified for the nested logit model
+
+ type    N      restaurant    N   k 
+-------------------------------------
+ fast   600 --- Freebirds    300  12
+             +- MamasPizza   300  15
+ family 900 --- CafeEccell   300  78
+             |- LosNortenos  300  75
+             +- WingsNmore   300  69
+ fancy  600 --- Christophers 300  27
+             +- MadCows      300  24
+-------------------------------------
+                     total  2100 300
+
+k = number of times alternative is chosen
+N = number of observations at each level
+
+.         
+. nlogitgen type_alt = restaurant(1 2, 3 4 5, 6 7)
+new variable type_alt is generated with 3 groups
+label list lb_type_alt
+lb_type_alt:
+           1 type_alt1
+           2 type_alt2
+           3 type_alt3
+
+. nlogittree restaurant type_alt
+
+tree structure specified for the nested logit model
+
+ type_alt   N      restaurant    N 
+------------------------------------
+ type_alt1 600 --- Freebirds    300
+                +- MamasPizza   300
+ type_alt2 900 --- CafeEccell   300
+                |- LosNortenos  300
+                +- WingsNmore   300
+ type_alt3 600 --- Christophers 300
+                +- MadCows      300
+------------------------------------
+                        total  2100
+
+N = number of observations at each level
+
+. 
+.         
+. nlogit chosen cost rating distance || type: income kids, base(family) || ///
+>        restaurant:, noconstant case(family_id)
+
+tree structure specified for the nested logit model
+
+ type    N      restaurant    N   k 
+-------------------------------------
+ fast   600 --- Freebirds    300  12
+             +- MamasPizza   300  15
+ family 900 --- CafeEccell   300  78
+             |- LosNortenos  300  75
+             +- WingsNmore   300  69
+ fancy  600 --- Christophers 300  27
+             +- MadCows      300  24
+-------------------------------------
+                     total  2100 300
+
+k = number of times alternative is chosen
+N = number of observations at each level
+
+Iteration 0:   log likelihood = -541.93581  
+Iteration 1:   log likelihood = -517.95909  (backed up)
+Iteration 2:   log likelihood = -511.99261  (backed up)
+Iteration 3:   log likelihood =  -506.5559  (backed up)
+Iteration 4:   log likelihood = -501.33127  (backed up)
+Iteration 5:   log likelihood = -492.93121  (backed up)
+Iteration 6:   log likelihood = -491.75884  
+Iteration 7:   log likelihood = -490.81911  
+Iteration 8:   log likelihood = -489.56195  
+Iteration 9:   log likelihood = -488.58891  
+Iteration 10:  log likelihood = -485.68122  
+Iteration 11:  log likelihood = -485.59216  
+Iteration 12:  log likelihood = -485.56202  
+Iteration 13:  log likelihood = -485.51992  
+Iteration 14:  log likelihood = -485.48062  
+Iteration 15:  log likelihood = -485.47384  
+Iteration 16:  log likelihood = -485.47333  
+Iteration 17:  log likelihood = -485.47331  
+
+RUM-consistent nested logit regression         Number of obs      =       2100
+Case variable: family_id                       Number of cases    =        300
+
+Alternative variable: restaurant               Alts per case: min =          7
+                                                              avg =        7.0
+                                                              max =          7
+
+                                                  Wald chi2(7)    =      46.71
+Log likelihood = -485.47331                       Prob > chi2     =     0.0000
+
+------------------------------------------------------------------------------
+      chosen |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+restaurant   |
+        cost |  -.1843847   .0933975    -1.97   0.048    -.3674404   -.0013289
+      rating |    .463694   .3264935     1.42   0.156    -.1762215     1.10361
+    distance |  -.3797474   .1003828    -3.78   0.000    -.5764941   -.1830007
+------------------------------------------------------------------------------
+type equations
+------------------------------------------------------------------------------
+fast         |
+      income |  -.0266038   .0117306    -2.27   0.023    -.0495952   -.0036123
+        kids |  -.0872584   .1385026    -0.63   0.529    -.3587184    .1842016
+-------------+----------------------------------------------------------------
+family       |
+      income |          0  (base)
+        kids |          0  (base)
+-------------+----------------------------------------------------------------
+fancy        |
+      income |   .0461827   .0090936     5.08   0.000     .0283595    .0640059
+        kids |  -.3959413   .1220356    -3.24   0.001    -.6351267   -.1567559
+------------------------------------------------------------------------------
+dissimilarity parameters
+------------------------------------------------------------------------------
+type         |
+   /fast_tau |   1.712878    1.48685                     -1.201295    4.627051
+ /family_tau |   2.505113   .9646351                       .614463    4.395763
+  /fancy_tau |   4.099844   2.810123                     -1.407896    9.607583
+------------------------------------------------------------------------------
+LR test for IIA (tau = 1):           chi2(3) =     6.87   Prob > chi2 = 0.0762
+------------------------------------------------------------------------------
+
+. 
+end of do-file
+
+. do "/var/folders/hw/wmwf0vcd4jxdz_tmk5ft0p480000gn/T//SD08408.000000"
+
+. estat alternatives         
+
+   Alternatives summary for type
+  +-------------------------------------------------------------------------+
+  |          Alternative                  |    Cases   Frequency    Percent |
+  |  index        value             label |   present   selected   selected |
+  |---------------------------------------+---------------------------------|
+  |      1           1               fast |       600         27       9.00 |
+  |      2           2             family |       900        222      74.00 |
+  |      3           3              fancy |       600         51      17.00 |
+  +-------------------------------------------------------------------------+
+
+   Alternatives summary for restaurant
+  +-------------------------------------------------------------------------+
+  |          Alternative                  |    Cases   Frequency    Percent |
+  |  index        value             label |   present   selected   selected |
+  |---------------------------------------+---------------------------------|
+  |      1           1          Freebirds |       300         12       4.00 |
+  |      2           2         MamasPizza |       300         15       5.00 |
+  |      3           3         CafeEccell |       300         78      26.00 |
+  |      4           4        LosNortenos |       300         75      25.00 |
+  |      5           5         WingsNmore |       300         69      23.00 |
+  |      6           6       Christophers |       300         27       9.00 |
+  |      7           7            MadCows |       300         24       8.00 |
+  +-------------------------------------------------------------------------+
+
+. predict p*
+(option pr assumed)
+
+. predict condp, condp hlevel(2)
+
+. sort family_id type restaurant
+
+. list restaurant type chosen p2 p1 condp in 1/14, sepby(family_id) divider
+
+     +-----------------------------------------------------------------+
+     |   restaurant |   type | chosen |       p2 |       p1 |    condp |
+     |--------------+--------+--------+----------+----------+----------|
+  1. |    Freebirds |   fast |      1 | .0642332 | .1189609 | .5399519 |
+  2. |   MamasPizza |   fast |      0 | .0547278 | .1189609 | .4600481 |
+  3. |   CafeEccell | family |      0 |  .284409 | .7738761 | .3675124 |
+  4. |  LosNortenos | family |      0 | .3045242 | .7738761 | .3935051 |
+  5. |   WingsNmore | family |      0 | .1849429 | .7738761 | .2389825 |
+  6. | Christophers |  fancy |      0 | .0429508 |  .107163 | .4007991 |
+  7. |      MadCows |  fancy |      0 | .0642122 |  .107163 | .5992009 |
+     |--------------+--------+--------+----------+----------+----------|
+  8. |    Freebirds |   fast |      0 | .0183578 | .0488948 | .3754559 |
+  9. |   MamasPizza |   fast |      0 |  .030537 | .0488948 | .6245441 |
+ 10. |   CafeEccell | family |      0 | .2832149 |  .756065 | .3745907 |
+ 11. |  LosNortenos | family |      1 | .3038883 |  .756065 | .4019341 |
+ 12. |   WingsNmore | family |      0 | .1689618 |  .756065 | .2234752 |
+ 13. | Christophers |  fancy |      0 | .1041277 | .1950402 |  .533878 |
+ 14. |      MadCows |  fancy |      0 | .0909125 | .1950402 |  .466122 |
+     +-----------------------------------------------------------------+
+
+. 
+end of do-file
+
+. do "/var/folders/hw/wmwf0vcd4jxdz_tmk5ft0p480000gn/T//SD08408.000000"
+
+. ** In Class Activity: TV
+. ** Nov 7, 2016
+. 
+. clear
+
+. cd "/Users/Andres/Dropbox/CORNELL/Fall 2016/AEM 6700 Economics of Consumer Demand/In Clas
+> s assignments/7. Conjoin analysis - Smart tvs"
+/Users/Andres/Dropbox/CORNELL/Fall 2016/AEM 6700 Economics of Consumer Demand/In Class assi
+> gnments/7. Conjoin analysis - Smart tvs
+
+. *log using TV_choices.log, replace
+. import delimited TV_Choices_data.csv
+(14 vars, 840 obs)
+
+. save TV_Choices_raw, replace
+file TV_Choices_raw.dta saved
+
+. 
+. use TV_Choices_raw, clear
+
+. 
+. * Add var to indicate obs#
+.   gen obs = _n
+
+.   order obs id
+
+. * Add var Question#
+.   gen question = obs - 12*(id-1)
+
+.   order obs id question 
+
+. * Add Dummies for var choice
+.   gen choice1 = 0
+
+.   replace choice1 = 1 if choice == 1
+(189 real changes made)
+
+.   gen choice2 = 0
+
+.   replace choice2 = 1 if choice == 2  
+(283 real changes made)
+
+.   gen choice3 = 0
+
+.   replace choice3 = 1 if choice == 3
+(322 real changes made)
+
+.   order obs id question choice*
+
+.   drop choice
+
+. 
+end of do-file
+
+. do "/var/folders/hw/wmwf0vcd4jxdz_tmk5ft0p480000gn/T//SD08408.000000"
+
+.   reshape long choice smarttv s_screen threed s_price,i(obs) j(option)
+(note: j = 1 2 3)
+
+Data                               wide   ->   long
+-----------------------------------------------------------------------------
+Number of obs.                      840   ->    2520
+Number of variables                  18   ->       9
+j variable (3 values)                     ->   option
+xij variables:
+                choice1 choice2 choice3   ->   choice
+             smarttv1 smarttv2 smarttv3   ->   smarttv
+          s_screen1 s_screen2 s_screen3   ->   s_screen
+                threed1 threed2 threed3   ->   threed
+             s_price1 s_price2 s_price3   ->   s_price
+-----------------------------------------------------------------------------
+
+. 
+end of do-file
+
+. do "/var/folders/hw/wmwf0vcd4jxdz_tmk5ft0p480000gn/T//SD08408.000000"
+
+.   tabulate s_screen, generate(s)
+
+   s_screen |      Freq.     Percent        Cum.
+------------+-----------------------------------
+         30 |        840       33.33       33.33
+         40 |        840       33.33       66.67
+         50 |        840       33.33      100.00
+------------+-----------------------------------
+      Total |      2,520      100.00
+
+.   rename s1 s30
+
+.   rename s2 s40
+
+.   rename s3 s50
+
+.   
+.   tabulate s_price, generate(p)
+
+    s_price |      Freq.     Percent        Cum.
+------------+-----------------------------------
+        400 |        840       33.33       33.33
+        500 |        840       33.33       66.67
+        600 |        840       33.33      100.00
+------------+-----------------------------------
+      Total |      2,520      100.00
+
+.   rename p1 p400
+
+.   rename p2 p500
+
+.   rename p3 p600
+
+. 
+. rename smarttv samsung  
+
+. drop s_screen s_price
+
+. save TV_Choices_reshape, replace  
+file TV_Choices_reshape.dta saved
+
+. 
+end of do-file
+
+. do "/var/folders/hw/wmwf0vcd4jxdz_tmk5ft0p480000gn/T//SD08408.000000"
+
+.   clear
+
+.   import delimited TV_Choices_demographics.csv
+(5 vars, 70 obs)
+
+.   save TV_Choices_demo, replace
+file TV_Choices_demo.dta saved
+
+. 
+. * Merge demographic data with TV choice data
+.   merge 1:m id using TV_Choices_reshape
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                             2,520  (_merge==3)
+    -----------------------------------------
+
+.   sort obs id option
+
+.   order q*, last
+
+.   order obs id question option 
+
+.   
+.   drop obs _merge
+
+.   save TV_Choices_clean, replace
+file TV_Choices_clean.dta saved
+
+. 
+end of do-file
+
+. do "/var/folders/hw/wmwf0vcd4jxdz_tmk5ft0p480000gn/T//SD08408.000000"
+
+.   xtset id
+       panel variable:  id (balanced)
+
+.   xtlogit choice samsung threed s40 s50 p500 p600
+
+Fitting comparison model:
+
+Iteration 0:   log likelihood = -1570.2237  
+Iteration 1:   log likelihood = -1246.9479  
+Iteration 2:   log likelihood = -1234.7636  
+Iteration 3:   log likelihood = -1234.6729  
+Iteration 4:   log likelihood = -1234.6729  
+
+Fitting full model:
+
+tau =  0.0     log likelihood = -1234.6729
+tau =  0.1     log likelihood =  -1244.286
+
+Iteration 0:   log likelihood =  -1244.286  
+Iteration 1:   log likelihood = -1234.8352  
+Iteration 2:   log likelihood = -1234.6796  
+Iteration 3:   log likelihood = -1234.6732  
+Iteration 4:   log likelihood = -1234.6729  
+Iteration 5:   log likelihood = -1234.6729  
+
+Random-effects logistic regression              Number of obs      =      2520
+Group variable: id                              Number of groups   =        70
+
+Random effects u_i ~ Gaussian                   Obs per group: min =        36
+                                                               avg =      36.0
+                                                               max =        36
+
+Integration method: mvaghermite                 Integration points =        12
+
+                                                Wald chi2(6)       =    484.31
+Log likelihood  = -1234.6729                    Prob > chi2        =    0.0000
+
+------------------------------------------------------------------------------
+      choice |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+     samsung |   .4325852   .1023103     4.23   0.000     .2320608    .6331096
+      threed |   .4545707    .106483     4.27   0.000     .2458678    .6632736
+         s40 |   .8765847   .1408419     6.22   0.000     .6005397     1.15263
+         s50 |   2.271936   .1371057    16.57   0.000     2.003214    2.540658
+        p500 |  -1.144556   .1195636    -9.57   0.000    -1.378897    -.910216
+        p600 |   -1.86852   .1276758   -14.63   0.000     -2.11876    -1.61828
+       _cons |  -1.473095   .1520537    -9.69   0.000    -1.771115   -1.175076
+-------------+----------------------------------------------------------------
+    /lnsig2u |  -15.87974   22.26941                     -59.52699    27.76751
+-------------+----------------------------------------------------------------
+     sigma_u |   .0003563   .0039668                      1.19e-13     1070625
+         rho |   3.86e-08   8.59e-07                      4.27e-27           1
+------------------------------------------------------------------------------
+Likelihood-ratio test of rho=0: chibar2(01) =     0.00 Prob >= chibar2 = 1.000
+
+. 
+end of do-file
+
+. do "/var/folders/hw/wmwf0vcd4jxdz_tmk5ft0p480000gn/T//SD08408.000000"
+
+.   xtlogit choice samsung threed s40 s50 p500 p600, i(id)
+
+Fitting comparison model:
+
+Iteration 0:   log likelihood = -1570.2237  
+Iteration 1:   log likelihood = -1246.9479  
+Iteration 2:   log likelihood = -1234.7636  
+Iteration 3:   log likelihood = -1234.6729  
+Iteration 4:   log likelihood = -1234.6729  
+
+Fitting full model:
+
+tau =  0.0     log likelihood = -1234.6729
+tau =  0.1     log likelihood =  -1244.286
+
+Iteration 0:   log likelihood =  -1244.286  
+Iteration 1:   log likelihood = -1234.8352  
+Iteration 2:   log likelihood = -1234.6796  
+Iteration 3:   log likelihood = -1234.6732  
+Iteration 4:   log likelihood = -1234.6729  
+Iteration 5:   log likelihood = -1234.6729  
+
+Random-effects logistic regression              Number of obs      =      2520
+Group variable: id                              Number of groups   =        70
+
+Random effects u_i ~ Gaussian                   Obs per group: min =        36
+                                                               avg =      36.0
+                                                               max =        36
+
+Integration method: mvaghermite                 Integration points =        12
+
+                                                Wald chi2(6)       =    484.31
+Log likelihood  = -1234.6729                    Prob > chi2        =    0.0000
+
+------------------------------------------------------------------------------
+      choice |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+     samsung |   .4325852   .1023103     4.23   0.000     .2320608    .6331096
+      threed |   .4545707    .106483     4.27   0.000     .2458678    .6632736
+         s40 |   .8765847   .1408419     6.22   0.000     .6005397     1.15263
+         s50 |   2.271936   .1371057    16.57   0.000     2.003214    2.540658
+        p500 |  -1.144556   .1195636    -9.57   0.000    -1.378897    -.910216
+        p600 |   -1.86852   .1276758   -14.63   0.000     -2.11876    -1.61828
+       _cons |  -1.473095   .1520537    -9.69   0.000    -1.771115   -1.175076
+-------------+----------------------------------------------------------------
+    /lnsig2u |  -15.87974   22.26941                     -59.52699    27.76751
+-------------+----------------------------------------------------------------
+     sigma_u |   .0003563   .0039668                      1.19e-13     1070625
+         rho |   3.86e-08   8.59e-07                      4.27e-27           1
+------------------------------------------------------------------------------
+Likelihood-ratio test of rho=0: chibar2(01) =     0.00 Prob >= chibar2 = 1.000
+
+. 
+end of do-file
+
+. do "/var/folders/hw/wmwf0vcd4jxdz_tmk5ft0p480000gn/T//SD08408.000000"
+
+.   xtlogit choice samsung threed s40 s50 p500 p600
+
+Fitting comparison model:
+
+Iteration 0:   log likelihood = -1570.2237  
+Iteration 1:   log likelihood = -1246.9479  
+Iteration 2:   log likelihood = -1234.7636  
+Iteration 3:   log likelihood = -1234.6729  
+Iteration 4:   log likelihood = -1234.6729  
+
+Fitting full model:
+
+tau =  0.0     log likelihood = -1234.6729
+tau =  0.1     log likelihood =  -1244.286
+
+Iteration 0:   log likelihood =  -1244.286  
+Iteration 1:   log likelihood = -1234.8352  
+Iteration 2:   log likelihood = -1234.6796  
+Iteration 3:   log likelihood = -1234.6732  
+Iteration 4:   log likelihood = -1234.6729  
+Iteration 5:   log likelihood = -1234.6729  
+
+Random-effects logistic regression              Number of obs      =      2520
+Group variable: id                              Number of groups   =        70
+
+Random effects u_i ~ Gaussian                   Obs per group: min =        36
+                                                               avg =      36.0
+                                                               max =        36
+
+Integration method: mvaghermite                 Integration points =        12
+
+                                                Wald chi2(6)       =    484.31
+Log likelihood  = -1234.6729                    Prob > chi2        =    0.0000
+
+------------------------------------------------------------------------------
+      choice |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+     samsung |   .4325852   .1023103     4.23   0.000     .2320608    .6331096
+      threed |   .4545707    .106483     4.27   0.000     .2458678    .6632736
+         s40 |   .8765847   .1408419     6.22   0.000     .6005397     1.15263
+         s50 |   2.271936   .1371057    16.57   0.000     2.003214    2.540658
+        p500 |  -1.144556   .1195636    -9.57   0.000    -1.378897    -.910216
+        p600 |   -1.86852   .1276758   -14.63   0.000     -2.11876    -1.61828
+       _cons |  -1.473095   .1520537    -9.69   0.000    -1.771115   -1.175076
+-------------+----------------------------------------------------------------
+    /lnsig2u |  -15.87974   22.26941                     -59.52699    27.76751
+-------------+----------------------------------------------------------------
+     sigma_u |   .0003563   .0039668                      1.19e-13     1070625
+         rho |   3.86e-08   8.59e-07                      4.27e-27           1
+------------------------------------------------------------------------------
+Likelihood-ratio test of rho=0: chibar2(01) =     0.00 Prob >= chibar2 = 1.000
+
+.   margins, dydx(*)
+
+Average marginal effects                          Number of obs   =       2520
+Model VCE    : OIM
+
+Expression   : Linear prediction, predict()
+dy/dx w.r.t. : samsung threed s40 s50 p500 p600
+
+------------------------------------------------------------------------------
+             |            Delta-method
+             |      dy/dx   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+     samsung |   .4325852   .1023103     4.23   0.000     .2320608    .6331096
+      threed |   .4545707    .106483     4.27   0.000     .2458678    .6632736
+         s40 |   .8765847   .1408419     6.22   0.000     .6005397     1.15263
+         s50 |   2.271936   .1371057    16.57   0.000     2.003214    2.540658
+        p500 |  -1.144556   .1195636    -9.57   0.000    -1.378897    -.910216
+        p600 |   -1.86852   .1276758   -14.63   0.000     -2.11876    -1.61828
+------------------------------------------------------------------------------
+
+. 
+end of do-file
+
+. do "/var/folders/hw/wmwf0vcd4jxdz_tmk5ft0p480000gn/T//SD08408.000000"
+
+.   xtlogit choice i.samsung i.threed i.s40 i.s50 i.p500 i.p600
+
+Fitting comparison model:
+
+Iteration 0:   log likelihood = -1570.2237  
+Iteration 1:   log likelihood = -1246.9479  
+Iteration 2:   log likelihood = -1234.7636  
+Iteration 3:   log likelihood = -1234.6729  
+Iteration 4:   log likelihood = -1234.6729  
+
+Fitting full model:
+
+tau =  0.0     log likelihood = -1234.6729
+tau =  0.1     log likelihood =  -1244.286
+
+Iteration 0:   log likelihood =  -1244.286  
+Iteration 1:   log likelihood = -1234.8352  
+Iteration 2:   log likelihood = -1234.6796  
+Iteration 3:   log likelihood = -1234.6732  
+Iteration 4:   log likelihood = -1234.6729  
+Iteration 5:   log likelihood = -1234.6729  
+
+Random-effects logistic regression              Number of obs      =      2520
+Group variable: id                              Number of groups   =        70
+
+Random effects u_i ~ Gaussian                   Obs per group: min =        36
+                                                               avg =      36.0
+                                                               max =        36
+
+Integration method: mvaghermite                 Integration points =        12
+
+                                                Wald chi2(6)       =    484.31
+Log likelihood  = -1234.6729                    Prob > chi2        =    0.0000
+
+------------------------------------------------------------------------------
+      choice |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+   1.samsung |   .4325852   .1023103     4.23   0.000     .2320608    .6331096
+    1.threed |   .4545707    .106483     4.27   0.000     .2458678    .6632736
+       1.s40 |   .8765847   .1408419     6.22   0.000     .6005397     1.15263
+       1.s50 |   2.271936   .1371057    16.57   0.000     2.003214    2.540658
+      1.p500 |  -1.144556   .1195636    -9.57   0.000    -1.378897    -.910216
+      1.p600 |   -1.86852   .1276758   -14.63   0.000     -2.11876    -1.61828
+       _cons |  -1.473095   .1520537    -9.69   0.000    -1.771115   -1.175076
+-------------+----------------------------------------------------------------
+    /lnsig2u |  -15.87974   22.26941                     -59.52699    27.76751
+-------------+----------------------------------------------------------------
+     sigma_u |   .0003563   .0039668                      1.19e-13     1070625
+         rho |   3.86e-08   8.59e-07                      4.27e-27           1
+------------------------------------------------------------------------------
+Likelihood-ratio test of rho=0: chibar2(01) =     0.00 Prob >= chibar2 = 1.000
+
+.   margins, dydx(*)
+
+Average marginal effects                          Number of obs   =       2520
+Model VCE    : OIM
+
+Expression   : Linear prediction, predict()
+dy/dx w.r.t. : 1.samsung 1.threed 1.s40 1.s50 1.p500 1.p600
+
+------------------------------------------------------------------------------
+             |            Delta-method
+             |      dy/dx   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+   1.samsung |   .4325852   .1023103     4.23   0.000     .2320608    .6331096
+    1.threed |   .4545707    .106483     4.27   0.000     .2458678    .6632736
+       1.s40 |   .8765847   .1408419     6.22   0.000     .6005397     1.15263
+       1.s50 |   2.271936   .1371057    16.57   0.000     2.003214    2.540658
+      1.p500 |  -1.144556   .1195636    -9.57   0.000    -1.378897    -.910216
+      1.p600 |   -1.86852   .1276758   -14.63   0.000     -2.11876    -1.61828
+------------------------------------------------------------------------------
+Note: dy/dx for factor levels is the discrete change from the base level.
+
+. 
+end of do-file
+
+. do "/var/folders/hw/wmwf0vcd4jxdz_tmk5ft0p480000gn/T//SD08408.000000"
+
+.   xtlogit choice i.samsung i.threed i.s40 i.s50 i.p500 i.p600
+
+Fitting comparison model:
+
+Iteration 0:   log likelihood = -1570.2237  
+Iteration 1:   log likelihood = -1246.9479  
+Iteration 2:   log likelihood = -1234.7636  
+Iteration 3:   log likelihood = -1234.6729  
+Iteration 4:   log likelihood = -1234.6729  
+
+Fitting full model:
+
+tau =  0.0     log likelihood = -1234.6729
+tau =  0.1     log likelihood =  -1244.286
+
+Iteration 0:   log likelihood =  -1244.286  
+Iteration 1:   log likelihood = -1234.8352  
+Iteration 2:   log likelihood = -1234.6796  
+Iteration 3:   log likelihood = -1234.6732  
+Iteration 4:   log likelihood = -1234.6729  
+Iteration 5:   log likelihood = -1234.6729  
+
+Random-effects logistic regression              Number of obs      =      2520
+Group variable: id                              Number of groups   =        70
+
+Random effects u_i ~ Gaussian                   Obs per group: min =        36
+                                                               avg =      36.0
+                                                               max =        36
+
+Integration method: mvaghermite                 Integration points =        12
+
+                                                Wald chi2(6)       =    484.31
+Log likelihood  = -1234.6729                    Prob > chi2        =    0.0000
+
+------------------------------------------------------------------------------
+      choice |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+   1.samsung |   .4325852   .1023103     4.23   0.000     .2320608    .6331096
+    1.threed |   .4545707    .106483     4.27   0.000     .2458678    .6632736
+       1.s40 |   .8765847   .1408419     6.22   0.000     .6005397     1.15263
+       1.s50 |   2.271936   .1371057    16.57   0.000     2.003214    2.540658
+      1.p500 |  -1.144556   .1195636    -9.57   0.000    -1.378897    -.910216
+      1.p600 |   -1.86852   .1276758   -14.63   0.000     -2.11876    -1.61828
+       _cons |  -1.473095   .1520537    -9.69   0.000    -1.771115   -1.175076
+-------------+----------------------------------------------------------------
+    /lnsig2u |  -15.87974   22.26941                     -59.52699    27.76751
+-------------+----------------------------------------------------------------
+     sigma_u |   .0003563   .0039668                      1.19e-13     1070625
+         rho |   3.86e-08   8.59e-07                      4.27e-27           1
+------------------------------------------------------------------------------
+Likelihood-ratio test of rho=0: chibar2(01) =     0.00 Prob >= chibar2 = 1.000
+
+.   margins, dydx(*)
+
+Average marginal effects                          Number of obs   =       2520
+Model VCE    : OIM
+
+Expression   : Linear prediction, predict()
+dy/dx w.r.t. : 1.samsung 1.threed 1.s40 1.s50 1.p500 1.p600
+
+------------------------------------------------------------------------------
+             |            Delta-method
+             |      dy/dx   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+   1.samsung |   .4325852   .1023103     4.23   0.000     .2320608    .6331096
+    1.threed |   .4545707    .106483     4.27   0.000     .2458678    .6632736
+       1.s40 |   .8765847   .1408419     6.22   0.000     .6005397     1.15263
+       1.s50 |   2.271936   .1371057    16.57   0.000     2.003214    2.540658
+      1.p500 |  -1.144556   .1195636    -9.57   0.000    -1.378897    -.910216
+      1.p600 |   -1.86852   .1276758   -14.63   0.000     -2.11876    -1.61828
+------------------------------------------------------------------------------
+Note: dy/dx for factor levels is the discrete change from the base level.
+
+.   predict
+'' found where varname expected
+r(7);
+
+end of do-file
+
+r(7);
+
+. do "/var/folders/hw/wmwf0vcd4jxdz_tmk5ft0p480000gn/T//SD08408.000000"
+
+.   predict prob
+(option xb assumed; linear prediction)
+
+. 
+end of do-file
+
+. help predict
+
+. do "/var/folders/hw/wmwf0vcd4jxdz_tmk5ft0p480000gn/T//SD08408.000000"
+
+.   predict prob1, pr
+option pr not allowed
+r(198);
+
+end of do-file
+
+r(198);
+
+. do "/var/folders/hw/wmwf0vcd4jxdz_tmk5ft0p480000gn/T//SD08408.000000"
+
+.   xtlogit choice i.samsung i.threed i.s40 i.s50 i.p500 i.p600
+
+Fitting comparison model:
+
+Iteration 0:   log likelihood = -1570.2237  
+Iteration 1:   log likelihood = -1246.9479  
+Iteration 2:   log likelihood = -1234.7636  
+Iteration 3:   log likelihood = -1234.6729  
+Iteration 4:   log likelihood = -1234.6729  
+
+Fitting full model:
+
+tau =  0.0     log likelihood = -1234.6729
+tau =  0.1     log likelihood =  -1244.286
+
+Iteration 0:   log likelihood =  -1244.286  
+Iteration 1:   log likelihood = -1234.8352  
+Iteration 2:   log likelihood = -1234.6796  
+Iteration 3:   log likelihood = -1234.6732  
+Iteration 4:   log likelihood = -1234.6729  
+Iteration 5:   log likelihood = -1234.6729  
+
+Random-effects logistic regression              Number of obs      =      2520
+Group variable: id                              Number of groups   =        70
+
+Random effects u_i ~ Gaussian                   Obs per group: min =        36
+                                                               avg =      36.0
+                                                               max =        36
+
+Integration method: mvaghermite                 Integration points =        12
+
+                                                Wald chi2(6)       =    484.31
+Log likelihood  = -1234.6729                    Prob > chi2        =    0.0000
+
+------------------------------------------------------------------------------
+      choice |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+   1.samsung |   .4325852   .1023103     4.23   0.000     .2320608    .6331096
+    1.threed |   .4545707    .106483     4.27   0.000     .2458678    .6632736
+       1.s40 |   .8765847   .1408419     6.22   0.000     .6005397     1.15263
+       1.s50 |   2.271936   .1371057    16.57   0.000     2.003214    2.540658
+      1.p500 |  -1.144556   .1195636    -9.57   0.000    -1.378897    -.910216
+      1.p600 |   -1.86852   .1276758   -14.63   0.000     -2.11876    -1.61828
+       _cons |  -1.473095   .1520537    -9.69   0.000    -1.771115   -1.175076
+-------------+----------------------------------------------------------------
+    /lnsig2u |  -15.87974   22.26941                     -59.52699    27.76751
+-------------+----------------------------------------------------------------
+     sigma_u |   .0003563   .0039668                      1.19e-13     1070625
+         rho |   3.86e-08   8.59e-07                      4.27e-27           1
+------------------------------------------------------------------------------
+Likelihood-ratio test of rho=0: chibar2(01) =     0.00 Prob >= chibar2 = 1.000
+
+. 
+end of do-file
+
+. do "/var/folders/hw/wmwf0vcd4jxdz_tmk5ft0p480000gn/T//SD08408.000000"
+
+.   predict prob1, pr
+option pr not allowed
+r(198);
+
+end of do-file
+
+r(198);
+
+. drop prob
+
+. do "/var/folders/hw/wmwf0vcd4jxdz_tmk5ft0p480000gn/T//SD08408.000000"
+
+.   predict prob
+(option xb assumed; linear prediction)
+
+. 
+end of do-file
+
+. bysort option: summ prob
+
+-------------------------------------------------------------------------------------------
+-> option = 1
+
+    Variable |       Obs        Mean    Std. Dev.       Min        Max
+-------------+--------------------------------------------------------
+        prob |       840   -1.408529    1.285334   -2.90903   1.253412
+
+-------------------------------------------------------------------------------------------
+-> option = 2
+
+    Variable |       Obs        Mean    Std. Dev.       Min        Max
+-------------+--------------------------------------------------------
+        prob |       840   -1.185142    1.272838   -2.90903   1.231426
+
+-------------------------------------------------------------------------------------------
+-> option = 3
+
+    Variable |       Obs        Mean    Std. Dev.       Min        Max
+-------------+--------------------------------------------------------
+        prob |       840   -.4712473    1.095316  -2.032445   1.685997
+
+
+. ssc new
+(contacting http://repec.org)
+
+. help webdoc
+
+. help georoute
+
+. ssc install insheetjson
+checking insheetjson consistency and verifying not already installed...
+installing into /Users/Andres/Library/Application Support/Stata/ado/plus/...
+installation complete.
+
+. ssc install libjson
+checking libjson consistency and verifying not already installed...
+installing into /Users/Andres/Library/Application Support/Stata/ado/plus/...
+installation complete.
+
+. help texdoc
+
+. ssc hot
+
+Top 10 packages at SSC
+
+        Oct 2016   
+  Rank   # hits    Package       Author(s)
+  ----------------------------------------------------------------------
+     1  197166.3    unique        Tony Brady                              
+     2  158211.7    rsource       Roger Newson                            
+     3  22114.2    outreg2       Roy Wada                                
+     4  21475.8    estout        Ben Jann                                
+     5   7442.2    ivreg210      Mark E Schaffer, Steven Stillman,       
+                                   Christopher F Baum                      
+     6   7405.2    ivreg2        Mark E Schaffer, Christopher F Baum,    
+                                   Steven Stillman                         
+     7   7402.9    ivreg29       Mark E Schaffer, Steven Stillman,       
+                                   Christopher F Baum                      
+     8   7337.1    ivreg28       Christopher F Baum, Mark E Schaffer,    
+                                   Steven Stillman                         
+     9   5468.3    winsor        Nicholas J. Cox                         
+    10   5002.0    distinct      Nicholas J. Cox, Gary Longton           
+  ----------------------------------------------------------------------
+  (Click on package name for description)
+
+. ssc install sjlatex
+ssc install: "sjlatex" not found at SSC, type -findit sjlatex-
+(To find all packages at SSC that start with s, type -ssc describe s-)
+r(601);
+
+. findit sjlatex
+
+. findit sjlog
+
+. ssc install texdoc
+checking texdoc consistency and verifying not already installed...
+all files already exist and are up to date.
+
+. net install sjlatex, from(http://www.stata-journal.com/production)
+checking sjlatex consistency and verifying not already installed...
+all files already exist and are up to date.
+
+. sjlatex install
+Installing Stata Journal LaTeX files...
+
+Stata Journal LaTeX files
+    folder:             /Users/Andres/Dropbox/CORNELL/Fall 2016/AEM 6700 Economics of Consumer 
+> Demand/In Class assignments/7. Conjoin analysis - Smart tvs
+    installed release:  (unknown)
+
+. ls
+
+total 4320
+-rw-r--r--@ 1 Andres  staff   15113 Nov 14 22:09 Problem_Set_Conjoint_Models_AEM6700.docx
+-rw-r--r--@ 1 Andres  staff   24485 Nov 16 13:12 SOL-PROBLEM SET CONJOINT ANALYSIS.docx
+-rw-r--r--@ 1 Andres  staff  681307 Nov 14 22:09 SmartTV_problem.docx
+-rw-r--r--@ 1 Andres  staff    1631 Nov 15 17:09 TV_Choice.do
+-rw-r--r--@ 1 Andres  staff   59641 Nov 15 15:47 TV_Choices_clean.dta
+-rw-r--r--@ 1 Andres  staff   32771 Nov 14 22:09 TV_Choices_data.csv
+-rw-r--r--@ 1 Andres  staff   31929 Nov  8 18:31 TV_Choices_data.txt
+-rw-r--r--@ 1 Andres  staff    1900 Nov 15 15:47 TV_Choices_demo.dta
+-rw-r--r--@ 1 Andres  staff     847 Nov 14 22:09 TV_Choices_demographics.csv
+-rw-r--r--@ 1 Andres  staff   17630 Nov 15 15:46 TV_Choices_raw.dta
+-rw-r--r--@ 1 Andres  staff   59041 Nov 15 15:47 TV_Choices_reshape.dta
+-rw-r--r--@ 1 Andres  staff  132240 Nov 16 20:14 altmain.pdf
+-rw-r--r--@ 1 Andres  staff     679 Nov 16 20:14 altmain.tex
+-rw-r--r--@ 1 Andres  staff     273 Nov  8 18:31 conjoint-homework.do
+-rw-r--r--@ 1 Andres  staff    1446 Nov 16 20:14 doit.bat
+-rw-r--r--@ 1 Andres  staff    1241 Nov 16 20:14 doit.sh
+-rw-r--r--@ 1 Andres  staff     226 Nov 16 20:14 main.do
+-rw-r--r--@ 1 Andres  staff  152584 Nov 16 20:14 main.pdf
+-rw-r--r--@ 1 Andres  staff     711 Nov 16 20:14 main.tex
+-rw-r--r--@ 1 Andres  staff     244 Nov 16 20:14 output.do
+-rw-r--r--@ 1 Andres  staff     280 Nov 16 20:14 output.do.log.tex
+-rw-r--r--@ 1 Andres  staff   11039 Nov 16 20:14 output1.eps
+-rw-r--r--@ 1 Andres  staff     881 Nov 16 20:14 output1.log.tex
+-rw-r--r--@ 1 Andres  staff    8205 Nov 16 20:14 output1.pdf
+-rw-r--r--@ 1 Andres  staff     350 Nov 16 20:14 output_7.do
+-rw-r--r--@ 1 Andres  staff    4233 Nov 16 20:14 pagedims.sty
+-rw-r--r--@ 1 Andres  staff    1062 Nov 16 20:14 readme.tex
+-rw-r--r--@ 1 Andres  staff     553 Nov 16 20:14 readme.txt
+-rw-r--r--@ 1 Andres  staff    1846 Nov 16 20:14 readme_example.txt
+-rw-r--r--@ 1 Andres  staff   33085 Nov 16 17:55 results conjoint analysis Tv choices.xlsx
+-rw-r--r--@ 1 Andres  staff  620022 Nov 16 20:14 sj.bib
+-rw-r--r--@ 1 Andres  staff   32283 Nov 16 20:14 sj.bst
+-rw-r--r--@ 1 Andres  staff   17739 Nov 16 20:14 sj.sty
+-rw-r--r--@ 1 Andres  staff    5395 Nov 16 20:14 sj.tex
+-rw-r--r--@ 1 Andres  staff      27 Nov 16 20:14 sj.version
+-rw-r--r--@ 1 Andres  staff   11376 Nov 16 15:48 ssc_results.smcl
+-rw-r--r--@ 1 Andres  staff   16515 Nov 16 20:14 stata.sty
+-rw-r--r--@ 1 Andres  staff   14788 Nov 16 20:14 stata.tex
+-rw-r--r--@ 1 Andres  staff    6821 Nov 16 20:14 statapress.cls
+-rw-r--r--@ 1 Andres  staff   34626 Nov 16 16:01 texdoc.zip
+-rw-r--r--@ 1 Andres  staff    1078 Nov 16 20:14 tl.eps
+-rw-r--r--@ 1 Andres  staff    2669 Nov 16 20:14 tl.pdf
+-rw-r--r--@ 1 Andres  staff     688 Nov 16 20:14 tr.eps
+-rw-r--r--@ 1 Andres  staff    2515 Nov 16 20:14 tr.pdf
+-rw-r--r--@ 1 Andres  staff   49083 Nov 16 15:51 webdoc.zip
+
+See the Getting Started instructions in the Remarks section of the online documentation for 
+sjlatex.
+
+. do "/var/folders/hw/wmwf0vcd4jxdz_tmk5ft0p480000gn/T//SD08408.000000"
+
+. clear all
+
+. 
+end of do-file
+
