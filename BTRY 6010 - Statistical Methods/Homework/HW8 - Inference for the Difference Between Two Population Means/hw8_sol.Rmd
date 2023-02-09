@@ -1,0 +1,352 @@
+---
+title: 'Homework 8 : Inference for the Difference Between Two Population Means'
+output: html_document
+---
+  
+
+ **For this homework, it will be helpful to have a copy of the knitted version of this document to answer the questions as much of it is written using mathematical notation that may be difficult to read when the document is not knitted.**  
+
+## Instructions
+
+For this homework:
+
+1. All calculations must be done within your document in code chunks.  Provide all intermediate steps.
+
+2. Incude any mathematical formulas you are using for a calculation.  Surrounding mathematical expresses by dollar signs makes the math look nicer and lets you use a special syntax (called latex) that allows for Greek letters, fractions, etc.  Note that this is not R code and therefore should not be put in a code chunk.  You can put these immediately before the code chunk where you actually do the calculation.
+
+
+### Problem 1
+
+Are mean pulse rates different when students are taking a quiz versus when they are sitting in lecture?  The *QuizPulse20* data contains the pulse rates for 20 randomly selected students from a large psychology class under two different scenerios: 1) when they were sitting in class taking a quiz and 2) when they were sitting in class during lecture.  
+
+
+$\mu_x$ = mean pulse rate for students taking a quiz
+
+$\mu_y$ = mean pulse rate for students sitting in lecture
+
+  
+  a) Read the `QuizPulse10` data into this homework document.
+  
+```{r}
+QuizPulse20 <- read.csv("QuizPulse20.csv")
+```
+  b) Add a new column to this data frame containing the differences between the pulse rates for each student (`Quiz - Lecture`).  Name this column "Differences."
+  
+```{r}
+QuizPulse20$Differences = QuizPulse20$Quiz - QuizPulse20$Lecture
+```
+  
+  c) Since the sample of differences is small, it makes sense to check whether it seems reasonable that the differences are normally distributed.  One way to check this is by looking at a Q-Q plot of the differences.  The "car" package in R includes the function `qqPlot()`.  To use this function, the "car" package will need to be installed.  To install this package, from the R Studio menu choose *Tools > Install Packages...*.  A window will pop up in which you can specify "car" as the package to be installed.  Then, just click on "Install".  After this package is installed, run the following code to create the Q-Q plot.  Knit your document to look at this plot.  Do most of the points lie within the confidence bands? *Yes.* If so, it is reasonable to assume the differences are normally distributed.
+    
+```{r, eval=TRUE}
+library(car)
+qqPlot(QuizPulse20$Differences)
+```
+
+  d) Create a 95% confidence interval for the difference between student mean pulse rate during a quiz and student mean pulse rate during lecture using the `t.test()` function in R.  Do this by passing in the differences.
+  
+```{r}
+t.test(QuizPulse20$Differences)
+```
+    
+  e) Interpret the confidence interval created in (d) in terms of the study.
+  
+  *With 95% confidence the increase in mean pulse rate during a quiz in comparison to the mean pulse rate during lecture lies in the interval (0.60,5.40).*
+  
+  f) The research question can be investigated using the `t.test()` function in R.  Complete the following steps to perform the test relevant to this study.
+    
+    i) State the null and alternative hypotheses for this study
+    
+    *$H_0: \mu_x- \mu_y = 0$*
+    
+    *$H_a: \mu_x - \mu_y \neq 0$*
+    
+     ii) The output from (d) can also be used to perform a paired t-test.  What is the decision based on the p-value of this test if the significance level is set at 0.05?  State your answer in the context of this study.
+    
+  *The p-value for this test of 0.01702 is less than 0.05, the significance level of the test.  So, we reject the null hypothesis that there is no difference between student mean pulse rates during a quiz and during lecture.*
+    
+
+### Problem 2
+    
+Is there an association between increased pulse rate and test performance?  The variable, `Score`, in the `QuizPulse20` data indicates each student's score on the quiz as a percent.  Here we will investigate the relationship between an increase in pulse rate during a quiz and quiz performance.  Due to measurement error, it was decided that a student's pulse will only be denoted as having increased during the quiz if it is at least 3 beats per minute higher than his/her pulse rate during lecture.
+
+$\mu_x$ = mean score for students whose pulse increased during the quiz
+
+$\mu_y$ = mean score for students whose pulse did not increase during the quiz
+
+
+  a)  In a code chunk create two vectors.  The first vector should contain the scores for students whose pulse increased during the quiz.  The second vector should contain scores for students whose pulse did not increase during the quiz (according to the criterion stated in the description of the study).
+  
+```{r}
+ScoreInc = QuizPulse20$Score[QuizPulse20$Differences >= 3]
+ScoreNoInc = QuizPulse20$Score[QuizPulse20$Differences < 3]
+```
+
+  b) Since the sample size is small for both sets of students, it would be a good idea to look at the Q-Q plots of `Score` for the students whose pulse rate increased during the quiz and also for the sample of students whose pulse did not increase during the quiz.  Use the `qqPlot()` function to create the Q-Q plots. Then, give an assessment of whether it seems reasonable to assume the populations these samples are drawn from are normally distributed.
+  
+```{r}
+qqPlot(ScoreInc)
+qqPlot(ScoreNoInc)
+```
+
+ *Since all points lie within the confidence bands for both groups of students, it seems reasonable to assume these samples are both drawn from normal populations.*
+
+  c) Create a 95% confidence interval for the difference in mean scores for the two groups of students using the `t.test()` function. Pass in the two groups' data as the first two arguments to `t.test`.
+  
+```{r}
+t.test(ScoreInc, ScoreNoInc)
+```
+  
+  d) Interpret the confidence interval from (c) in the context of the study.
+  
+  *We are 95% confident that the true increase in mean score for students whose pulse rates increased during the quiz over students whose pulse rates did not increase during the quiz is between 2.25 and 12.14.* 
+  
+  e) At the 0.05 significance level, is there evidence that the mean score for students whose pulses increase is different from the mean score for students whose pulses do not increase?  Base your answer on the confidence interval created in (c).
+  
+  *Since 0 is not in the confidence interval, we will reject the null hypothesis at the 0.05 significance level.  So, there is evidence that mean scores for students whose pulses increased during the quiz are different from the mean score for students whose pulses did not increase during the quiz.*
+  
+  f) Increased pulse rate has been shown to be associated with higher stress levels.  Based on the result of this study, would it make sense for the professor of this psychology class to take measures to reduce the stress level of students on days they are taking a quiz in order to increase their scores?
+  
+  *The second test indicates that students on average perform better on a quiz when their stress level is higher.  So, it wouldn't make sense to try to lower the stress levels of his students on quiz days if his goal is increased scores.  (However, for the health and happiness of his students, he might still wish to lower the stress levels.)*
+
+  
+## Power
+
+The power of a test is the probability you will reject the null hypothesis when it is false.  In problem 3 we will investigate how the power of a two independent sample t-test is influenced by the following factors:
+
+  1) Sample size 
+  2) Effect Size - the absolute difference between the means of the two populations
+  
+### Problem 3  
+  
+  a) In a code chunk here, define the following variables associated with two independent samples, $X_1, \dots, X_{16}$ and $Y_1, \dots, Y_{14}$ where the respective samples are drawn from  $X_i \sim N(6, 4)$ and $Y_i \sim N(8, 8)$.  
+  
+    1. `nx` = $n_x$
+    
+    2. `ny` = $n_y$
+    
+    3. `mux` = $\mu_x$
+    
+    4. `muy` = $\mu_y$
+    
+    5. `sigx` = $\sigma_x$
+    
+    6. `sigy` = $\sigma_y$
+    
+    
+```{r}
+nx = 16
+ny = 14
+mux = 6
+muy = 8
+sigx = 4
+sigy = 8
+```
+
+  b) Using the variables defined above, simulate two independent samples from the respective normal distributions and perform a t-test for the hypothesis, $H_0: \mu_x = \mu_y$.
+  
+```{r}
+sampx = rnorm(nx,mux,sigx)
+sampy = rnorm(ny,muy,sigy)
+t.test(sampx,sampy)
+```
+
+  c) In this part you will perform a simulation to check whether the significance level of the test is in fact 0.05.  Start by copying and pasting the code from (a) and (b) into one code chunk here.  Steps (i)-(vi) will walk you through writing the simulation.
+    
+    
+    
+```{r}
+rej=rep(0,5000)
+nx = 16
+ny = 14
+mux = 6
+muy = 6
+sigx = 4
+sigy = 8  
+
+for (i in 1:5000) {
+sampx = rnorm(nx,mux,sigx)
+sampy = rnorm(ny,muy,sigy)
+t.sampxy=t.test(sampx,sampy)
+pvalue=t.sampxy$p.value
+rej[i]=pvalue <= 0.05
+}
+
+sum(rej)/5000
+```
+
+  i) Remember that the significance level of a test corresponds to the probability the null hypothesis is rejected when it is true.  So, to estimate this probability, we should simulate samples under $H_0: \mu_x = \mu_y$.  Let  `muy = 6` so that the two samples are drawn from populations with the same mean.
+      
+  ii) Name your t-test, `t.sampxy`.  Save the p-value of your t-test by including the code `pvalue=t.sampxy$p.value` after the code for the t-test.
+      
+  iii) On the first line in your code chunk create a vector called `rej` that includes 5,000 zeros.
+    
+  iv) Using a `for` loop, repeat the following process 5,000 times.
+    
+    1. Simulate two independent samples, one from $N(\mu_x, \sigma^2_x)$ and the other from $N(\mu_y, \sigma^2_y)$ using the parameters already defined in your code chunk.
+        
+    2. Perform a t-test for these two samples (using the code in (ii) so that you also save the p-value).
+        
+    3. Set `rej[i] = pvalue <= 0.05` to assign `rej[i]` to 0 in iteration i if the null hypothesis is not rejected and 1 to `rej[i]` if the null hypothesis is rejected.
+        
+  v) After the `for` loop created in the last step, estimate the probability that the null hypothesis is rejected when it is true by including the following code,`sum(rej)/5000`.
+
+  vi) Does the estimate for the significance level of the test indicate that it is 0.05?  Why or why not. *Yes, the estimated probability of a type 1 error is very close to 0.05.*
+    
+    
+    d) Now let's estimate the power of the test performed in (b).  Remember that the power of a test is the probability that we will reject $H_0$ when it is false.  Repeat the simulation from part (c) where now `mux` and `muy` are set to their original values from part (a).  What is the approximate power of this test?
+
+```{r}
+rej=rep(0,5000)
+nx = 16
+ny = 14
+mux = 6
+muy = 8
+sigx = 12
+sigy = 8  
+
+for (i in 1:5000) {
+sampx = rnorm(nx,mux,sigx)
+sampy = rnorm(ny,muy,sigy)
+t.sampxy=t.test(sampx,sampy)
+pvalue=t.sampxy$p.value
+rej[i]=pvalue <= 0.05
+}
+
+sum(rej)/5000
+```  
+ *The power of this test is approximately 0.08.*
+ 
+  e) Using the code from part (d), include a code chunk for parts (i), (ii), and (iii), below, that changes the power calculation as specified.  Then, for all three parts, make a general statement of how changing the parameter as indicated seems to impact the power calculation.
+  
+    i) Repeat the power calculation twice.  First, increase `nx` to 25, keeping everything else fixed.  For the next power calculation change `nx` to 50, keeping everything else fixed.
+    
+```{r}
+rej=rep(0,5000)
+nx = 25
+ny = 14
+mux = 6
+muy = 8
+sigx = 12
+sigy = 8  
+
+for (i in 1:5000) {
+sampx = rnorm(nx,mux,sigx)
+sampy = rnorm(ny,muy,sigy)
+t.sampxy=t.test(sampx,sampy)
+pvalue=t.sampxy$p.value
+rej[i]=pvalue <= 0.05
+}
+
+sum(rej)/5000
+```
+
+```{r}
+rej=rep(0,5000)
+nx = 50
+ny = 14
+mux = 6
+muy = 8
+sigx = 12
+sigy = 8  
+
+for (i in 1:5000) {
+sampx = rnorm(nx,mux,sigx)
+sampy = rnorm(ny,muy,sigy)
+t.sampxy=t.test(sampx,sampy)
+pvalue=t.sampxy$p.value
+rej[i]=pvalue <= 0.05
+}
+
+sum(rej)/5000
+```   
+    
+*When one of the sample sizes increases, estimated power seems to also increase.*
+    
+  ii) Repeat the power calculation twice.  First, increase `nx` and `ny` to 25, keeping everything else fixed.  For the next power calculation, change `nx` and `ny` to 50, keeping everything else fixed. 
+    
+```{r}
+rej=rep(0,5000)
+nx = 25
+ny = 25
+mux = 6
+muy = 8
+sigx = 12
+sigy = 8  
+
+for (i in 1:5000) {
+sampx = rnorm(nx,mux,sigx)
+sampy = rnorm(ny,muy,sigy)
+t.sampxy=t.test(sampx,sampy)
+pvalue=t.sampxy$p.value
+rej[i]=pvalue <= 0.05
+}
+
+sum(rej)/5000
+```
+
+```{r}
+rej=rep(0,5000)
+nx = 50
+ny = 50
+mux = 6
+muy = 8
+sigx = 12
+sigy = 8  
+
+for (i in 1:5000) {
+sampx = rnorm(nx,mux,sigx)
+sampy = rnorm(ny,muy,sigy)
+t.sampxy=t.test(sampx,sampy)
+pvalue=t.sampxy$p.value
+rej[i]=pvalue <= 0.05
+}
+
+sum(rej)/5000
+```    
+    
+*Increasing both sample sizes results in a more significant increase in power than increasing only one of the sample sizes.*
+    
+  iii) Repeat the power calculation twice.  First, increase the effect size, |`mux` - `muy`| to 5, keeping everything else fixed.  For the next power calculation, increase the effect size to 10, keeping everything else fixed.
+    
+```{r}
+rej=rep(0,5000)
+nx = 16
+ny = 14
+mux = 6
+muy = 11
+sigx = 12
+sigy = 8  
+
+for (i in 1:5000) {
+sampx = rnorm(nx,mux,sigx)
+sampy = rnorm(ny,muy,sigy)
+t.sampxy=t.test(sampx,sampy)
+pvalue=t.sampxy$p.value
+rej[i]=pvalue <= 0.05
+}
+
+sum(rej)/5000
+```
+
+```{r}
+rej=rep(0,5000)
+nx = 16
+ny = 14
+mux = 6
+muy = 16
+sigx = 12
+sigy = 8  
+
+for (i in 1:5000) {
+sampx = rnorm(nx,mux,sigx)
+sampy = rnorm(ny,muy,sigy)
+t.sampxy=t.test(sampx,sampy)
+pvalue=t.sampxy$p.value
+rej[i]=pvalue <= 0.05
+}
+
+sum(rej)/5000
+```     
+    
+*Increasing the effect size, increases the power of the test.  When $\mu_x$ and $\mu_y$ are far apart in absolute value, it is more likely that the samples will provide significant evidence that $H_0$ is false.*

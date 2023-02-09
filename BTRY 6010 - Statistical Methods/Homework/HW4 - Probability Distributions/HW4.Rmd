@@ -1,0 +1,592 @@
+---
+title: 'Homework 4: Probability Distributions'
+output: html_document
+---
+  
+----
+
+# NAME: Andres  Castano Zuluaga
+# NETID: ac986
+**DUE DATE: September 27, 2016 by 1:00pm **  
+
+
+----
+
+## Instructions
+
+For this homework:
+
+1. All calculations must be done within your document in code chunks.  Provide all intermediate steps.
+
+2. DO NOT JUST INCLUDE A CALCULATION:
+
+    i) Incude any formulas you are using for a calculation.  You can put these immediately before the code chunk where you actually do the calculation.
+    
+    ii) The corresponding lab provides some notation you can use to express your formulas in R Markdown as well as R Code that can help you calculate probabilities in code chunks.
+    
+    iii) DO NOT calculate probabilities using R functions UNLESS you are specifically asked to do so.
+  
+
+
+### Problem 1 
+
+A friend is giving a dinner party.  Her current wine supply includes 8 bottles of zinfandel, 10 of merlot, and 12 of cabernet (she drinks all red wine).  All 30 bottles are from different wineries.  Assume in the problems below, the order the wine is served in is not important unless it is specifically stated.
+
+  a) If she wants to serve 3 bottles of zinfandel and serving order is important, how many ways are there to do this?
+  
+  If serving order is important we can use permutations as the total possible orderings of choosing x out of n objects. in our case is the possible orderings to choose 3 out of 8 bottles of zinfandel.
+  
+  $$ P^{n}_{x}= (n!)/((n-x)!) = (8!)/(5!)$$
+  
+```{r}
+A1 <- factorial(8) / factorial(5)
+A1
+```  
+  
+  b) If 6 bottles of wine are to be randomly selected from the 30 for serving, how many ways are there to do this?
+  
+ This problem es equivalent to $\binom{30}{6} = (30!)/((6!)*(24!))$:
+ 
+```{r}
+A2 <- factorial(30) / (factorial(6) * factorial(24))
+A2
+```
+ 
+  c) If 6 bottles are randomly selected, how many ways are there to select two bottles of each variety?
+  
+  This problem es equivalent to choose 2 out of 8 bottles of Zinfandel $\binom{8}{2}$, multiplied by choose 2 out of 10 bottles of merlot $\binom{10}{2}$ multiplied by choose 2 bottles out of 12 cabernet $\binom{12}{2}$,
+
+
+```{r}
+ZIN <- factorial(8) / (factorial(2) * factorial(6))
+MER <- factorial(10) / (factorial(2) * factorial(8))
+CAB <- factorial(12) / (factorial(2) * factorial(10))
+A3  <-  ZIN*MER*CAB 
+A3
+```  
+
+Thus, there 83160 ways to select two bottles of each variety. 
+
+  d) If 6 bottles are randomly selected, what is the probability that this results in 2 bottles of each variety being chosen?
+  
+Let's define S = {total possible outcomes} and A ={2 bottles of each variety}. The total possible outcomes are the number of ways of choose 6 out 30 bottles, and the number of ways of select two bottles of each variety was found it in the above question. Then the probability of interest is:
+
+P(A) = (A)/(S)
+
+$S = \binom{30}{6}$
+
+$A = \binom{8}{2} * \binom{10}{2} * \binom{12}{2}$
+
+```{r}
+S <- factorial(30) / (factorial(6) * factorial(24))
+S
+A <- (factorial(8) / (factorial(2) * factorial(6))) * (factorial(10) / (factorial(2) * factorial(8))) * (factorial(12) / (factorial(2) * factorial(10)))
+A
+PA=(A)/(S)
+PA
+```
+
+
+  e) If 6 bottles are randomly selected, what is the probability that all of them are the same variety?
+
+Let's define S = {total possible outcomes} and A ={all bottles same variety}. The total possible outcomes are the number of ways of choose 6 out 30 bottles.
+
+$S = \binom{30}{6}$
+
+To count the number of ways in that all of then are the same variety, we need to address three cases, the six bottles could be all zinfandel, all merlot, or all cabernet, so A is:
+
+$A = \binom{8}{6} + \binom{10}{6} + \binom{12}{6}$
+
+```{r}
+A <-  (factorial(8) / (factorial(2) * factorial(6))) + (factorial(10) / (factorial(2) * factorial(8))) + (factorial(12) / (factorial(2) * factorial(10)))
+S <- factorial(30) / (factorial(6) * factorial(24))
+PA <-(A)/(S)
+PA
+```
+
+
+### Problem 2  
+
+Harold and Timmy are playing a game of chance.  In each round of the game, both players roll a fair die.  If the sum of the numbers on both dice is less than or equal to 3, Harold is considered the "winner." If the sum of the numbers on both dice is greater than or equal to 10, Timmy is considered the "winner."  Whoever loses picks a card from a standard deck where all Aces have been removed and must pay the winner according to the table below.  If the sum of the dice is between 4 and 9, inclusively, there is no winner of that round.  After the completion of each round, they roll the dice again to start the next round.  
+
+Each player starts the game with $10.  Assume all die rolls and card draws are independent.
+
++-------------+-------+---------+
+| Card Drawn  |  2-10 |   J-K   |  
++=============+=======+=========+
+| Amount      |  $1   |   $5    | 
++-------------+-------+---------+
+
+ 
+ a) Is this a fair game? Explain.
+ 
+ This game is not fair because en each round of the game Timmy has a greater probability to win than Harold. Let's explain why, The sample space of toss two dice must have 36 outcomes because the first dice has 6 possible outcomes and the second 6 possible outcomes, then we have 6*6=36 possible outcomes to roll two dice. 
+ 
+  S = {{1,1},{1,2},{1,3},{1,4},{1,5},{1,6},{2,1},{2,2},{2,3},{2,4},{2,5},{2,6},{3,1},{3,2},{3,3},{3,4},{3,5},{3,6},{4,1},{4,2},{4,3},{4,4},{4,5},{4,6},{5,1},{5,2},{5,3},{5,4},{5,5},{5,6},{6,1},{6,2},{6,3},{6,4},{6,5},{6,6}}
+
+ 
+ Lets define X = {sum of the dice}. By construction, the smallest possible value of X is 2 and the greatest possible value is 12. Then the Probability Mass Function for X is:
+ 
+ P(X=2) = 1/36
+ P(X=3) = 2/36
+ P(X=4) = 3/36
+ P(X=5) = 4/36
+ P(X=6) = 5/36
+ P(X=7) = 6/36
+ P(X=8) = 5/36
+ P(X=9) = 4/36
+ P(X=10) = 3/36
+ P(X=11) = 2/36
+ P(X=12) = 1/36
+ 
+If the sum of the numbers on both dice is less than or equal to 3, Harold is considered the "winner", then the probability that Harold wins is P(Harold wins)= $P(X \leqslant 3)$ = P(X=2) + P(X=3) = 1/36 + 2/36, in R:
+
+```{r}
+PX2 = (1/36)
+PX3 = (2/36)
+PHW = PX2 + PX3 
+PHW 
+```
+
+Now, let's consider  that if the sum of the numbers on both dice is greater than or equal to 10, Timmy is considered the "winner", then the probability that Timmy wins is P(Timmy wins)= $P(X \geqslant 10)$ = P(X=10) + P(X=11) +  P(X=12) = 3/36 + 2/36 + 1/36, in R:
+
+```{r}
+PX10 = 3/36
+PX11 = 2/36
+PX12 = 1/36
+PTW = PX10 + PX11 + PX12
+PTW
+```
+
+Now we can see that the probability that Timmy wins (0.166) is almost the double that Harold wins (0.083), then this is a unfair game. 
+
+ b) If Timmy wins in round 1, what is his expected earnings?
+
+Let's define X=Earnings of Timmy when wins, then define the random outcome $x_{1}$ as an ernings of $1 and $x_{2}$ as an earnings of $5. Then we need to calculate the probabilities of each outcome. The probability that the earning is $1 $(P(X=x_{1}))$, is the probability that the card picked by the loser (Harold) is a 2 or 3 or 4 or 5 or 6 or 7 or 8 or 9 or 10. This probability is equivalent to (taking into account that the A's were removed):
+
+```{r}
+PX1= (4/48) + (4/48) + (4/48) + (4/48) + (4/48) + (4/48) + (4/48) + (4/48) + (4/48)
+PX1 
+```
+
+The probability that the earning of Timmy is $5 $(P(X=x_{2}))$ is equal to the probability that the card picked by Harold is a J, Q or K. Given that there fourth of each type, this probability is: 
+
+```{r}
+PX2= (4/48) + (4/48) + (4/48)
+PX2 
+```
+
+Then the expected value of earnings for Timmy is $E(X) = x_{1}*P(X=x_{1} + x_{2}*P(X=x_{2}$
+
+```{r}
+EET = ((1)*(0.75)) + ((5)*(0.25))
+EET
+```
+
+ c) What is the probability that one of them is broke after 2 rounds of the game?
+ 
+Given that the card picked after the loss determine how much one player must pay to the other ($1 or $5), if we are interested in the probability that one of them is broke after two rounds, this is equivalent to the probability that the loser picks a card and get J, Q or K in the first round and the same for the second round. Thus let's define A = {one player go broke}
+
+P(A) = P(Pick J, Q or K in the first round) * P(Pick J, Q, or K in the second round). 
+
+
+```{r}
+PA = ((4/48) + (4/48) + (4/48)) * ((4/48) + (4/48) + (4/48))
+PA
+```
+
+ 
+ d) Let X = Amount of money earned by Harold in a round of the game (when Harold loses to Timmy his earnings are negative).
+ 
+   
+     i. Give the distribution of X.
+
+In each round of the game, Harold can win $5, $1 or 0, or can lose $1 or $5. Then to contruct the PMF of X we need to compute the probablity of each of those events.
+
+ - P(X=5) is equal to the probability that Harold wins and that timmy pick a J, Q or K. P(X=5)=P(Harold wins) * P(Timmy pick a J, Q, or K):
+
+```{r}
+PX5= (3/36) * ((4/48) + (4/48) + (4/48))
+PX5
+```
+
+- P(X=1) is equal to the probability that Harold wins and that timmy pick a number between 2-10. P(X=1)=P(Harold wins) * P(Timmy pick a 2, 3, 4, 5, 6, 7, 8, 9 or 10):
+
+```{r}
+PX1= (3/36) * ((4/48) + (4/48) + (4/48) + (4/48) + (4/48) + (4/48) + (4/48) + (4/48) + (4/48))
+PX1
+```
+
+- P(X=0) is equal to the probability neither Harold or timmy win. P(X=0)=P(no winner):
+
+```{r}
+PX0 = 27/36
+PX0 
+```
+
+ - P(X=-5) is equal to the probability that Timmy wins and that Harold pick a J, Q or K. P(X=-5)=P(Timmy wins) * P(Harold pick a J, Q, or K):
+
+```{r}
+PX_5= (6/36) * ((4/48) + (4/48) + (4/48))
+PX_5
+```
+
+ - P(X=-1) is equal to the probability that Timmy wins and that Harold pick a number between 2-10. P(X=-1)=P(Timmy wins) * P(Harold pick a 2, 3, 4, 5, 6, 7, 8, 9 or 10):
+
+```{r}
+PX_1= (6/36) * ((4/48) + (4/48) + (4/48) + (4/48) + (4/48) + (4/48) + (4/48) + (4/48) + (4/48))
+PX_1
+```
+
+Thus, in summarize the distribution of X (PMF of X) is:
+     
+     \[ P(X=x) =
+  \begin{cases}
+    0.020       & \quad \text{if } x = 5  \\
+    0.062      & \quad \text{if } x = 1   \\
+    0.75          & \quad \text{if } x = 0   \\
+    0.125          & \quad \text{if } x = -1\\
+    0.042         & \quad \text{if } x = -5\\
+  \end{cases}
+   \]
+   
+     ii. Calculate E(X)
+     
+     The expected value of earnings for Harold is
+      
+```{r}
+EXH= (5)*(0.020) + (1)*(0.062) + (0)*(0.75) + (-1)*(0.125) + (-5)*(0.042)
+EXH
+```    
+
+     iii. Calculate Var(X)
+
+ First recalculate the expected value of ernings and then use it to compute the variance:
+     
+```{r}
+EXH= (5)*(0.020) + (1)*(0.062) + (0)*(0.75) + (-1)*(0.125) + (-5)*(0.042)
+VARX1= (((5-EXH)^2)*(0.020)) + (((1-EXH)^2)*(0.062)) + (((0-EXH)^2)*(0.75)) + (((-1-EXH)^2)*(0.125)) + (((-5-EXH)^2)*(0.042)) 
+VARX1
+```   
+     
+
+ e) How many rounds can Harold expect to play before he goes broke?
+ 
+Given that expect value of earnings by round is $-0.173, Harold can expect to play (10/0.173) rounds before he goes broke.
+```{r}
+R = (10/0.173)
+R  
+```
+
+
+
+### Problem 3 
+
+A lepidopterist is studying changes in butterfly flight patterns in the first 30 days after metamorphisis. For every cocoon collected for the study, there is a 20% chance in lab conditions that the butterfly will not complete metamorphisis.  Hint: recall that in lab we introduced the R function `dbinom`.
+
+ a) What probability distribution can be used to model the number of butterflies that can be used for the study from an initial batch of cocoons?
+ 
+ Here we can use the Binomial distribution  because:
+ 
+ - each coccoon represents a indepedent trial 
+ - each trial or coccoon could be success or failure 
+ - The probability of success is the same for each trail or cocoon
+ 
+ b) If the researcher starts with 50 cocoons, what is the probability she will have at least 48 surviving butterflies?
+ 
+ Here we have 50 trials (cocoons) with a probability of success = 0.8 (probability that the butterfly complete metamorphisis). An we are interested in the probability that the researcher will have at least 48 surviving butterflies. Let's define X = {number of surviving butterflies}, then we are interested in:
+ 
+ $$P(X \geq 48) = P(X=48) + P(X=49) + P(X=50) =$$
+ 
+```{r}
+PX48 <- dbinom(x = 48, size = 50, prob = 0.8)
+PX49 <- dbinom(x = 49, size = 50, prob = 0.8)
+PX50 <- dbinom(x = 50, size = 50, prob = 0.8)
+PX <- PX48 + PX49 + PX50
+PX
+```
+ 
+ c) The lepidopterist must have at least 60 surviving butterflies to find significant results in her research on flight behavior.  To be comfortable that she will have at least 60 surviving butterflies, she will collect enough cocoons such that the expected number of surviving cocoons is 80.  How many cocoons should she collect?
+ 
+The expected value for X is: 
+
+$$E(X) = np$$
+
+Given that we have E(X) and p, we can obtain the number of cocoons that she should collect as:
+
+n= E(X)/(p)= (80)/(0.8)
+```{r}
+n <- (80)/(0.8)
+n
+```
+
+ 
+ d) Unfortunately, the lepidopterist is only able to collect 40 cocoons on her own.  She calls a friend in another lab who is willing to collect additional cocoons (and data).  Her friend collects 50 cocoons.  The rate of successful metamorphisis in her friend's lab is 75%.  What is the expected number of surviving butterflies from both labs?
+ 
+ The expected number of surviving butterflies for the lepidopterist is $E(X_{1}) = np = (40)*(0.8)$
+ 
+ The expected number of surviving butterflies of her friend is $E(X_{2}) = n_{2}p_{2} = (50)*(0.75)$ 
+ 
+ The we know that for Expected value properties: E(X_{1} + X_{2})= E(X_{1}) + E(X_{2}). Thus, the expected number of surviving butterflies from both labs is:
+ 
+```{r}
+EX=(40)*(0.8) + (50)*(0.75)
+EX
+```
+
+### Problem 4
+
+Suppose the number X of tornadoes observed in a particular region during a 1 year period has a Poisson distribution with $\lambda = 8$.
+
+  a) Compute $P(X<3)$.
+  
+  Here we know that $\lambda=8$ and we are interested in the probability:
+  
+  $P(X<3)= P(X=0) + P(X=1) + P(X=2) = (e^{-8}\frac{8^{0}}{0!}) + (e^{-8}\frac{8^{1}}{1!}) + (e^{-8}\frac{8^{2}}{2!})$
+  
+```{r}
+PX0 <- (exp(-8)) * ((8^0)/(factorial(0)))
+PX1 <- (exp(-8)) * ((8^1)/(factorial(1))) 
+PX2 <- (exp(-8)) * ((8^2)/(factorial(2))) 
+PX <- PX0 + PX1 + PX2
+PX
+```  
+
+  b) Compute $P(6 \le X<9)$.
+  
+  This problem is equivalent to compute: P(X<9) - P(X<6): 
+  
+  $$P(X<9) =  P(X=0) + P(X=1) + P(X=2) + P(X=3) + P(X=4) + P(X=5) + P(X=6) + P(X=7) + P(X=8)$$
+  
+  $$P(X<6) =  P(X=0) + P(X=1) + P(X=2) + P(X=3) + P(X=4) + P(X=5)$$
+  
+  If we subtract one equation to the other we get $P(6 \le X<9)$ = P(X=6) + P(X=7) + P(X=8), in R:
+  
+```{r}
+PX6 <- (exp(-8)) * ((8^6)/(factorial(6)))
+PX7 <- (exp(-8)) * ((8^7)/(factorial(7)))
+PX8 <- (exp(-8)) * ((8^8)/(factorial(8)))
+PB <- PX6 + PX7 + PX8
+PB
+``` 
+
+  c) Compute $P(X>2)$.
+  
+  here is easir to work with the complement, then:
+  
+  $P(X>2)= 1 - P(X\le2) = 1 - ((P(X=0) + P(X=1) + P(X=2))$, in R:
+  
+```{r}
+PX0 <- (exp(-8)) * ((8^0)/(factorial(0)))
+PX1 <- (exp(-8)) * ((8^1)/(factorial(1))) 
+PX2 <- (exp(-8)) * ((8^2)/(factorial(2))) 
+PC <- 1 - PX0 - PX1 - PX2
+PC
+``` 
+  
+  
+  d) What is the probability the observed number of tornadoes is less than the expected value minus 2 standard deviations?
+  
+Here, first we need to compute the E(X)  and the SD(X):
+
+$E(X)= \lambda=8$
+
+$SD(X) = \sqrt(\lambda) = \sqrt(8)$, in R,
+
+```{r}
+LAMBDA <- 8
+EX <- LAMBDA
+SD <- sqrt(LAMBDA)
+SD
+X <- LAMBDA - 2*(SD)
+X
+```
+
+Then, we are interested in P(X<2.34):
+
+P(X<2.34) =  P(X=0) + P(X=1) + P(X=2) 
+
+```{r}
+PX0 <- (exp(-8)) * ((8^0)/(factorial(0)))
+PX1 <- (exp(-8)) * ((8^1)/(factorial(1))) 
+PX2 <- (exp(-8)) * ((8^2)/(factorial(2))) 
+PX <- PX0 + PX1 + PX2
+PX
+```
+
+
+### Problem 5
+
+Chickenpox has predominately been eradicated in the United States due to the development of the varicella vaccine.  However, approximately .08% of infants immunized experience a serious reaction to the vaccine (febrile seizures).  Suppose on a given day, one million infants are vaccinated against Chickenpox.
+
+  a) What is the expected number of infants that will experience febrile seizures from the Chickenpox vaccine on a given day?  Be sure to justify your answer.
+  
+This problem can be solve using the binomial distribution:
+
+-  Each one of the 1 million infants can represent a single trial,
+- They are indepedent,
+- We have the probability of success for each single trial, which in this case is the probability of experience febrile seizures equal to 0.0008 (p=0.0008), and
+- this probability is the same for each trial or infant.
+
+Then the expected number of infants taht will experience febrile seizures is equal to:
+
+$E(X)= np = (1000000)*(0.0008)$
+
+```{r}
+EX <- (1000000)*(0.0008)
+EX
+```
+
+  
+  b) What is the variance of the number of infants experiencing febrile seizures from the Chickenpox vaccine on a given day?
+  
+  $VAR(X) = n*p*(1-p) = (1000000)*(0.0008)*(1-0.0008)$
+  
+```{r}
+VARX <- (1000000)*(0.0008)*(1-0.0008)
+VARX
+```
+  
+  c) Using the `dbinom()` function in R, calculate the probability that exactly 850 infants develop febrile seizures after being vaccinated for Chickenpox.
+  
+  
+```{r}
+PX850 <- dbinom(x = 850, size = 1000000, prob = 0.0008)
+PX850
+```
+
+  
+  d) Is it appropriate to use the Poisson distribution in this situation (to approximate the binomial distribution) to model the number of serious reactions to the varicella vaccine?  Explain why.  What is the mean of the approximating Poisson distribution?  Considering that the Poisson distribution is often used to model counts over space or time, how could you interpret the mean of the approximating Poisson distribution for this problem?
+  
+- Yes, it is appropriate to use the Poisson distribution as an approximate of the binomial distribution because n is large (1000000) and the probality of success is small (0.0008). 
+
+- The mean will be $np= (1000000)*(0.0008)$
+
+```{r}
+EX=(1000000)*(0.0008)
+EX
+```
+
+- This mean could be interpreted as that we expect to observed 800 infants to develop febrile seizures in a given day.
+
+  
+e) Using (d), and the R function, `dpois()`, determine the approximate probability that exactly 850 of the 1 million infants vaccinated against the Chickenpox experience a febrile seizure.  How does this probability compare to that calculated in part (c)?
+
+```{r}
+x <- 850
+lambda <- 800 
+dpois(x, lambda)
+```
+
+The probality is almost similar that we have calculated in part C. This means that the Poisson distribution is a good aproximation to the binomial in our particular case (n large and p small).
+  
+
+### Problem 6
+
+Sometimes the easiest way to calculate a probability is by Monte Carlo simulation.  Suppose you have a coin that lands on heads with probability $p=0.6$ and your sister has one that lands on heads with probability $p=0.8$.  If you each flip the coin 20 times, what is the approximate probability that she will have more heads than you?  Recall that in R,  the function `rbinom(1, 20, 0.6)` gives a random draw from the Binomial$(20,0.6)$ distribution.  
+
+a) Write some R code that assigns the number of heads when flipping a coin 20 times with $p=0.6$ to a variable called `mycoin`.  Do the same for `siscoin` but with $p=0.8$.
+
+```{r}
+set.seed(1)
+num_simulations = 1
+for (i in 1:num_simulations) {
+mycoin = rbinom(num_simulations, size = 20, prob = 0.6)
+siscoin = rbinom(num_simulations, size = 20, prob = 0.8)
+}
+```
+
+b) To simulate the result of one set of 20 coin flips, write R code that does the following:
+
+  1. Prints "Flip coins..."
+ 
+  2. Defines `mycoin` and `siscoin` as in (a).
+  
+  3. Prints "Sister wins." if `siscoin` ended up higher than `mycoin`. 
+  
+  Include 3 copies of the code for (1)-(3) in your code chunk to simulate the game being played 3 times.  
+  
+You may also find it useful to run the code in the console a few times where you also list `mycoin` and `siscoin` to see that the comparison has been done correctly.
+
+```{r}
+set.seed(1)
+num_simulations = 1
+for (i in 1:num_simulations) {
+mycoin = rbinom(num_simulations, size = 20, prob = 0.6)
+siscoin = rbinom(num_simulations, size = 20, prob = 0.8)
+print(mycoin)
+print(siscoin) 
+if (siscoin > mycoin) {
+print("sister wins")  
+} 
+}
+```
+
+```{r}
+set.seed(2)
+num_simulations = 1
+for (i in 1:num_simulations) {
+mycoin = rbinom(num_simulations, size = 20, prob = 0.6)
+siscoin = rbinom(num_simulations, size = 20, prob = 0.8)
+print(mycoin)
+print(siscoin) 
+if (siscoin > mycoin) {
+print("sister wins")  
+} 
+}
+```
+
+
+```{r}
+set.seed(3)
+num_simulations = 1
+for (i in 1:num_simulations) {
+mycoin = rbinom(num_simulations, size = 20, prob = 0.6)
+siscoin = rbinom(num_simulations, size = 20, prob = 0.8)
+print(mycoin)
+print(siscoin) 
+if (siscoin > mycoin) {
+print("sister wins")  
+} 
+}
+```
+
+
+c) Write a `for` loop that repeats the game 100,000 times and counts the number of times your sister wins.  To do this, start with a variable called `counter=0`. Then, instead of printing "Sister wins.", add one to `counter` whenever `siscoin` is higher.  (You should also not print "Flip coins..." for this part.) What is your estimate of the probability that she wins?
+
+Here I only ran 10000 simulations because my computer just get overheat when I tried 100000 simulations. I hope this does not affect my grade.
+
+```{r}
+set.seed(5)
+num_simulations <- 10000
+num_sister_wins <- 0
+for (i in 1:num_simulations) {
+mycoin <- rbinom(num_simulations, size = 20, prob = 0.6)
+siscoin <- rbinom(num_simulations, size = 20, prob = 0.8)
+if (siscoin > mycoin) {
+num_sister_wins <- num_sister_wins + 1
+    } 
+}
+num_sister_wins
+```
+
+
+d) Do this simulation now without the `for` loop.  Hint: see what happens when you change the first argument passed to `rbinom`.  Another useful fact: in the console, see what happens when you have a vector `a=c(5,6,7,3)` and `b=c(2,10,10,4)` and you type `d=a > b`.  Look at `d` and `sum(d)`
+
+Here I only ran 10000 simulations because my computer just get overheat when I tried 100000 simulations. I hope this does not affect my grade.
+
+```{r}
+set.seed(5)
+num_simulations <- 10000
+mycoin <- rbinom(num_simulations, size = 20, prob = 0.6)
+siscoin <- rbinom(num_simulations, size = 20, prob = 0.8)
+mycoin
+siscoin
+num_sister_wins = (c(siscoin) > c(mycoin))
+num_sister_wins
+summ_sis_win = (sum(num_sister_wins))
+summ_sis_win 
+```
+
+
+  

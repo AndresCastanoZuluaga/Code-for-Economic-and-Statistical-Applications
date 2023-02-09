@@ -1,0 +1,405 @@
+---
+title: 'Homework 9: ANOVA'
+output: pdf_document
+---
+  
+----
+
+# NAME: Andres Castano
+# NETID: ac986
+**DUE DATE: November 22, 2016 by 1:00pm **  
+----
+
+## Instructions
+
+For this homework:
+
+1. All calculations must be done within your document in code chunks.  Provide all intermediate steps.
+
+2. DO NOT JUST INCLUDE A CALCULATION:  Incude any formulas you are using for a calculation.  You can put these immediately before the code chunk where you actually do the calculation.
+    
+## Sleep Study Data
+
+This dataset includes observations of the following variables from a random sample of 253 college students.
+
++------------------+----------------------------------------------+
+|   Variable       |            Description                       |
++==================+==============================================+
+|   `Gender`       |  1 = Male 0 = Female                         |
++------------------+----------------------------------------------+
+|  `ClassYear`     |  Year in school, 1=first year,..., 4=Senior  |
++------------------+----------------------------------------------+
+| `LarkOwl`        |  Early riser or night owl?                   |
+|                  |  Responses: `Lark`, `Owl`, or `Neither`      |                   
++------------------+----------------------------------------------+
+|`NumEarlyClass`   |  Number of early classes each week           |
+|                  |  (before 9am)                                |                   
++------------------+----------------------------------------------+
+|  `EarlyClass`    |  Indicator for at least 1 early class        |
++------------------+----------------------------------------------+
+| `GPA`            |  Grade Point Average                         |                  
++------------------+----------------------------------------------+
+|  `ClassesMissed` |  Number of classes missed in a semester      |
++------------------+----------------------------------------------+
+|`CognitionZscore` |  Z-score on a test of cognitive skills       |
++------------------+----------------------------------------------+
+|`PoorSleepQuality`|  Higher values indicate poorer sleep         |
++------------------+----------------------------------------------+
+| `DepressionScore`|  Measure of degree of depression             |
++------------------+----------------------------------------------+
+| `AnxietyScore`   |  Measure of amount of anxiety                |
++------------------+----------------------------------------------+
+|  `StressScore`   |  Measure of amount of stress                 |
++------------------+----------------------------------------------+
+|`DepressionStatus`|  `normal`, `moderate`, or `severe`           |
++------------------+----------------------------------------------+
+| `AnxietyStatus`  |  `normal`, `moderate`, or `severe`           |   
++------------------+----------------------------------------------+
+|  `Stress`        |  `normal` or `high`                          |
++------------------+----------------------------------------------+
+|  `DASScore`      |  Combined score for depression, anxiety      |
+|                  |        and stress                            |                 
++------------------+----------------------------------------------+
+|  `Happiness`     |  Measure of degree of happiness              |
++------------------+----------------------------------------------+
+|  `AlcoholUse`    |  `Abstain`, `Light`, `Moderate`, or `Heavy`  |
++------------------+----------------------------------------------+
+|  `Drinks`        |  Number of alcoholic drinks per week         |
++------------------+----------------------------------------------+
+| `WeekdaySleep`   | Average hours of sleep on the weekdays       |
++------------------+----------------------------------------------+
+| `WeekendSleep`   | Average hours of sleep on the weekend days   |
++------------------+----------------------------------------------+
+| `AverageSleep`   | Average hours of sleep for all days          |
++------------------+----------------------------------------------+
+| `AllNighter`     | Had an all-nighter this semester?            |
+|                  | 1 = yes 0 = no                               |
++------------------+----------------------------------------------+
+
+
+Initually, let's load the data into R:
+
+```{r}
+Sleep_data <- read.csv("SleepStudy.csv")
+dim(Sleep_data)
+Sleep_data$ClassYear=factor(Sleep_data$ClassYear)
+```
+
+
+### Problem 1
+
+Does mean GPA for college students change by class year?  At a significance level of 0.05, test this hypothesis.  The first step is reading in the `SleepStudy` data from the folder for Homework 9.  Then, do the following:
+
+
+  a) State the null and alternative hypotheses.
+  
+  There are 4 categories for class year, then the null and alternative hypotheses are:
+  
+  $H_{0}: \mu_{1} = \mu_{2} = \mu_{3} = \mu_{4}$
+  
+  $H_{A}:$ At least one of the means is not the same as the others
+ 
+  
+  b) Compute the total degrees of freedom, the degrees of freedom associated with the numerator of the F statistic, and the error degrees of freedom.
+  
+  Total degrees of freedon are:
+  
+```{r}
+ntotal= 253
+total_df = ntotal - 1
+total_df
+```
+  
+Whereas the degrees of freedon associated with the Mean Square Error (mse), e.g. the measure of the variability within groups are: 
+
+```{r}
+k = 4
+mse_df = ntotal - k
+mse_df
+```
+
+Finally the degrees of freedon associated with Mean Square Between Groups (msb), e.g. the measure of variability between groups are:
+
+```{r}
+k = 4
+msb_df = k-1
+msb_df
+```
+
+
+  c) Perform the test in R and include the ANOVA table here.
+
+Strategy 1:
+```{r}
+gpa.lm = lm(Sleep_data$GPA ~ Sleep_data$ClassYear, data = Sleep_data)
+anova(gpa.lm)
+```
+
+Strategy 2:
+
+```{r}
+fit = aov(Sleep_data$GPA ~ Sleep_data$ClassYear)
+summary(fit)
+```
+
+
+  d) What is the sse and mse?  Include how you would calculate the mse from the sse.
+
+The sse is the sum of squares within groups and is calculated as: 
+
+$sse=\sum_{i=1}^{k} \sum_{j=1}^{n_i} (Y_{ij} -\bar Y_{i\mathbf{.}})^2$
+
+According to the ANOVA output the sse is 36.06. When we divided this result by $n_{total}-k$, we get a Pooled Error Variance, also called Mean Square Error (mse):
+
+$mse = sse/n_{total}-k$, where $n_{total}$ is the total of observations and k is the number of groups, in our case k is the class year of the students. 
+
+```{r}
+sse = 36.06
+mse = sse / mse_df
+mse
+```
+
+  e) What is the ssb and msb? Include how you would calculate the msb from the ssb.
+  
+The ssb is the sum of squares between groups and is calculated as: 
+
+$ssb=\sum_{i=1}^{k} n_i (\bar Y_{i\mathbf{.}} -\bar Y_{\mathbf{..}})^2$
+
+According to the ANOVA output this values is 5.13. When we want to know how much on average a group vary from the grand mean, we compute the Mean Square Between Groups (msb) as:
+
+$msb = ssb/k-1$
+
+```{r}
+ssb = 5.13
+msb = ssb / msb_df
+msb
+```
+
+  
+  f) What is the realization of the F statistic?  Include a formula.
+  
+Under $H_0$ a realization of the F statistic is $F = msb/mse$, which has a $F_{df1, df2}$ distribution. 
+
+```{r}
+F =  msb/mse
+F
+```
+
+  g) What is the p-value of this test?  Calculate the p-value using the `pf()` function in a code chunk here. Verify that this p-value matches the p-value in the ANOVA table.  Should the null hypothesis be rejected based on this p-value?
+
+```{r}
+pvalue_F = 1-pf(F,msb_df,mse_df)
+pvalue_F
+```
+
+Given that 0.000000291 < 0.05, we should reject $H_0$.  We are 95% confident that mean GPA is not the same for all four class year groups.
+
+  h) Follow these steps to check the assumptions required to perform an ANOVA test.  
+  
+    i) Does the assumption of independence hold? (Suppose you could talk to the researchers who collected these data.  What would be relevant to ask them?)
+    
+it will be relevant to ask the researchers how the k different populations (class year groups) were sampled? and If the researchers point out that the data come from  an independent SRS (Simple Random Sampling) of the k different class years, we can defend that the GPA of the students is independent within and between groups. 
+
+    ii) Check using a graphical method if the assumption of normality holds. Does it hold?
+
+Using a qqplot of the GPS by class we can discuss if the assumption of normality holds:
+
+```{r}
+gpa_group1 <- subset(Sleep_data, ClassYear==1, select = GPA)
+gpa_group2 <- subset(Sleep_data, ClassYear==2, select = GPA)
+gpa_group3 <- subset(Sleep_data, ClassYear==3, select = GPA)
+gpa_group4 <- subset(Sleep_data, ClassYear==4, select = GPA)
+library(car)
+qq_group1=qqPlot(gpa_group1$GPA)
+qq_group2=qqPlot(gpa_group2$GPA)
+qq_group3=qqPlot(gpa_group3$GPA)
+qq_group4=qqPlot(gpa_group4$GPA)
+```
+
+As we can observe, there is not notable outliers across the groups, with exception of one particular point for group 3 and another for group 2, then the normality assumption is reasonable. However, maybe a more compelling way to check if the normality assumption holds is making the qqplot over the residuals estimated for the ANOVA model:
+
+```{r}
+gpa.res=gpa.lm$residuals  #Stores Estimated Residuals
+qqPlot(gpa.res)
+```
+
+With this alternative method there are some outliers as well, but since we have sample sizes across groups large enough it seems reasonable to defend the normality assumption.  
+
+
+    iii) Check using a graphical method and a formal test if the assumption of equal variance holds.  Does it hold?
+
+```{r}
+boxplot(GPA ~ ClassYear, data = Sleep_data)
+```
+
+Using the above boxplots it seems reasonable to assume equal variance. But it will be useful to make the ANOVA analysis with and without the outliers for group 2 and 3, just to be sure.
+
+```{r}
+leveneTest(gpa.lm)
+```
+
+With the formal formal test (Levene's test) at a significance level of 0.05, we fail to reject the null hypothesis that the 4 populations have the same variance. 
+
+
+    iv) Are the assumptions required to perform an ANOVA hypothesis test met?
+    
+Yes, according the results and analysis above, all the assumptions are reasonable. 
+
+
+### Problem 2
+
+Which of the class years have significantly different mean GPAs?  Conduct all pairwise tests using the Tukey HSD method.  Assume the significance level of these tests is 0.01.  State your conclusion.
+
+
+```{r}
+TukeyHSD(fit, 'Sleep_data$ClassYear', conf.level = 0.99)
+```
+
+According to the simultaneosly pairwise comparisons using the Tukey HSD test, we can observe statistical significant differences between groups 1 (Freshmen) and 2 (Sophomores), 1 (freshmen) and 3 (juniors), and, 1 (freshmen) and 4 (seniors). 
+
+### Problem 3  
+
+Does mean GPA for college students change by `AlcoholUse`?  At a significance level of 0.05, test this hypothesis.  For this research question, do the following:
+
+  a) Perform an ANOVA test in R and include the ANOVA table here.
+
+```{r}
+fit = aov(Sleep_data$GPA ~ Sleep_data$AlcoholUse)
+summary(fit)
+```  
+  
+  b) What is the realization of the test statistic?
+  
+Under $H_0$ a realization of the F statistic is $F = msb/mse$, which has a $F_{df1, df2}$ distribution. 
+
+```{r}
+msb=0.2004
+mse=0.1630
+F =  msb/mse
+F
+```
+
+  c) What is the p-value of this test?  Include a formula for the p-value with your answer.  Should the null hypothesis be rejected based on the p-value?  Use a significance level of 0.05.
+
+The p-value of the statistic is:
+
+$$P(F_{K-1,n_{total}-k} > msb/mse)$$
+
+```{r}
+msb_df = 3
+mse_df = 249
+pvalue = 1-pf(F,msb_df,mse_df)
+pvalue
+```
+
+Since 0.29 > 0.05, we should not reject $H_0$.  We are 95% confident that mean GPA is the same for all four types of alcohol consumers. 
+
+  d) Assuming the assumptions for ANOVA are met, state the conclusion of this test in the context of the research question.
+  
+There is not differences between the GPA's of the students according to their use of alcohol, or in other words, the alcohol consumption is not related with academic performance (measured with the GPA). 
+
+
+### Problem 4
+
+Consider the partially filled in ANOVA table below.  In this study, the means of 5 different treatments were compared.  There was 8 observations for each of the 5 populations.
+
+
+```{r, results='asis'}
+tbl <- matrix(c("G", "A", "H",
+                "B", "1837", "3037",
+                "C", "D", "",
+                "E", "", "",
+                "F", "", ""), nrow = 3)
+rownames(tbl) <- c("Treatment", "Error", "Total")
+colnames(tbl) <- c("Df", "Sum Sq", "Mean Sq", "F value", "Pr(>F)")
+knitr::kable(tbl)
+```
+
+
+  a) Determine G, A, and H. 
+  
+  G is the degrees of freedon of the msb, e.g. the  number of groups minus 1 (k-1) . A is the degrees of freedon of the mse, e.g. the number of observation minus the number of groups (n-k). Finally, H is n-1.
+
+```{r}
+k=5
+n=40
+G=k-1
+G
+A=n-k
+A
+H=n-1
+H
+```  
+
+  b) Determine B. 
+  
+  B sum of squares between groups (ssb). ssb=$\sum_{i=1}^{k} n_i$ $(\bar Y_{i\mathbf{.}}$ $-\bar Y_{\mathbf{..}})^2$, then using the identity sst = ssb + sse, we can get ssb as ssb= sst-sse.
+  
+```{r}
+sst = 3037
+sse = 1837
+B = sst-sse
+B
+```  
+  
+  c) Determine C. 
+  
+  C is how much on average a group vary from the grand  mean, also called Mean Square Between Groups (msb) and it's calculated as $msb=ssb/k-1$
+
+```{r}
+C = B/G
+C
+```  
+  
+  d) Determine D. 
+  
+  D is the Pooled Error Variance, also called Mean Square Error (mse):
+
+$mse = sse/n_{total}-k$, where $n_{total}$ is the total of observations and k is the number of groups.
+
+```{r}
+D = sse/A
+D
+```
+
+  e) Determine E. 
+  
+  Under $H_0$,  E is a realization of the F statistic and it's calculated as  $F = msb/mse$, which has a $F_{df1, df2}$.
+  
+```{r}
+E = C/D
+E
+```  
+  
+  f) Determine F. 
+  
+F is the p-value associated to the F statistic, formally: 
+
+$$P(F_{K-1,n_{total}-k} > msb/mse)$$
+
+```{r}
+F = 1-pf(E,G,A)
+F
+```
+
+
+Then, our complete table should be:
+
+```{r, results='asis'}
+tbl <- matrix(c("4", "35", "39",
+                "1200", "1837", "3037",
+                "300", "52.49", "",
+                "5.72", "", "",
+                "0.001195", "", ""), nrow = 3)
+rownames(tbl) <- c("Treatment", "Error", "Total")
+colnames(tbl) <- c("Df", "Sum Sq", "Mean Sq", "F value", "Pr(>F)")
+knitr::kable(tbl)
+```
+
+
+
+```{r}
+2*pnorm(-0.17)
+```
+
+ 

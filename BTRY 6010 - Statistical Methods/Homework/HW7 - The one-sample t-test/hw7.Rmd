@@ -1,0 +1,121 @@
+---
+title: 'Homework 7: The one-sample t-test'
+output: html_document
+---
+  
+----
+
+# NAME: Your Name 
+# NETID: Your NetID 
+**DUE DATE: November 1, 2016 by 1:00pm **  
+
+----
+
+ **For this homework, it will be helpful to have a copy of the knitted version of this document to answer the questions as much of it is written using mathematical notation that may be difficult to read when the document is not knitted.**  
+
+## Instructions
+
+For this homework:
+
+1. All calculations must be done within your document in code chunks.  Provide all intermediate steps.
+
+2. Incude any mathematical formulas you are using for a calculation.  Surrounding mathematical expresses by dollar signs makes the math look nicer and lets you use a special syntax (called latex) that allows for Greek letters, fractions, etc.  Note that this is not R code and therefore should not be put in a code chunk.  You can put these immediately before the code chunk where you actually do the calculation.
+
+3.  To help you solve these problems, you will find it helpful to draw a picture (as was done in Lab 8).  Please do so by hand on paper, but do not worry about submitting this picture.  (You will indirectly get credit for having drawn the picture by being more likely to have the right answer!)
+
+4. Be sure you have read Lab 8 carefully before starting this homework.
+
+## Hypothesis Testing for $\mu$ Using a t-distribution
+
+### Review: When can we treat $\bar X_n$ as normal? 
+In Lab 8, we saw that hypothesis testing for $\mu$ can be based on the distribution of $\bar X_n$.  In the lab it was assumed that $\bar X_n \sim N(\mu, \sigma/\sqrt{n})$.  Generally, this assumption can be made at least approximately when the $X_i$'s are indepedent and one of the following conditions holds:
+
+  1) The sample size, $n$, is greater than 30 and the distribution isn't strongly skewed. In that case, the Central Limit Theorem applies.  (For the case of sampling from a Bernoulli distribution, we have a more specific rule, namely that $n\hat p$ and $n(1 - \hat p)$ should both be greater than or equal to 10.)
+  
+  2) The sample, $X_i, i = 1, \dots, n$, is iid from $N(\mu, \sigma)$.
+
+### Doing inference when $\bar X_n \sim N(\mu, \sigma/\sqrt{n})$
+
+
+
+If the population standard deviation $\sigma$ is known, we can do tests (and form confidence intervals) based on the fact that, at least approximately,
+$$
+\frac{\bar X_n - \mu}{\sigma/\sqrt{n}} \sim N(0,1).
+$$
+This worked fine in Lab 8 because we were told $\sigma$.  But typically we don't know $\sigma$.  This is the *identical* situation as with confidence intervals, so this is a good time for you to review Lecture 13.  The idea is to replace $\sigma$ by $S_n$, the standard deviation of the sample.
+
+**If $n$ is sufficiently large**, we expect $S_n$ to be so close to $\sigma$ that we can just assume
+$\frac{\bar X_n - \mu}{S_n/\sqrt{n}}$ is approximately $N(0,1)$, and we can simply operate as in Lab 8.
+
+**If $n$ is small**, however, we have to account for the variability introduced by $S_n$, and we will find that
+$$
+\frac{\bar X_n - \mu}{S_n/\sqrt{n}} \text{ is not } N(0,1).
+$$
+
+Do we know what the distribution of $\frac{\bar X_n - \mu}{S_n/\sqrt{n}}$ is when $n$ is small?  The answer, unfortunately, is "no" in general **except for the special case that $X_i, i = 1, \dots, n$, iid from $N(\mu, \sigma)$**.
+
+If $X_i, i = 1, \dots, n$, iid from $N(\mu, \sigma)$, then for **any** $n>1$,
+
+$$
+\frac{\bar X_n - \mu}{S_n/\sqrt{n}}\sim t_{n-1}.
+$$
+That is, this random variable follows a $t$-distribution with $n-1$ degrees of freedom.
+
+We will still consider the three alternative hypotheses presented in Lab 8 and always take $H_0$ to be $\mu=\mu_0$.
+
+### Problem 1
+
+A study was conducted of a simple random sample of 15 adult male patients following a new treatment for congestive heart failure.  One of the variables measured on the patients was the increase in exercise capacity (in minutes) over a 4-week treatment period.  Assume this variable is normally distributed.  The previous treatment regime had produced an average of $\mu =2$ minutes.  The researchers wanted to evaluate whether the new treatment had a different impact on the increase in exercise capacity than the old treatment. The data can be found in the *Heart.csv* file.
+
+  a) What are the null and alternative hypotheses of this study?
+  
+  b) What is the distribution of the standardized sample mean, $\frac{\bar X_n - \mu_0}{S_n/\sqrt{n}}$, under the null hypothesis for this study?
+  
+## Rejection Regions and p-Values Using the t-distribution
+ 
+Look back at Steps 1 -- 4 at the bottom of page 1 of Lab 8.  For Step 2, we used that $\bar X_n\sim N(\mu_0,\sigma/\sqrt{n})$ under $H_0$, which is equivalent to 
+$$
+\frac{\bar X_n - \mu_0}{\sigma/\sqrt{n}} \sim N(0,1).
+$$
+
+When $\sigma$ is unknown and when it is valid to use a t-distribution (see above), we replace the above with the fact that
+$$
+\frac{\bar X_n - \mu_0}{S_n/\sqrt{n}}\sim t_{n-1}
+$$
+under $H_0$.  Other than that, all the same logic used in Lab 8 applies.  Rather than using the quantiles of $N(0,1)$ you use the corresponding quantiles of $t_{n-1}$.
+
+Likewise at the bottom of page 5, Steps 1 -- 4 still apply, just Step 2 has a different null distribution.
+
+### Problem 2
+
+  a) Using a code chunk, import the data set *Heart.csv* into the workspace of this document (look back at Lab 6 if you need help).  Make sure it is read in correctly.
+  
+  b) Assuming the significance level of the test is 0.05, what is the rejection region of the test described in Problem 1?
+ 
+  c) Compute the statistic, $\frac{\bar x_n - \mu_0}{s/\sqrt{n}}$, needed to perform this test using the variable `Increase` from the `Heart` data.  
+  
+   d) Based on the rejection region, should we reject $H_0$?
+   
+### Problem 3
+
+  a) What is the p-value of the test described in Problem 1?
+  
+  b) Should we reject $H_0$ at the $0.05$ level based on this p-value?
+  
+## Power calculation for a t-test
+
+When the study described above was being planned, the researchers wanted to make sure that if the new treatment were to lead to a  (population-level) $\mu=3$ minute increase in exercise, that the study would be able to reject the null that $\mu=2$ in favor of the alternative $\mu\neq2$.  In particular, they wanted to choose a sample size $n$ large enough so that there would be a $90\%$ probability that the study would reject the null hypothesis when $\mu=3$.
+
+They did a Monte Carlo study to decide what sample size would be required.  In particular, they simulated data like the kind they expected to collect:  $X_1,\ldots, X_n\sim N(\mu, \sigma)$.  They took $\mu=3$ since they wanted to know about a probability in the case that $\mu=3$.  From the previous literature, they guessed that $\sigma=1$ minute would be a reasonable value.  This was a big guess, but they figured it'd be better to have a rough sense of $n$ required than to just pick a sample size completely arbitrarily.
+
+### Problem 4
+
+a) Write a code chunk that does the following two things:
+ - draws a realization of a sample of size $n$ from the distribution described above (for now, your first line of code can set `n = 10`).
+ - does exactly what was done in Problem 2 for parts (b)-(d) but on the sample of simulated data instead of on the actual data (don't forget that the quantile of the t-distribution will change since $n$ is different). For part (d), the necessary comparison should be done using logic operations in R -- the output of the code should be `TRUE` if the test rejects $H_0$ in favor of $H_a$ and `FALSE` if the test fails to reject $H_0$.
+
+b) To perform a Monte Carlo simulation, we want to repeat (a) a very large number of times (perhaps `nsim = 100000`) and calculate the proportion of times the test rejects.  Write a code chunk with a `for` loop that does this.  Hint: It may help to look back at past examples of Monte Carlo studies. (Note: It is possible, but more advanced, to write this without a `for` loop.  If you're up for the challenge, you should go for it. But this is not required.)
+
+c) Use the code from part (b) to estimate the power for four values of $n$.  Try a wide enough range of $n$ values to see a wide range of powers.  Also, include $n=15$ to see what they would have estimated the power of their own study to have been.
+
+d) Find a value of $n$ (using trial-and-error) for which the power is close to the desired $90\%$.
