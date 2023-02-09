@@ -1,0 +1,612 @@
+---
+title: "BTRY 6020 Homework V"
+output:  pdf_document 
+---
+
+
+
+#NAME: Andres Castano
+#NETID: ac986
+#**DUE DATE: 8:40 am Friday March 31**  
+
+-----
+
+#Question 1.
+
+Health officials wonder why some people get the flu shot while others don't. In a study designed to shed some light on this, researchers asked a random sample of patients if they had gotten a flu shot, recorded their age and gender, and also gave each a written questionnaire designed to evaluate their health awareness index. Data appear in Hwk5Q1DatSp17. Note here that Y = 1 means they received the flu shot and that males were coded as $X_3$ = 1, females coded as $X_3$ = 0.
+
+A) Obtain the maximum likelihood estimators of $\beta_{0}$, $\beta_{1}$, $\beta_{2}$, and $\beta_{3}$. State the fitted regression function.
+```{r}
+library(readxl)
+data_flu = read_excel("Hwk5Q1DatSp17.xlsx")
+head(data_flu)
+#Model
+flu.glm=glm(FShot~Age + Ind + Gen, family = binomial, data=data_flu)
+#Summary
+summary(flu.glm)
+```
+
+The fitted regression function is:
+
+$$logit(\pi)=log_{e}(\frac{\hat\pi_{i}}{1-\hat\pi_{i}})=-1.17716 + 0.07279*Age_{i} - 0.09899*Ind_{i} + 0.43397*Gen_{i}$$
+
+B) What is the estimated probability of getting the flu shot that a male clients aged 55 years with a health awareness score of 60?
+
+$$\hat\pi_{i}=\hat p(FShot=1 | Age=55, Ind=60, Gen=1) = \frac{1}{1+exp(-(-1.17716 + 0.07279*55 - 0.09899*60 + 0.43397*1))}$$
+
+```{r}
+# Manually
+coef=coefficients(flu.glm)
+coef
+b0=coef[1]
+b1=coef[2]
+b2=coef[3]
+b3=coef[4]
+x1=55
+x2=60
+x3=1
+prob_estimated = (1 ) / (1 + exp(-(b0 + b1*x1 + b2*x2 + b3*x3)))
+prob_estimated
+#Verification with R command                           
+newdata=data.frame(Age=55, Ind=60, Gen=1)
+predict(flu.glm, newdata, type="response")
+```
+
+The probability of getting flu for the person described is 0.06422197 $\approx$ 6.42%
+
+C) Obtain the VIFs for the regression predictors. What conclusions can you reach from these statistics?
+
+```{r}
+library(car)
+vif(flu.glm)
+```
+
+Since all the VIFs are less than 10 we can say that we do not have a multicolinearity problem. Here the the VIFs of interest are for the quantitative variables Age and Ind.
+
+D) Get the standardized deviance residuals and plot against observation number. Does there appear to be any outliers?
+
+```{r}
+#data_flu$flu.stdres=rstandard(flu.glm)
+plot(rstandard(flu.glm))
+```
+
+It seems that we do not have outliers. 
+
+	
+E) Get the Cook's distance numbers and plot against observation number. Do there appear to be any influential outliers? If so, check their effects.
+
+```{r}
+#data_flu$flu.cooks = cooks.distance(flu.glm)
+library(car)
+plot(flu.glm, which=4)
+```
+
+There are two observations that are highly influential (observations 47 and 123). We are going to drop this observations, run again to model and then compare the coefficients against the model with all the observations.
+
+```{r}
+# drop observation 47 and 123
+data_flu_2 = data_flu[data_flu$ObsNum!=47 & data_flu$ObsNum!= 123,]
+# re run the model
+flu2.glm=glm(FShot~Age + Ind + Gen, family = binomial, data=data_flu_2)
+summary(flu2.glm)
+```
+
+Comparing the models, We can observe:
+
+- The standard error of the coefficients have increased in the model without the observations 47 and 123. The standard errors have increased by 11.9% for $\hat\beta_{0}$, 11.2% for $\hat\beta_{1}$, 12.6% for $\hat\beta_{2}$ and 10.3% for $\hat\beta_{3}$. The rate of change among the models was calculate as $change(\%) = (\frac{SE_{\beta_{j}}^{flu2} - SE_{\beta_{j}}^{flu1}}{SE_{\beta_{j}}^{flu1}})*100$, where $SE_{\beta_{j}}^{flu1}$ is the standard error for the coefficient j (j=1,2,3,4) in the model with all observations and $SE_{\beta_{j}}^{flu2}$ is the standard error for the coefficient j (j=1,2,3,4) in the model that excludes observations 47 and 123.
+
+- The estimated coefficients have also change by 64%, 22.5%, 12.8% and 74.15%, respectively. The calculation of this rate of change in the estimated coefficients follow the same logic used for the standard error of the coefficients.
+
+- The pseudo R square in the model with all the observations is $R^{2}_{1}= 1 - \frac{deviance^{flu1}_{full}}{deviance^{flu1}_{null}} = 1 - \frac{105.09}{134.94} = 0.22$, meanwhile The pseudo R square in the model without observations 47 and 123 is $R^{2}_{2}= 1 - \frac{deviance^{flu2}_{full}}{deviance^{flu2}_{null}} = 1 - \frac{ 91.81}{127.23} = 0.28$. Thus, deleting the two influential points the model also gain 6 percentage points in its ability to fit the data.
+
+- The second model should be prefered for prediction purposes since the Akaike information criteria decrease almost 14 units in the model without the influential points compared to the model with all the data ($AIC^{flu2}=99.81$ and $AIC^{flu1}=113.09$). 
+
+
+F) Can we drop Age and Gender if we keep the health awareness index in the model? State hypotheses, test statistic, p-value, and conclusions.
+
+Since not clarification is provided, I going to use the database with all the observation to answer this question.  
+
+Here we are interested in a simultaneous test for $\beta_{1}$ and $\beta_{3}$:
+
+$$H_{0}: \beta_{1}=\beta_{3}=0$$
+$$H_{A}: not \space H_{0}$$
+
+We can test for this using a likelihood ratio test. The test statistis is defined as the difference in the residual deviance of the full model (the model with all the explanatory variables) and the residual deviance of the null model (the model with only the health awareness index as explanatory variable):
+
+$$TS= D_{null} - D_{full}$$ 
+Where $D_{null}$ is the residual deviance of the null model and $D_{full}$ is the residual deviance of the full model. This test statistic follow a $\chi^2$ distribution with k degrees of freedon. So the p value is $p=P(\chi^2_{k}>TS)$
+
+We can make this test in R as follows:
+
+```{r}
+# To run the null model (only with Ind as explanatory variable)
+flu_null.glm=glm(FShot~Ind, family = binomial, data=data_flu)
+summary(flu_null.glm)
+anova(flu_null.glm, flu.glm, test = 'LRT')
+```
+
+
+Thus, the test statistic is:
+
+$$TS= 113.20  - 105.09 =8.1026$$ 
+The p-value is $p=P(\chi^{2}_{2}>8.1026)=0.0174$
+
+Then, we have evidence to reject $H_{0}$, Which in turns means that  we can not drop both Age and Gender of the model. 
+
+
+G) Install the package "bestglm". Visit the following website:
+	
+https://cran.r-project.org/web/packages/bestglm/vignettes/bestglm.pdf
+
+to learn how to use this package. Don't forget the "library(bestglm)" command before you use it.
+
+
+	i) Find the best model for getting a flu shot according to the BIC criteria
+	
+```{r}
+library(leaps)
+library(bestglm)
+str(data_flu)
+#Reorganazing the data in the format need it for the package
+data_flu_new=data_flu[,-1]
+data_glm=data_flu_new[,c(2,3,4,1)]
+# best model according to the BIC criteria
+bestglm(data_glm, family=binomial,  IC="BIC")
+```
+
+The best model according to this procedure is a model with Age and Ind as explanatory variables
+
+
+	ii) Find the best models for a 0, 1, 2, and 3 predictors using the Subsets command
+	
+Here it is not clear which criterion we need to use to rank the models, but try to do my best guess, I would do it also with the BIC criterion. 
+	
+	
+```{r}
+best_bic= bestglm(data_glm, family=binomial,  IC="BIC", TopModels = 4)
+best_bic$Subsets
+```
+
+- The best 0 predictor model is the model with only the intercept.
+- The best 1 predictor model is the model  with only Ind as explanatory variable
+- The best 2 predictor model is the model with Age and Ind as explanatory variables 
+- The best 3 predictor model is the models with all the predictors
+
+
+	iii) Find the best model for getting a flu shot according to the AIC criteria
+
+```{r}
+# best model according to the AIC
+bestglm(data_glm, family=binomial, IC="AIC")
+```
+
+The best model using the AIC criteria is a model with Age and Ind as explanatory variables.
+
+
+	iv) Find the best models for a 0, 1, 2, and 3 predictors using the Subsets command
+
+```{r}
+best_aic= bestglm(data_glm, family=binomial,  IC="AIC", TopModels = 5)
+best_aic$Subsets
+```
+
+- The best 0 predictor model is the model with only the intercept.
+- The best 1 predictor model is the model  with only Ind as explanatory variable
+- The best 2 predictor model is the model with Age and Ind as explanatory variables 
+- The best 3 predictor model is the models with all the predictors
+
+  v) What model from the above models evaluated would you choose for this situation? Explain BRIEFLY; you may include data from all parts of Question 1.
+
+Since the two selection criteria arrived to the same best model (the model with Age and Ind as explanatory variables), I consider this is the best model for this situation. We can also defend this idea observing that there are not gains in the AIC result when gender is included as the third explanatory variable (AIC with Age and Ind as explanatory variables=109.79, and AIC including all the predictors = 111.0932).
+
+\pagebreak
+
+#Question 2.
+
+A disease outbreak has occurred in a certain city. Data have been collected on a random telephone survey of 196 people within city limits and the following data recorded: 1) Whether or not they have contracted the disease (Dis, =1 if they have, =0 if not), Age, Socioeconomic Status (SES, = 1 if upper, = 2 if middle, = 3 if lower), Sector of the city they live (Sect, either sector 1 or sector 2), and saving account status (Sav, = 1 if they have a savings account, = 0 if not). data appear in Hwk5Q2DatSp17
+
+Part A) Develop a logistic regression model for predicting the probability of contracting this disease, using the above variables. Be sure to check for polynomial effects of significant quantitative variables as well as interactions between significant predictor variables. When finished, explicitly state your prediction equation. Be sure to show significant steps in model development, using simultaneous tests when you want to omit/test more than one predictor.
+
+Step 1: enter the data into R for the analysis and define as categorical variables as such.
+
+```{r}
+library(readxl)
+data_disease = read_excel("Hwk5Q2DatSp17.xlsx")
+head(data_disease)
+# define the variables SES, sector, saving account status
+data_disease$SES = factor(data_disease$SES, labels = c("Upper", "Middle", "Lower"))
+data_disease$Sect = factor(data_disease$Sect, labels = c("Sector1", "Sector2"))
+data_disease$Sav = factor(data_disease$Sav, labels = c("NOT", "YES")) 
+head(data_disease)
+```
+
+
+Step 2: Run Backward elimination using AIC criteria.
+
+```{r}
+glm_disease_null=glm(Dis~1, family = binomial, data=data_disease)
+glm_disease_full=glm(Dis~ Age  + SES + Sect + Sav, family = binomial, data=data_disease)
+# AIC based backward elimination
+step(glm_disease_full, direction="backward", trace = 1)
+```
+
+The best model according to these criteria is a model that includes Age and Sect as explanatory variables.
+
+
+Step 3: Run best subsets using the BIC criteria to get an idea of the best models. Then compare the best models with those obtained using the AIC criteria.
+
+```{r}
+# Organize the data as required for using bestglm command
+data_disease_new=data_disease[,-1]
+data_disease_glm=data_disease_new[,c(1,2,3,5,4)]
+# all subsets using "bestglm"
+best_disease_bic= bestglm(data_disease_glm, family=binomial,  IC="BIC", TopModels = 5)
+best_disease_bic$Subsets
+#best_disease_bic$BestModels
+```
+
+According to these criteria the best models are:
+
+- best one predictor model includes only Sect as explanatory variable
+- best two predictor model includes Age and Sect as explanatory variables
+- best three predictor model includes Age, Sect and Sav as explanatory variables
+- Best fourth predictor model includes Age, Sect, Sav, and SES as explanatory variables. For SES, we will see which of its categories provide the better fit. 
+
+
+Step 4: Run the set of best candidate models and get their summaries in R.
+
+Here, I will use the best 2, 3 and 4 predictors model (the best model according to both procedures use in step 2 and 3 is a model with Age and Sect as explanatory variables). I discard the one predictor model because I do believe that a phenomenon of such complexity as a the probability to contract a disease during an outbreak should be determine by more tha one variable. 
+
+```{r}
+# Best two predictor model
+two_predictor.glm=glm(Dis~Age+Sect, family = binomial, data=data_disease_glm)
+summary(two_predictor.glm)
+# Best three predictor model
+three_predictor.glm=glm(Dis~Age+Sect+Sav, family = binomial, data=data_disease_glm)
+summary(three_predictor.glm)
+# Best fourth predictor model (it is not really a 4 predictor model, but a 5 predictor model since SES is a categorical variable with more than 2 categories)
+fourth_predictor.glm=glm(Dis~Age+Sect+Sav+SES, family = binomial, data=data_disease_glm)
+summary(fourth_predictor.glm)
+```
+
+
+Step 5: comapre the results of the different models and decide which one is the best for prediction.
+
+Here, We are going to compare the results of the models based on the pseudo-R square, Residual Deviance and the Akaike Criterion:
+
+\begin{tabular}{cccc}
+	\hline
+	Model &  Residual Deviance & pseudo-r2 & AIC   \\ 
+	\hline
+	Two predictors & $211.64$ & $0.1045$  & $217.64$  \\ 
+		\hline
+	Three predictors   & $211.54$ & $0.1049$  & $219.54$ \\ 
+		\hline
+	Five predictors    & $211.21$ & $0.1063$  & $223.21$ \\ 
+		\hline
+\end{tabular} 
+
+As we can see the gains to include Sav and SES as predictors are minimum in terms of residual deviance, and pseudo R square. Then, based on these results, I consider that the best model is the two predictor model, i.e, the one with only Age and Sect as explanatory variables.
+
+
+Step 6: Check for suspect and influential data points 
+
+```{r}
+# Suspect data points
+#data_flu$flu.stdres=rstandard(flu.glm)
+# Check for suspect points
+plot(rstandard(two_predictor.glm))
+# Check for influential points
+library(car)
+plot(two_predictor.glm, which=4)
+```
+The graphs above teall us that we do not have outliers, but at the same time the cook´s distance grpah tell us that we have two observation highly influential (observations 195 and 157). 
+
+Let's drop the point 157, run again the model and the check for influential data points. 
+
+```{r}
+data_disease_glm_2 = data_disease_glm[-157,]
+two_predictor.glm_2=glm(Dis~Age+Sect, family = binomial, data_disease_glm_2)
+summary(two_predictor.glm_2)
+# check for unusual points
+plot(rstandard(two_predictor.glm_2))
+# Check for influential points
+library(car)
+plot(two_predictor.glm_2, which=4)
+```
+
+In general the fit of the model improve a little bit since the residual deviance decrease almost 3 points, from 211.64 to 208.65, and the AIC decrease also almost three points. Now, let´s drop the another highly influential point and check what happens with our analysis. 
+
+
+```{r}
+data_disease_glm_3 = data_disease_glm_2[-194,]
+two_predictor.glm_3=glm(Dis~Age+Sect, family = binomial, data_disease_glm_3)
+summary(two_predictor.glm_3)
+# check for unusual points
+plot(rstandard(two_predictor.glm_3))
+# Check for influential points
+library(car)
+plot(two_predictor.glm_3, which=4)
+```
+
+Again, deleting this point the fit of the model improve a little bit since the residual deviance decrease almost 2 points, from 208.65 to 206.84, and the AIC also decreases also almost two points. 
+
+Since the these two points are highly influential and only represent 1% of our data, we are going to delete it and 
+return to the step 2 to repeat the analysis with the new data set.
+
+
+Step 2.A: Run again the Backward elimination using AIC criteria with the new dataset.
+
+```{r}
+glm_disease_null_new=glm(Dis~1, family = binomial, data=data_disease_glm_3)
+glm_disease_full_new=glm(Dis~ Age  + SES + Sect + Sav, family = binomial, data=data_disease_glm_3)
+# AIC based backward elimination
+step(glm_disease_full_new, direction="backward", trace = 1)
+```
+
+The best model according to these criteria is a model that includes Age and Sect as explanatory variables.
+
+
+
+Step 3.A: Run again best subsets using the BIC criteria to get an idea of the best models. Then compare the best models with those obtained using the AIC criteria.
+
+```{r}
+best_disease_bic_new= bestglm(data_disease_glm_3, family=binomial,  IC="BIC", TopModels = 5)
+best_disease_bic_new$Subsets
+#best_disease_bic$BestModels
+```
+
+According to these criteria the best models are:
+
+- best one predictor model includes only Age as explanatory variable
+- best two predictor model includes Age and Sect as explanatory variables
+- best three predictor model includes Age, Sect and Sav as explanatory variables
+- Best fourth predictor model includes Age, Sect, Sav, and SES as explanatory variables. For SES we will see which of its categories provide the better fit. 
+
+Step 4.A: Run again the set of best candidate models and get their summaries in R.
+
+Here, I will use the best 2, 3 and 4 predictors model (the best model according to both procedures use in step 2 and 3 is a model with Age and Sect as explanatory variables). I discard the one predictor model because, since I do believe that a phenomenon of such complexity as a the probability to contract a disease during an outbreak should be determine by more tha one variable. In general, the best models are the same compared with the case with all the data was used.
+
+```{r}
+# Best two predictor model
+two_predictor_new.glm=glm(Dis~Age+Sect, family = binomial, data=data_disease_glm_3)
+summary(two_predictor_new.glm)
+# Best three predictor model
+three_predictor_new.glm=glm(Dis~Age+Sect+Sav, family = binomial, data=data_disease_glm_3)
+summary(three_predictor_new.glm)
+# Best fourth predictor model (it is not really a 4 predictor model, but a 5 predictor model since SES is a categorical variable with more than 2 categories)
+fourth_predictor_new.glm=glm(Dis~Age+Sect+Sav+SES, family = binomial, data=data_disease_glm_3)
+summary(fourth_predictor_new.glm)
+```
+
+
+Step 5: compare again the results of the different models and decide which one is the best for prediction.
+
+Here, We are going to compare the results of the models based on the pseudo-R square, Residual Deviance and the Akaike Criterion:
+
+\begin{tabular}{cccc}
+ \hline
+	Model &  Residual Deviance & pseudo-r2 & AIC   \\ 
+	\hline
+	Two predictors & $206.84$ & $0.1197$  & $212.84$  \\ 
+		\hline
+	Three predictors   & $206.74$ & $0.1200$  & $214.74$ \\ 
+		\hline
+	Five predictors    & $206.32$ & $0.1219$  & $218.32$ \\ 
+		\hline
+\end{tabular} 
+
+Two things are notorious:
+
+- Compared to the results obtained using all the data, using the new data, We have improved the fit of all the models. For instance, the residual deviance have decreased almost 5 points, and the pseudo R-Squared have increased almost 1.5 percentage points.
+
+- Again, the results shows that even after drop the highly influential data points, the improvements in fit of using a model that include Sav and SES as explanatory variables are minimun (in terms of residual deviance and pseudo R squared). Then, again based on these results, I consider that the best model is the two predictor model, i.e, the one with only Age and Sect as explanatory variables.
+
+
+Step 6: Check for suspect and influential data points 
+
+```{r}
+# check for outliers
+plot(rstandard(two_predictor_new.glm))
+# Check for influential points
+library(car)
+plot(two_predictor_new.glm, which=4)
+```
+The graphs above tell us that we do not have outliers, and the points with greater cook's distance are not too far away from the majority of the rest. 
+
+Step 7. Check if polynomial terms are neccesary.
+
+```{r}
+two_predictor_new_pol.glm=glm(Dis~Age+Sect+I(Age^2), family = binomial, data=data_disease_glm_3)
+summary(two_predictor_new_pol.glm)
+```
+
+Since the polynomial term for age is significant and improve the fit (reduce the AIC by almost 2.5 points from 212.84 to 210.22), we will keep it  in our model.  Let’s try the cubes as well: 
+
+```{r}
+two_predictor_new_cube.glm=glm(Dis~Age+Sect+I(Age^2)+I(Age^3), family = binomial, data=data_disease_glm_3)
+summary(two_predictor_new_cube.glm)
+```
+
+The cube term is also significant and and improve the fit as well. The residual deviance decreases by almost 5 points and the AIC by almost 3 points. Then, we are also going to keep this variable in our model. Now, let's try the quartic of age  ($Age^{4}$) as well:
+
+```{r}
+two_predictor_new_quartic.glm=glm(Dis~Age+Sect+I(Age^2)+I(Age^3)+I(Age^4), family = binomial, data=data_disease_glm_3)
+summary(two_predictor_new_quartic.glm)
+```
+
+The quartic is not significant and does not improve the fit, then we drop the quartic of age and continue with the model with only the square and cubic of age as additional explanatory variables.
+
+
+Step 8: Check all possible first order interactions.
+
+
+```{r}
+two_predictor_new_interact.glm=glm(Dis~Age + Sect + I(Age^2) + I(Age^3) + Age:Sect, family = binomial, data=data_disease_glm_3)
+summary(two_predictor_new_interact.glm)
+```
+
+Since the first order interaction required the estimation of only one additional parameter we can decide wether or not this intercation is significan base on partial z test. In this case, the interaction is not significant and does not contribute to the improvement of the fit of the model. Therefore, our final model does not include first order interactions.
+
+
+Step 9: Check final model using standarized residual plot and cook's distance plot. 
+
+
+```{r}
+# check for outliers
+plot(rstandard(two_predictor_new_cube.glm))
+# Check for influential points
+library(car)
+plot(two_predictor_new_cube.glm, which=4)
+```
+
+The graphs above tell us that we do not have outliers, but the observation 170 is highly influential. Now, we are going to drop this observation and graph again the diagnostic plots. We are also going to compare how the coefficients really change deleting this observation, to decide if it is worth it to return to the step 2 again.
+
+
+```{r}
+summary(two_predictor_new_cube.glm)
+data_disease_glm_4 = data_disease_glm_3[-169,]
+two_predictor_new_cube2.glm=glm(Dis~Age+Sect+I(Age^2)+I(Age^3), family = binomial, data=data_disease_glm_4)
+summary(two_predictor_new_cube2.glm)
+# check for unusual points
+plot(rstandard(two_predictor_new_cube2.glm))
+# Check for influential points
+library(car)
+plot(two_predictor_new_cube2.glm, which=4)
+```
+
+The table below shows the comparison of the coefficients taking into account observation 169 and also deleting it.
+
+\begin{tabular}{ccc}
+  \hline
+	Coefficient &  including observation 169  &   Excluding observation 169 \\ 
+	\hline
+	 Intercept & $-4.64$ & $-4.8040$  \\ 
+		\hline
+	  Age &   $0.3036$ & $0.3329$  \\ 
+		\hline
+	 Sector & $1.3250$ & $1.2830$  \\ 
+		\hline
+		Age2 & $-0.0078$ & $-0.0090$  \\ 
+		\hline
+		Age3   & $0.0001$ & $0.0001$  \\ 
+		\hline
+			Residual deviance   & $197.44$ & $195.55$  \\ 
+		\hline
+				AIC   & $207.44$ & $205.55$  \\ 
+		\hline
+\end{tabular} 
+
+
+As we can see the changes that experiment the coefficients are not enough large to consider deleting this observation and run the analysis again. Futhermore, since the purpose of the model is prediction, I consider that the gains in residual deviance and AIC are not enough to follow that strategy. Therefore, we have arrived to our final model. 
+
+Part B) Give a 90% confidence interval for the probability that a 64 year old patient, with middle socioeconomic status and a savings account that lives in sector 2 of the city, contracts the disease. 
+
+```{r}
+model_part_b = glm(Dis~ Age  + SES + Sect + Sav, family = binomial, data=data_disease_glm)
+summary(model_part_b)
+newdata=data.frame(Age=64, SES="Middle", Sect="Sector2", Sav="YES")
+prediction=predict(model_part_b, newdata, type="response",  se.fit = TRUE)
+#90% C.I for the estimated probability
+lower= prediction$fit - (-qnorm(0.05))*prediction$se.fit
+upper= prediction$fit + (-qnorm(0.05))*prediction$se.fit
+c(lower,upper)
+```
+
+We are 90% confident that the probability to contract a disease for this person is between 0.49 and 0.85.
+
+
+#Question 3.
+
+Multiple cohorts of subjects, some non-smokers and others smokers, were observed for several years. The number of cases (NumCases) of lung cancer diagnosed in the different cohorts was recorded, in addition to the following predictor variables:
+
+CigsperDay = Number of cigarettes smoked per day per individual in the cohort;
+Years = The number of years the individuals in the cohort had smoked.
+
+Additionally, the total number of years in which individuals in each category were observed (summed over all individuals) was recorded in the column PersonYears. (For example, if a cohort had 50 people that had been observed for 20 years, that would be 50 x 20 = 1000 PersonYears.) Data appear in Hwk5Q3DatSp17.
+
+```{r}
+library(readxl)
+data_smoke = read_excel("Hwk5Q3DatSp17.xlsx")
+head(data_smoke)
+```
+
+
+
+A) Write down a Poisson regression model where the mean number of cases of observed lung cancer cases per cohort are a function of CigsperDay and Years. Your model should start like "? = .", NOT "log(?) = .".
+
+The poisson regression model for the mean number of cases of observed lung cancer is:
+
+$$\mu=E(Y|X)=exp(\beta_{0}+\beta_{1}*CigsperDay + \beta_{2}*Years)$$
+
+B) Fit the model above; include summary output. State your model of the estimated mean with the maximum likelihood estimators included.
+
+```{r}
+smoke.glm=glm(NumCases~CigsperDay + Years, family=poisson, data=data_smoke)
+summary(smoke.glm)
+```
+
+The model of the estimated mean is:
+$$\mu=E(NumCases | CigsperDay, Years)=exp(-1.726048+0.040434*CigsperDay + 0.043769*Years)$$
+
+
+C) Do a deviance goodness-of-fit test on your model; state hypotheses, test statistic, p-value, and conclusions.
+
+The null hypothesis in this model is $H_{0}:$ the model fits the data; and the alternative hypothesis is $H_{A}:$ the model does not fit the data. The test statistic is the value of the residual deviance in the model (88.13). This test is distributed $\chi^{2}$ with n-k-1 degrees of freedom (in our case 32), where n is the number of observations, and k is the number of parameters (excluding the intercept). The p-value of this test is:
+
+$$pvalue=P(\chi^{2}_{n-k-1}>TS)$$
+
+In our case:
+
+$$pvalue=P(\chi^{2}_{32}>88.13)$$
+
+For our model the test statistic and its pvalue is:
+```{r}
+TS=88.13
+n=35
+k=2
+pvalue=1-pchisq(88.13, df=n-k-1)
+pvalue
+```
+
+We reject the null hypothesis, therefore this model does not fit the data. This result imply that We need to study if a model that account for overdispersion fits the data better.
+
+D) Does it make sense for your mean in Part A above to be proportional to the variable PersonYears? Explain briefly.
+
+It makes sense since we would expect more number cases of lung cancer diagnosed if the individuals were observed for more time.Therefore, we need to include PersonYears as an offset in our estimation process.
+
+E) Write down a Poisson regression model where the mean number of cases of observed lung cancer cases per cohort are a function of CigsperDay and Years, but are also proportional to PersonYears. Your model should start like "? = .", NOT "log(?) = ."
+
+
+$$\mu_{i}*PersonYears_{i}=E(Y|X_{i})*PersonYears_{i}=exp(\beta_{0}+\beta_{1}*CigsperDay_{i} + \beta_{2}*Years_{i} + log_{e}PersonYears_{i})$$
+
+F) Fit the above model; include summary output. Perform a deviance goodness-of-fit test on this model; state hypotheses, test statistic, p-value, and conclusions.
+
+
+```{r}
+smoke_offset.glm=glm(NumCases~CigsperDay + Years, family=poisson, data=data_smoke, offset = log(PersonYears))
+summary(smoke_offset.glm)
+
+```
+
+The null hypothesis for the goodness of fit test in this model is $H_{0}:$ the model fits the data; and the alternative hypothesis is  $H_{A}:$ model does not fit the data. The test statistic is the value of the residual deviance in the model (43.347). This test is distributed $\chi^{2}$ with n-k-1 degrees of freedom, where n is the number of observations, and k is the number of parameters (excluding the intercept). The p-value of this test is:
+
+$$pvalue=P(\chi^{2}_{n-k-1}>TS)$$
+
+In our case:
+
+$$pvalue=P(\chi^{2}_{32}>43.347 )$$
+
+In R, we make this test as follows:
+
+```{r}
+TS=43.347 
+n=35
+k=2
+pvalue=1-pchisq(43.347, df=n-k-1)
+pvalue
+```
+
+pvalue>0.05 (0.08693202>0.05),  We do not reject the null hypothesis. This mean that after correcting for the offset effect the model fits the data.
+
+

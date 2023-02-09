@@ -1,0 +1,484 @@
+---
+title: "BTRY 6020 Homework VII"
+output:
+  pdf_document: default
+  html_document:
+    highlight: pygments
+    theme: cerulean
+  word_document: default
+---
+-----
+
+
+#NAME: ANDRES CASTANO
+#NETID: ac986
+#**DUE DATE: May 1, 2017, by 8:40 am**  
+
+-----
+
+##Question 1.
+
+A study was designed to investigate the effects of certain toxic agents. Four medications (hypothesized poison antidotes) and 3 poisons were used in a completely randomized factorial experiment consisting of 12 treatment combinations (each poison with each antidote). The design was balanced with 4 animals randomly assigned to each of the 12 treatments. The two factors were fixed in this study as they were the only ones about which statistical inference was needed. For each animal, the survival time (in hours) was recorded following administration of the treatment combination. Data appears in file Hwk7Q1DatSp17.
+
+A)	What is the experimental unit in this experiment? 
+
+The experimental units are each one of the possible factor combinations (12 in total). 
+
+B)	Give the general linear model for this analysis and define each term. What constraints are imposed upon this model for the analysis?
+
+Here, we could define the model as an additive model (without interactions) or the interaction model. Since, it not clear which one we should use or which one the question is looking for, I will define an interaction model as follows (maybe I will end up using an only main effects model, so the model here is only presented to deal with the question asked):
+
+
+$$y_{ijk} = \mu + \alpha_{i} + \beta_{j} + (\alpha \beta)_{ij} + \epsilon_{ijk}$$
+
+Where $y_{ijk}$  is  the response for observation k (k=1,2,..,4) with treatments i (medication=1,2,..,4) and treatments j (poison=1,2,.,3). In our case $y_{ij}$ is the survival time (in hours) for observation k in treatments j and i. $\mu$ is the grand overall mean of the response variable; $\alpha_{i}$ is the effect of the ith level of factor medication; $\beta_{j}$ is the effect of the jth level of factor poison; $(\alpha \beta)_{ij}$ is the interaction term for treatment ij; and $\epsilon_{ijk}$ is an error term. We also assume that $y_{ijk} \sim ind \space N(\mu_{i} + \alpha_{i} + \beta_{j}, \sigma^{2})$ and that $\epsilon_{ijk} \sim i.i.d \space N (0, \sigma_{\epsilon}^{2})$.
+
+ 
+The constraints impose on the parameters are $\sum_{i} \alpha_{i}=0$, $\sum_{j}\beta_{j}=0$, $\sum_{i}(\alpha \beta)_{ij}=0$, and $\sum_{j}(\alpha \beta)_{ij}=0$.
+
+
+C) 	Without any data transformation, analyze the data and report the ANOVA table for the fixed effects model. 
+
+Let´s look to what the data tell us in terms of what model could be more suitable to run (a fixed effects model with interactions or without interactions):
+
+```{r}
+library(readxl)
+data_animals = read_excel("Hwk7Q1DatSp17.xlsx")
+head(data_animals)
+data_animals$medication = as.factor(data_animals$medication)
+data_animals$poison = as.factor(data_animals$poison)
+# interaction plot
+interaction.plot(data_animals$medication, data_animals$poison, data_animals$survtime)
+```
+
+The graph above suggest that we should run an ANOVA model with main and interaction effects. The mean survival time depend of the level of factor one (medication), the level of factor 2 (poison), and the interaction between factors (the differences in mean responses for the level of medication depends on the level of poison).
+
+Thus, the two-way fixed effects model with interactions is:
+
+```{r}
+model1_animals = aov(survtime~medication + poison + medication:poison , data=data_animals)
+summary(model1_animals)
+```
+
+The results suggest that only the main effects (medication and poison) are significant. 
+
+
+D)	Make a plot of standardized residuals against predicted values and assess the validity of the equal variance assumption. Is the assumption of equal variance satisfied? If this assumption is not satisfied, make an appropriate transformation. Which transformation stabilizes the variance of residuals (append your plot)?
+
+
+```{r}
+library(car)
+data_animals$stdres=rstandard(model1_animals)
+plot(model1_animals$fitted.values,data_animals$stdres, ylab="Standarized residuals", xlab="Predicted values", abline(0,0))
+```
+
+The variance residuals do not seem to be constant for different values of the predicted values, therefore the assumption of equal variance is not satisfied.  A transformation that help to stabilize the variance is the log transformation.
+
+```{r}
+data_animals$log_survtime= log(data_animals$survtime)
+# new model with the response in a log scale
+model2_animals = aov(log_survtime~medication + poison + medication:poison , data=data_animals)
+anova(model2_animals)
+# new graph to check equal variance
+data_animals$stdres2=rstandard(model2_animals)
+plot(model2_animals$fitted.values,data_animals$stdres2, ylab="Standarized residuals", xlab="Predicted values", abline(0,0))
+```
+
+With the log transformation, we can see a more stable residual variance. Still, it seems to increase a little bit with the values of the predicted values.
+
+Answer questions (E) through (H) based on the transformed data from (D):
+
+E) Make an interaction plot on your transformed data. What does this tell you, and why (be brief).  
+
+```{r}
+interaction.plot(data_animals$medication, data_animals$poison, data_animals$log_survtime)
+```
+
+
+The graph above suggest that we should run an ANOVA model with main and interaction effects. It seems that the mean survival time depend of the level of factor one (medication), the level of factor 2 (poison), and the interaction between factors (the differences in mean responses for the level of medication depends on the level of poison).
+
+F)	Perform a hypothesis test of the null hypothesis that the interaction between the two factors is not significant. Show the null and alternative hypotheses, the test statistic, the p-value, and state your conclusions. Use $\alpha$ = .05.
+
+In this question, we can use an incremental F test to test for the present of interaction effects. Using the notation defined in part B of question 1, the null hypothesis is:
+
+$$H_{0}: all \space (\alpha \beta)_{ij}=0$$
+
+$$H_{A}: Not \space H_{0}$$
+
+The general idea of the F test here is to determine the differences in sum squares between a model with main effects and interactions, and another with only main effects. For instance, the incremental sum of squares to represent this difference is:
+
+
+$$SS(\alpha \beta | \alpha, \beta) = SS( \alpha, \beta, \alpha \beta) - SS(\alpha, \beta) $$
+
+Where $SS(\alpha \beta | \alpha, \beta)$ are the sum of squares for interaction after the main effects; $SS( \alpha, \beta, \alpha \beta)$ is the sum of squares of the model with all main effects and interactions; and $SS(\alpha, \beta)$ is the model with only main effects. Then the F test could be defined as:
+
+
+$$F= \frac{\frac{SS( \alpha, \beta, \alpha \beta) - SS(\alpha, \beta)}{q}}{MSE_{full}}$$
+
+Where q is, the additional parameters estimated in the model with interactions; $MSE_{full}$ is the mean square error in the model with interactions and main effects. This test can be done using the definition previously used during the course for incremental F test (anova(model1, model2, test='F')) or the definition used in the lab 10 (Anova(model1, type = 'III')).
+
+```{r}
+Anova(model2_animals, type = 'III')
+```
+
+
+The p value of the test is 0.3189375, then $p-value>0.05$. Therefore, we do not reject the null hypothesis of not interaction effects. In conclusion, the test support the idea of not interaction effects between medication and poison.
+
+
+G)	Perform a hypothesis test of the null hypothesis that the mean survival time is equal across all types of poisons.  Show the null and alternative hypotheses, the test statistic, the p-value, and state your conclusions. Use $\alpha$ = .05.  
+
+In this question is not clear if we should make a type I or type II test for the poisons, it is also no clear if we should use the results in the question F, in terms of use the model with or without interactions to test for differences in poisons. This kind of issue is very common in most of the homeworks: there is always a question in which the writer (professor or TA) assume that we should do something but it is not clear detailed in the question. Given this uncertainty, I will explain my logic to solve this question (I hope this is what you expect, and if it is not, I hope to be evaluated in the circumstances that I have used to solve the question).  In this question, I will do type II test for two reasons: 1) the interaction term is not significant in question F and 2) It seems interesting to me to test for main effect of each factor after the other main effect was included in the model. In other words, I will do an incremental F test to represent the difference in sums squares between a model with poison and medication and other model with only medication:
+
+
+$$SS(\beta | \alpha)= SS(\alpha, \beta) - SS(\alpha)$$
+
+The test hypotesis therefore is:
+
+$$H_{0}: \beta_{1}=\beta_{2}=\beta_{j}=0$$
+$$H_{A}: not \space H_{0}$$
+
+The F test is define as:
+
+$$F= \frac{\frac{SS( \alpha, \beta) - SS(\alpha)}{q}}{MSE_{full}}$$
+
+Where q are the additional parameters estimated in the model with both main effects; $MSE_{full}$ is the mean square error in the model with both main effects. In R, we can do this test as follows:
+
+```{r}
+# model without interactions
+model3_animals = aov(log_survtime~medication + poison, data=data_animals)
+Anova(model3_animals, type = 'II')
+```
+
+The p-value of the test is 0.00000000001948, thus we reject the null hypothesis that the mean survival time is equal across all types of poisons. In conclusion, in a model initially controlled by medication, there are differences in the mean survival time across the types of poisons.
+
+H)	Perform a hypothesis test of the null hypothesis that the mean survival time is equal across all medications. Show the null and alternative hypotheses, the test statistic, the p-value, and state your conclusions. Use $\alpha$ = .05.
+
+In this question, I will follow the same idea that in question G.  I will do an incremental F test to represent the difference in sums squares between a model with poison and medication and other model with only poison:
+
+$$SS(\alpha | \beta)= SS(\alpha, \beta) - SS(\beta)$$
+
+The test hypotesis therefore is:
+
+$$H_{0}: \alpha_{1}=\alpha_{2}=\alpha_{i}=0$$
+$$H_{A}: not \space H_{0}$$
+
+The F test is define as:
+
+$$F= \frac{\frac{SS( \alpha, \beta) - SS(\beta)}{q}}{MSE_{full}}$$
+
+Where q are the additional parameters estimated in the model with both main effects; $MSE_{full}$ is the mean square error in the model with both main effects. In R, we can do this test as follows:
+
+```{r}
+# we change the order in the model, first poison and then medication, it will leads to the same results since the treatments are balanced
+model4_animals = aov(log_survtime~ poison + medication, data=data_animals)
+Anova(model4_animals, type = 'II')
+```
+
+The p-value of the test is 0.0000000156, thus we reject the null hypothesis that the mean survival time is equal across all types of medications. In conclusion, in a model initially controlled by poison, there are differences in the mean survival time across the types of medications.
+
+
+I)	What medication would you recommend for each of the poisons? (Be careful; does your transformation effect the interpretation of results from the output?).
+
+The nature of this question suggests a model with interactions. Here, I will explore for the differences in the interactions of interest using the Tukey Method:
+
+```{r}
+# model with log transformation
+model5 = aov(formula = log_survtime ~ poison + medication + poison:medication, data = data_animals)
+TukeyHSD(model5)
+```
+
+Since the question ask for the medication that I would recommend for each of the poisons. Not all the differences are relevant. For instance, for poison 1, I will only be interested in the differences in survival time for animals that receive poison 1 and the different medications:
+
+- poisson 1: medication 1 (1:1)
+- poisson 1: medication 2 (1:2)
+- poisson 1: medication 3 (1:3)
+- poisson 1: medication 4 (1:4)
+
+Then, the differences of interest are:
+
+(1:2) - (1:1)
+(1:3) - (1:1)
+(1:3) - (1:2)
+(1:4) - (1:1)
+(1:4) - (2:2)
+(1:3) - (1:4)
+
+The tests for this differences are in the below table 
+
+\begin{table}[htbp]
+  \centering
+  \caption{Poison 1 vs medications}
+    \begin{tabular}{|l|r|r|}
+    \hline
+    Tests of intest & \multicolumn{1}{l|}{Difference} & \multicolumn{1}{l|}{p-value} \\
+    \hline
+    1:2 - 1:1 & 0.757678 &  0.002516 \\
+    1:3  - 1:1  & 0.302810 & 0.784909 \\
+    1:3 - 1:2 & -0.450000 & 0.236671 \\
+    1:4 - 1:1 & 0.388910 & 0.452985 \\
+    1:4 - 1:2 & -0.368768 & 0.531848 \\
+    1:4 - 1:3 & 0.086100 & 0.999993 \\
+    \hline
+    \end{tabular}
+  \label{tab:addlabel}
+\end{table}
+
+For this comparison in the table above, there is only statistical differences in (1:2) - (1:1), for the rest of these tests the differences are not statistically relevant. In other words, there is only differences in the survival time for an animal that receive poison 1 and medication 1 vs poison 1 and medication 2. Then, I we could recommend that for poison 1 animals receive medication 2.
+
+On the other hand, for animal that receive poison 2, I only interested in the possible differences for the combinations of:
+
+- poisson 2: medication 1 (2:1)
+- poisson 2: medication 2 (2:2)
+- poisson 2: medication 3 (2:3)
+- poisson 2: medication 4 (2:4)
+
+Therefore, the differences of interest are:
+(2:2) - (2:1)
+(2:3) - (2:1) 
+(2:3) - (2:2)
+(2:4) - (2:1)
+(2:4) - (2:2)
+(2:4) - (2:3)
+
+The tests for this differences are in the table below:
+
+\begin{table}[htbp]
+  \centering
+  \caption{Poison 2 vs medications}
+    \begin{tabular}{|l|r|r|}
+    \hline
+    Tests of intest & \multicolumn{1}{l|}{Difference} & \multicolumn{1}{l|}{p-value} \\
+    \hline
+    2:2 - 2:1 & 0.892394 &  0.000226 \\
+    2:3  - 2:1  & 0.171804 & 0.995266 \\
+    2:3 - 2:2 & -0.720590 & 0.004771 \\
+    2:4 - 2:1 & 0.693851 & 0.007499 \\
+    2:4 - 2:2 & -0.198543 & 0.984887 \\
+    2:4 - 2:3 & 0.522047 & 0.103540 \\
+    \hline
+    \end{tabular}
+  \label{tab:addlabel}
+\end{table}
+
+
+For the comparison table above, there are significative differences in the contrasts (2:2) - (2:1),  (2:3) - (2:2), and (2:4) - (2:1). These differences point out that for animals that receive poison 2, I would recommend medication 2.
+
+Finally,  for animals that receive poison 3, I only interested in the possible differences for the combinations of:
+
+- poisson 3: medication 1 (3:1)
+- poisson 3: medication 2 (3:2)
+- poisson 3: medication 3 (3:3)
+- poisson 3: medication 4 (3:4)
+
+Therefore, the differences of interest are:
+(3:2) - (3:1)
+(3:3) - (3:1) 
+(3:3) - (3:2)
+(3:4) - (3:1)
+(3:4) - (3:2)
+(3:4) - (3:3)
+
+The tests for this differences are in the table below:
+
+\begin{table}[htbp]
+  \centering
+  \caption{Add caption}
+    \begin{tabular}{|l|r|r|}
+    \hline
+    Tests of intest & \multicolumn{1}{l|}{Difference} & \multicolumn{1}{l|}{p-value} \\
+    \hline
+    3:2 - 3:1 & 0.463892 & 0.213678 \\
+    3:3  - 3:1  & 0.115509 & 0.999873 \\
+    3:3 - 3:2 & -0.348383 & 0.613549 \\
+    3:4 - 3:1 & 0.438445 & 0.282833 \\
+    3:4 - 3:2 & -0.025447 & 1.000000 \\
+    3:4 - 3:3 & 0.322936 & 0.712869 \\
+    \hline
+    \end{tabular}
+  \label{tab:addlabel}
+\end{table}
+
+
+For the comparison table above, there are not significate differences in any of the contrasts. This situation points out that no matter the medication, there is not differences in survival time for animals with poison 3. Therefore, none of the treatments are recommendable.
+
+\pagebreak
+
+#Question 2.
+
+An experiment was conducted to investigate the effect of four diets (1 = diet #1, 2 = diet #2, etc.) on weight gains of two breeds of cows. Twelve three-week-old cows, having the same birth date, were randomly selected from each of the two breeds. So, there were a total of 24 animals in this experiment. Three animals from each breed were randomly assigned to each of the four diets. After a period of five weeks, weight gain (pounds) was recorded for each animal. Data can be found in the file Hwk7Q2DatSp17.
+
+The herdsman wants to know: Which diets maximize the weight gain for these two breeds of cows? (Note that he needs all comparisons on mean weight gains to have a *combined* error rate of no more than 5%.
+
+Include the following parts in your answer:
+
+A) Formulation of the research question and choice of the appropriate statistical technique used to answer this question.
+
+The research question of interest here is which diet causes more weight gain in the two breeds of cows. 
+
+Since the data come from a factorial experimental design, we could use a two-way ANOVA to study the effect of each factor (diet=factor 1; and breed=factor 2) and their interactions on the weight gains.  After this, we can use the Tukey's method to identify which diet maximize the weight gains of the two breeds of cows. This method allows us to control for all pairs of means possible while we absolutely control the overall error rate.
+
+
+B) Notation for the random variable(s) and parameter(s) of interest; define these explicitly. Give the distributional assumptions for your random variable(s) and state all assumptions necessary for the statistical application you intend to use.
+
+Our statistical model of interest is a two-way ANOVA with interactions:
+
+$$y_{ijk} = \mu + \alpha_{i} + \beta_{j} + (\alpha \beta)_{ij} + \epsilon_{ijk}$$
+
+Where $y_{ijk}$  is the weight gain (in pounds) for observation k (k=1,2,..,4), with breed j (=1,2) and diet i (=1,2,..,4). $\mu$ is the grand overall mean of weight gain; $\alpha_{i}$ is the effect of the ith level of diet; $\beta_{j}$ is the effect of the jth level of breed; $(\alpha \beta)_{ij}$ is the interaction between the i level of diet and the j level of breed; and $\epsilon_{ijk}$ is an error term. 
+
+We assume that $y_{ijk} \sim ind \space N(\mu_{i} + \alpha_{i} + \beta_{j}, \sigma^{2})$, that $\epsilon_{ijk} \sim i.i.d \space N (0, \sigma_{\epsilon}^{2})$, that observations are independent between treatments, and that there are not outliers driving our conclusions.  
+
+The constraints impose on the parameters are $\sum_{i} \alpha_{i}=0$, $\sum_{j}\beta_{j}=0$, $\sum_{i}(\alpha \beta)_{ij}=0$ and $\sum_{j}(\alpha \beta)_{ij}=0$.
+
+
+C) Calculations for the analysis. For hypothesis and significance tests, formulate the null and the alternative hypotheses, calculate the value of your test statistic, and then calculate your p-value. For confidence intervals, show and apply the appropriate formula. Use $\alpha=0.05$ if not otherwise specified.
+
+Initially, we are going to load the data and make an initial analysis with an interaction plot to gain some insights about the results that we might encounter in the ANOVA:
+
+```{r}
+library(readxl)
+data_cows = read_excel("Hwk7Q2DatSp17.xlsx")
+head(data_cows)
+data_cows$Diet = as.factor(data_cows$Diet)
+data_cows$Breed= as.factor(data_cows$Breed)
+# interaction plot
+interaction.plot(data_cows$Diet, data_cows$Breed, data_cows$Weight)
+```
+
+
+The graph above might suggest that we should run an ANOVA model with main and interaction effects. The mean weight gain depends on the level of factor one (diet), the level of factor 2 (breed), and arguably the interaction between factors:  the differences in mean weight gain for the level of diet seems to depend on the level of breed, especially when we go from medication 2 to medication 3.
+
+Thus, the two-way ANOVA with interactions is: 
+
+```{r}
+model1_cows = aov(Weight~Diet + Breed + Diet:Breed, data=data_cows)
+Anova(model1_cows, type = 'III')
+```
+
+The results depicted by the F incremental tests (using sequential sum of squares) show that the main effects and the interaction effects are significant (p value < 0.05 for all F tests). Therefore, the mean weight gains are affected by the diet, the breed, and the interaction between diet and breed. These tests follow the same idea of those described in question 1.F (for the interaction) and 1.G (for the main effects), obviously adjusting the factors to those in our question of interest. 
+
+On the other hand, the interaction plot presented before might suggest that for each breed, the diet that maximizes the weight gains is the diet 3. Let´s see whether a formal analysis with the Tukey method supports this graphical deduction. The general idea here is to test for all possible differences and then use the differences that we think are related to the research question to reach a conclusion.
+
+
+```{r}
+TukeyHSD(model1_cows)
+```
+
+Specifically, I will only be interested in the differences in weight gain for cows of breed 1 that receive the different diets; and, for cows of breed 2 that receive the different diets. For instance, for the former case we are interested in:
+
+- diet 1: breed 1 (1:1)
+- diet 2: breed 1 (2:1)
+- diet 3: breed 1 (3:1)
+- diet 4: breed 1 (4:1)
+
+and the possible combinations of mean differences, e.g.:
+
+(2:1) - (1:1)
+(3:1) - (1:1)
+(4:1) - (1:1)
+(3:1) - (2:1)
+(4:1) - (2:1)
+(4:1) - (3:1)
+
+The tests for this differences are presented in the table below:
+
+\begin{table}[htbp]
+  \centering
+  \caption{Breed 1 vs diets}
+    \begin{tabular}{|l|r|r|}
+    \hline
+    Tests of interest & \multicolumn{1}{l|}{Difference} & \multicolumn{1}{l|}{p-value} \\
+    \hline
+    2:1 - 1:1 & -4.000000 & 0.023675 \\
+    3:1  - 1:1  & 7.733333 & 0.000030 \\
+    4:1 - 1:1 & -0.500000 & 0.999601 \\
+    3:1 - 2:1 & 11.733333 & 0.000000 \\
+    4:1 - 2:1 & 3.500000 & 0.059025 \\
+    4:1 - 3:1 & -8.233333 & 0.000014 \\
+\hline
+    \end{tabular}
+  \label{tab:addlabel}
+\end{table}
+
+As we can observe, the mean weight gain for breed 1 that receives diet 3 is always higher and statistically significant when is compared with all other diets. Therefore, the diet that maximize the weight gains for breed 1 is the diet 3.
+
+On the other hand, for breed 2, we are interested in the means for 
+
+- diet 1: breed 2 (1:2)
+- diet 2: breed 2 (2:2)
+- diet 3: breed 2 (3:2)
+- diet 4: breed 2 (4:2)
+
+and the possible combinations of differences, e.g.:
+
+(2:2) - (1:2)
+(3:2) - (1:2)
+(4:2) - (1:2)
+(3:2) - (2:2)
+(4:2) - (2:2)
+(4:2) - (3:2)
+
+The tests for this differences are presented in the table below:
+
+% Table generated by Excel2LaTeX from sheet 'Sheet2'
+\begin{table}[htbp]
+  \centering
+  \caption{Breed 2 vs diets}
+    \begin{tabular}{|l|r|r|}
+    Tests of interest & \multicolumn{1}{l|}{Difference} & \multicolumn{1}{l|}{p-value} \\
+    2:2 - 1:2 & -3.833333 & 0.032224 \\
+    3:2 - 1:2 & 3.033333 & 0.132137 \\
+    4:2 - 1:2 & -4.233333 & 0.015317 \\
+    3:2 - 2:2 & 6.866667 & 0.000127 \\
+    4:2 - 2:2 & -0.400000 & 0.999909 \\
+    4:2 - 3:2 & -7.266667 & 0.000065 \\
+    \end{tabular}
+  \label{tab:addlabel}
+\end{table}
+
+
+As we can observe, the mean weight gain for breed 2 that receives diet 1 is higher and significant when is compared with diets 2 or 4. Also, the mean weight for breed 2 that receives diet 3 is higher when is compared with diets 2 or 4. However, there is not statistical difference in the weight gain when we compared a cow of breed 2 that receives diet 2 with a cow of the breed 2 that receives diet 3. Therefore, the results suggest that for breed 2, either one the two diets (1 or 3) will maximize the weight gains in cows.
+
+D) Discuss whether the assumptions stated in Part B) above are met sufficiently for the validity of the statistical inferences; use graphs and other tools where applicable.
+
+- The assumption of independence is guarantee given the statistical design.
+
+- The normality assumption could be checked with a q-q plot of the residuals as follows:
+
+
+```{r}
+library(car)
+data_cows$stdres=rstandard(model1_cows)
+qqPlot(data_cows$stdres)
+```
+
+The assumption of normality is feasible. 
+
+
+- The assumption of equal variance could be checked with a plot of the residuals vs the fitted values as follows:
+
+```{r}
+plot(model1_cows$fitted.values, data_cows$stdres, ylab="Standarized residuals", xlab="Predicted values", abline(0,0))
+```
+
+The assumpation of equal variance seems reasonable. 
+
+
+- To check whether there are outliers driving conclusions, we can make a cook`s distance plot:
+
+```{r}
+plot(model1_cows, which=4)
+```
+
+
+All the observations have a cook`s distance value inferior to 0.3, then we can say that the outliers are not driving our conclusions. 
+
+
+E) Discuss the sampling scheme and whether or not it is sufficient to meet the objective of the study. Be sure to include whether or not subjective inference is necessary and if so, defend whether or not you believe it is valid.
+
+The experimental factorial design seems to be enough to meet the objective of the study. With this design, we guarantee that the observations are independent between the two breeds, and therefore we can make inference about which diet maximize the weight gains of cows for each breed.
+
+F) State the conclusions of the analysis. These should be practical conclusions from the context of the problem, but should also be backed up with statistical criteria (like a p-value, etc.). Include any considerations such as limitations of the sampling scheme, impact of outliers, etc., that you feel must be considered when you state your conclusions.
+
+The results point out that the correct model to make inference is a two-way ANOVA with interaction effects. In this model, the F incremental test tell us that the main and interaction effects are significant (using sequential sum of squares). Regarding the research question of interest, we use the Tukey method to make all the simultaneous test possible, and then we use the comparisons of interest to determine which diet maximize the weight gains for each breed. We conclude that the diet that maximize the weight gains for breed 1 is the diet 3 and for breed 2, either of the two diets (1 or 3) will maximize the weight gains. These results are in line with what we can observe in the interaction plot. Finally, the model used seem to meet all the assumptions required for correct inference.
+

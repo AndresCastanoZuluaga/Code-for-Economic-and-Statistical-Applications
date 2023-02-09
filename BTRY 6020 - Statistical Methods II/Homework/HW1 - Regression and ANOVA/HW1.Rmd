@@ -1,0 +1,43 @@
+---
+title: "Results Homework 1"
+author: "Andres Castano"
+date: "2/4/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## Question a, read and plot the relantionship between y = digested amount of detergent-solubles (grams) from 300 grams of feed, and  x = percent of detergent-solubles in that feed.
+
+```{r}
+HW1data <- read.csv("HW1.csv")
+names(HW1data)
+sd(HW1data$x)
+varx=sd(HW1data$x)^2
+plot(HW1data$x, HW1data$y)
+```
+
+## Regression results:
+```{r}
+hw1.lm = lm(y~x, data=HW1data)
+summary(hw1.lm)
+anova(hw1.lm)
+plot(hw1.lm$fitted.values, hw1.lm$residuals)  
+``` 
+```{r}
+hw1.lm = lm(y~x, data=HW1data)
+plot(hw1.lm$fitted.values, hw1.lm$residuals)  
+t=11.046
+pt(t, 4, lower.tail = FALSE)
+``` 
+```{r}
+predict(hw1.lm, newdata = list(x = 48), interval = "confidence")
+qt(0.025, 4)
+qt(0.025, 4)
+qt(0.975, 4)
+qnorm(0.025, mean = 0, sd = 1, lower.tail = TRUE, log.p = FALSE)
+```
+

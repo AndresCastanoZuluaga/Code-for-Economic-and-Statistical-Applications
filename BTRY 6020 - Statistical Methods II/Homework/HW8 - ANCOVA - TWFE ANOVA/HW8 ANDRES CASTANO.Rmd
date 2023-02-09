@@ -1,0 +1,270 @@
+---
+title: "BTRY 6020 Homework VIII"
+output:
+  pdf_document: default
+  html_document:
+    highlight: pygments
+    theme: cerulean
+  word_document: default
+---
+-----
+
+
+#NAME: ANDRES CASTANO
+#NETID: AC986
+#**DUE DATE: May 10, by 8:40 am**  
+
+-----
+
+# Question 1.
+A study was conducted to investigate the effect of fertilization on the yield of a commercial variety of tomato. In this study, a completely randomized design was used as the experimental plot was  homogeneous both in humidity and nutrient content. The treatments of interest in this study consisted of a control (E=no fertilizer used), very slow release (A), a slow release fertilizer (B), a moderate release fertilizer (C) and a fast release fertilizer (D). These treatment levels were each assigned at random to 20 plots with 15 plants per plot. 
+Prior to planting, the researchers noticed big differences in plant heights. There was no record of when the seeds were planted, so nobody knew if the plants were the same age or not. They therefore decided to record information on mean plant height on each plot. The response variable of interest was the total weight of tomatoes harvested per plot. Data for this study can be downloaded from the course web site. The file name is Hwk8Q1DatSp17. 
+
+Answer the following questions.
+
+A) 	Give a model for the analysis of covariance, explain each term in the model and formulate appropriate assumptions.
+
+Here we could define a ANCOVA model with or without interaction. I will define it as an interaction model: 
+
+$$y_{ij} = \mu + \alpha_{j} + \beta(X_{ij}-\bar X) +  \delta_{j}(X_{ij} - \bar X) + \epsilon_{ij}$$
+
+Where $y_{ij}$  is  total weight of tomatoes in  plot  i  with treatment j. $\mu$ is the grand overall mean of the response variable; $\alpha_{j}$ is the effect of the jth level of treatment; $\beta$ is the main effect slope of mean plant height;  $\delta_{j}$ is the interaction between treatment and mean plant height; and $\epsilon_{ij}$ is an error term. We assume that $y_{ij} \sim ind \space N(\mu_{ij}, \sigma^{2})$ and that $\epsilon_{ij} \sim i.i.d \space N (0, \sigma_{\epsilon}^{2})$. The mean for mean plant height is computed over all the data. 
+
+The constraints impose on the parameters are $\sum_{j} \alpha_{j}=0$ and $\sum_{j}(\delta_{j})=0$.
+
+
+B)	Plot the response variable weight against the covariate height using levels of the treatments as different plotting symbols. What relationship is there between these two variables? 
+
+```{r}
+library(readxl)
+data_tomatoes = read_excel("Hwk8Q1DatSp17.xlsx")
+head(data_tomatoes)
+data_tomatoes$Treatment = as.factor(data_tomatoes$Treatment)
+# coded scatterplot
+firesymbols = c()
+firecolors = c()
+for (i in 1:(dim(data_tomatoes)[1])) {
+#check if there is a fireplace, symbol 2 corresponds to triangles
+if (data_tomatoes$Treatment[i] == "E") {
+firesymbols[i] = 0
+firecolors[i] = 'blue'
+}
+if (data_tomatoes$Treatment[i] == "A") {
+firesymbols[i] = 1
+firecolors[i] = 'red'
+}
+if (data_tomatoes$Treatment[i] == "B") {
+firesymbols[i] = 2
+firecolors[i] = 'green'
+}
+if (data_tomatoes$Treatment[i] == "C") {
+firesymbols[i] = 5
+firecolors[i] = 'orange'
+}
+if (data_tomatoes$Treatment[i] == "D") {
+firesymbols[i] = 4
+firecolors[i] = 'yellow'
+}  
+}
+plot(data_tomatoes$Height, data_tomatoes$Weight, pch = firesymbols, col = firecolors,
+xlab = "Mean tomatoes height", ylab = "total weight of tomatoes",
+main = "tomatoes weight-height relationship")
+legend("topleft", legend = c("Control", "Very slow", "Slow", "Moderate", "Fast"),  pch = c(0,1,2,5,4), col = c('blue', 'red', 'green', 'orange', 'yellow'))
+```
+
+- There is a positive linear relationship between weight and height of the tomatoes.
+
+- All the lines seem to be parallel for the different treatments. Even for all the treatments except very slow, the lines may be one above the other. This might suggest two things: 1) that the interaction between treatment and height is not relevant, and 2) that there are only differences between the other treatments (control, slow, moderate, and fast) vs Very Slow.
+
+
+C)	Based on ordinary one-way ANOVA perform a significance test for the equality of the five treatment means. State hypotheses, test statistic, p-value, and your conclusions.
+
+The null hypothesis here is:
+
+$$H_{0}: \alpha_{1}=\alpha_{2}=\alpha_{3}=\alpha_{4}=\alpha_{5}=0$$
+The alternative hypotesis is: 
+
+$$H_{A}: Not \space H_{0}$$
+
+The test statistic is defined as: 
+
+$$F= \frac{MSB}{MSE}$$
+Where $MSB$ is the mean square between treatments and $MSE$ is the mean square error. The p-value is $P(F_{4,95} > \frac{MSB}{MSE})$ In our case the F statistic is 1.3708.
+
+```{r}
+model1 = lm(Weight~Treatment, data=data_tomatoes)
+anova(model1)
+```
+
+The p-value is 0.2499, Thus the p-value>0.05 (0.2499>0.05) and we dot not reject the null hypothesis. Therefore, there is not differences in the total weight between the different treatments. 
+
+
+D)	Determine if the interaction between treatment and initial plant height is significant.  State hypotheses, test statistic, p-value, and your conclusions.
+
+
+Here, the null hypothesis is (using the notation defined in part A):
+
+
+$$H_{0}: all \space \delta_{j}=0$$
+$$H_{A}: Not \space H_{0}$$
+
+The test statistic is: 
+
+$$F= \frac{\frac{SS( \alpha, \beta, \delta) - SS(\alpha, \beta)}{q}}{MSE_{full}}$$
+
+Where $SS( \alpha, \beta, \delta)$ is the sum of squares of the model with all main effects and interactions; and $SS(\alpha, \beta)$ is the model with only main effects (treatments and slope), q are the additional parameters estimated in the model with interactions; $MSE_{full}$ is the mean square error in the model with interactions and main effects. 
+
+
+```{r}
+model2 = lm(Weight~ Treatment*Height, data=data_tomatoes)
+anova(model2)
+```
+
+The p value of the test is 0.4717, then $p-value>0.05$. Therefore, we do not reject the null hypothesis of not interaction effects. In conclusion, the test support the idea of not interaction effects between treatments and height.
+
+E)	Regardless of your answer to Part D above, perform analysis of covariance and make and summarize your results.
+
+here is not clear if we need to make the ANCOVA with or without interactions. I will do it including the interactions:
+
+```{r}
+summary(model2)
+anova(model2)
+```
+
+The results of the ANCOVA shows:
+
+- There are differences in the in the mean weight between treatments.
+- There is a positive and significate effect of the mean plant height on the tomatoes weight.
+- The slope of height is not different among treatments.
+
+
+F)	Based on the model in Part A, make use of standardized  residual plots to assess validity of the assumptions of independence, equal variance, and normality.
+
+- The assumption of independence seems reasonable given the experimental design.
+
+- The normality assumption could be checked with a q-q plot of the residuals as follows:
+
+```{r}
+library(car)
+data_tomatoes$stdres=rstandard(model2)
+qqPlot(data_tomatoes$stdres)
+```
+
+The assumpation of normality holds.
+
+
+- The assumption of equal variance could be checked with a plot of the residuals vs the fitted values as follows:
+
+```{r}
+plot(model2$fitted.values, data_tomatoes$stdres, ylab="Standarized residuals", xlab="Predicted values", abline(0,0))
+```
+
+The assumpation of equal variance seems reasonable. 
+
+
+G)	What multiple comparison method that we've used would be more appropriate to compare each treatment to the control treatment? Use such a method at an overall error rate ??? = 0.05 and state carefully your conclusions.
+
+Since we are interested in compare each treatment to the control treatment keeping an overall error rate of 0.05, the Dunnett's multiple comparison method is reasonable.
+
+
+```{r}
+library(multcomp)
+model3 = aov(Weight~ Treatment*Height, data=data_tomatoes)
+factors=table(data_tomatoes$Treatment)
+#cont = contrMat(factors, base=5) # this function help us to establish treatment E as the control group 
+cont = contrMat(factors, type=c("Dunnett"), base=5) # this function help us to establish treatment E as the control group 
+summary(glht(model3, linfct = mcp(Treatment=cont)))
+```
+
+The results suggest that there is only difference between the control and treatment A (very slow release). This result is supported by the graphical evidence that we have shown in part B: the mean weight for treatment A is greater than for the control. There is not differences in the mean weight for the other treatments vs the control.  
+
+
+\pagebreak
+
+#Question 2.
+
+A field trial is run to test the productivity of three different varieties of strawberries in an experimental field station in New York State. Four equally sized fields are available for use, and one-third of each field is planted in one variety of strawberry, the density of plants kept the same throughout the trial. Each 1/3 field is then randomly assigned one of the three varieties in such a way that each field has all three varieties planted within it. The Yield of strawberries (kg) over a two week period is then recorded for each 1/3 field.
+
+A) Give a model statement for this experiment. Define each term and any constraints or conditions that are attached to it.
+
+
+I consider that there is no reason to consider a random effects model is this experiment. The study seems to be interested in the three varieties of strawberries and the blocks are not chosen randomly but just for convenience (availability). Therefore, the model for this experiment is just a two-way fixed effects ANOVA:
+
+
+$$y_{ij} = \mu + \alpha_{i} + \beta_{j}  + \epsilon_{ij}$$
+
+Where $y_{ij}$  is  the response for observation with treatments i (var=A,B,..,C) in block j (block=1,2,3,..,4). In our case $y_{ij}$ is the Yield of strawberries (kg) over a two week period for observation in treatments i and block j. $\mu$ is the grand overall mean of the response variable; $\alpha_{i}$ is the effect of the ith variety of strawberry; $\beta_{j}$ is the effect of the jth block; and $\epsilon_{ij}$ is an error term. We also assume that $y_{ij} \sim ind \space N(\mu_{ij}, \sigma^{2})$ and that $\epsilon_{ij} \sim i.i.d \space N (0, \sigma_{\epsilon}^{2})$. The constraints impose on the parameters are $\sum_{i} \alpha_{i}=0$ and $\sum_{j}\beta_{j}=0$.
+
+B) Test to see if there are any differences between the yields of the various strawberries. State hypotheses, test statistic, p-value, and conclusions.
+
+```{r}
+library(readxl)
+data_berries = read_excel("Hwk8Q2DatSp17.xlsx")
+head(data_berries)
+data_berries$Var = as.factor(data_berries$Var)
+data_berries$Blk = as.factor(data_berries$Blk)
+```
+
+The null hypothesis here is:
+
+$$H_{0}: \alpha_{1}=\alpha_{2}=\alpha_{3}=0$$
+
+The alternative hypotesis is: 
+
+$$H_{A}: Not \space H_{0}$$
+
+The test statistic is defined as: 
+
+$$F= \frac{MSB}{MSE}=58.1875$$
+Where $MSB$ is the mean square between treatments (variety of strawberries) and $MSE$ is the mean square error. The p-value is $P(F_{2,8} > 58.1875)$. We get the value of the test in R as follows:
+
+
+```{r}
+model1_berries = aov(Yield~ Var + Blk, data=data_berries)
+anova(model1_berries)
+```
+
+The p-value is 0.00001712, Thus the p-value<0.05 (0.00001712>0.05) and we do reject the null hypothesis. Therefore, there are differences in the yield between the different strawberries. 
+
+C) Use Tukey's HSD to find the varieties of strawberries which produce different yields. Whiuch would you recommend to be used in New York State (based solely on this yield criteria). 
+
+
+```{r}
+TukeyHSD(model1_berries)
+```
+
+As we can see, all the differences calculated are significant at 0.05 of significance level. This result means that all the varieties produce different mean yields. However, we are interested in the one that produce the higher yield; based on the comparisons we can see that the strawberry to be recommended to be used in New York is the variety A because compared with either variety B or C produce a higher yield.  
+
+
+D) What are the the values of the two compnents of variance in this study? What proportion of the variance of yield is attributable to the differences in fields? 
+
+In this question, you assume that I have define a model in part A with some of the factors being random. Well, I did not define neither factor to be random and I have given my reasoning to do it. However, since in this question you are looking for another source of variability (field), I will run an ANOVA treating field as a random effect.  This means that we have two component of variance: $\sigma_{\epsilon}^{2}$ and $\sigma_{blocks}^{2}$. 
+
+```{r}
+library('lme4')
+model2_berries= lmer(Yield~ Var + (1|Blk), data=data_berries, REML=F)
+summary(model2_berries)
+```
+
+The variance for the error $\sigma_{\epsilon}^{2}=0.09063$ and the variance due to blocks $\sigma_{blocks}^{2}=0.11333$. Therefore, the proportion of variance in yield due to blocks is:
+
+$$\%Var_{blocks}= \frac{\sigma_{blocks}^{2}}{\sigma_{blocks}^{2} + \sigma_{\epsilon}^{2}}= \frac{0.11333}{0.20396}=0.5556 \approx 55\% $$
+
+E) Use library(lme4) and library(LmerTest) to test to see if the random effects are statistically significant in this model. (Note: There is some debate amongst statisticians that this procedure is appropriate when using REML. Some say it is OK to use REML with this test IF THE FIXED EFFECTS ARE THE SAME IN BOTH THE FULL AND REDUCED MODELS, which how it is stated in our text.)
+
+
+```{r}
+library(nlme)
+modelA = lme(Yield~ Var, random=~1|Blk, data=data_berries, method="ML")
+modelB = gls(Yield~ Var, data=data_berries, method = "ML")   
+anova(modelB,modelA)
+```
+
+The results show that at 0.05 of significance level, we do not reject the null hypothesis ($H_{0}: \sigma_{blocks}^{2}=0$). p-value>0.05 (0.0614>0.05). Therefore, the random effect of block is not significant. This result is surprising given the proportion of variability due to blocks (part E).
+
+
+F) State which of our observations are correlated in this situation.
+
+Since the random effect of blocks is not significant, we have evidence to say that strawberries with the same block for the random predictor will not be correlated.
+
+

@@ -1,0 +1,65 @@
+---
+title: "BTRY 6020 Homework IV"
+output:
+  pdf_document: default
+  html_document:
+    highlight: pygments
+    theme: cerulean
+  word_document: default
+---
+-----
+
+
+#NAME: student name
+#NETID: student NetID
+#**DUE DATE: March 13 2017, by 8:40 am**  
+
+-----
+
+#Question 1. 
+In an experiment with a newly developed insecticide, 1500 experimental insects were divided at random into six groups of 250 each. Each insect in a given group was exposed to a certain dose of the insecticide. A day later, the number of insects out of 250 that had died was recorded. Data appear in Hwk4Q1DatSp17. (Note this "grouped" data is in the format of CocaineTreatment2 of Lab 5, and must be handled accordingly)
+
+A)	For each dose level, calculate the proportion of insects that were killed within one day. Plot these proportions against the ln(dose) given in the data. Does a logistic model appear to fit the data?
+
+B)	Find the maximum likelihood estimates for $\beta_o$ and $\beta_1$. State the fitted response function.
+
+C)	Obtain and interpret a 90% confidence interval for $exp(\beta_1)$. 
+
+D)	Insects are exposed to a ln(dose) level of 3.5. What is the probability each will die? (Use an appropriate inferential procedure; sample R code: predict(GLMName, newdata, type="response", se.fit=T)).
+
+E)	Give a point estimate for the median lethal dose (what entymologists refer to as the LD50)-the dose at which 50% of the insects are expected to die.
+
+
+
+
+
+
+
+
+
+
+
+\vspace{6cm}
+
+
+
+
+#Question 2 appears on following page.
+\pagebreak
+
+#Question 2. 
+A psychologist conducted a study to determine if emotional stability is related to an employee's ability to complete a difficult and often frustrating task. Emotional stability was measured by the score on a written test commonly used to measure this. A random sample of 27 employees were selected from a single company that was willing to participate in the study. Data appears in Hwk4Q3DatSp17.
+
+Does the likelihood of being able to do this task increase with emotional stability?
+
+A)	Formulation of the research question and choice of the appropriate statistical technique used to answer this question. 
+
+B)	Notation for the random variable(s) and parameter(s) of interest; define these explicitly. Give the distributional assumptions for your random variable(s) and state all assumptions necessary for the statistical application you intend to use.
+
+C)	Calculations for the analysis. For hypothesis and significance tests, formulate the null and the alternative hypotheses, calculate the value of your test statistic, and then calculate your p-value. For confidence intervals, show and apply the appropriate formula. Use $\alpha$ = .05 if not otherwise specified.
+
+D)	Discuss whether the assumptions stated in Part B above are met sufficiently for the validity of the statistical inferences; use graphs and other tools where applicable.
+
+E)	Discuss the sampling scheme and whether or not it is sufficient to meet the objective of the study. Be sure to include whether or not subjective inference is necessary and if so, defend whether or not you believe it is valid.
+
+F)	State the conclusions of the analysis. These should be practical conclusions from the context of the problem, but should also be backed up with statistical criteria (like a p-value, etc.). Include any considerations such as limitations of the sampling scheme, impact of outliers, etc., that you feel must be considered when you state your conclusions.

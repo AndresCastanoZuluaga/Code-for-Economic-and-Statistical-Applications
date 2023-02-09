@@ -1,0 +1,196 @@
+---
+title: "BTRY 6020 Homework VII"
+output:
+  pdf_document: default
+  html_document:
+    highlight: pygments
+    theme: cerulean
+  word_document: default
+---
+-----
+
+
+#NAME: student name
+#NETID: student NetID
+#**DUE DATE: May 1, 2017, by 8:40 am**  
+
+-----
+
+##Question 1.
+
+A study was designed to investigate the effects of certain toxic agents. Four medications (hypothesized poison antidotes) and 3 poisons were used in a completely randomized factorial experiment consisting of 12 treatment combinations (each poison with each antidote). The design was balanced with 4 animals randomly assigned to each of the 12 treatments. The two factors were fixed in this study as they were the only ones about which statistical inference was needed. For each animal, the survival time (in hours) was recorded following administration of the treatment combination. Data appears in file Hwk7Q1DatSp17.
+
+A)	What is the experimental unit in this experiment? 
+
+```{r}
+library(readxl)
+Q1Dat <- read_excel("~/BTRY6020Sp17/Homework/Hwk7/Hwk7Q1DatSp17.xlsx")
+Q1Dat$Surv=Q1Dat$survtime
+Q1Dat$Med=as.factor(Q1Dat$medication)
+Q1Dat$Pois=as.factor(Q1Dat$poison)
+
+```
+In this case, the animals were the experimental units-they were randomly assigned the treatments (Poison-medication combinationss)
+
+B)	Give the general linear model for this analysis and define each term. What constraints are imposed upon this model for the analysis?
+
+$Y_{ijk}$ $\sim N(\mu + \alpha_i + \beta_j + (\alpha \beta)_{ij}, \sigma^2)$, so
+
+$Y_{ijk} = \mu + \alpha_i + \beta_j + (\alpha \beta)_{ij} + \epsilon_{ijk}$, where
+
+$Y_{ijk}$ = kth observation at level j of factor B and level i of factor A.
+
+$\alpha_i$ = effect of ith level of factor A
+
+$\beta_j$ = effect of jth level of factor B
+
+$(\alpha\beta)_{ij}$ = interaction effect at being at the ith level of factor A and jth level of factor B
+
+$\epsilon_{ijk}$ = error term of the kth observation at the jth level of factor B and the ith level of factor A.
+
+C) 	Without any data transformation, analyze the data and report the ANOVA table for the fixed effects model. 
+
+```{r}
+Q1Unt <- aov(Surv ~ Pois * Med, data=Q1Dat)
+anova(Q1Unt)
+plot(Q1Unt$fitted.values, rstandard(Q1Unt))
+abline(h = 0)
+library(car)
+qqPlot(rstandard(Q1Unt))
+```
+
+
+D)	Make a plot of standardized residuals against predicted values and assess the validity of the equal variance assumption. Is the assumption of equal variance satisfied? If this assumption is not satisfied, make an appropriate transformation. Which transformation stabilizes the variance of residuals (append your plot)?
+
+```{r}
+Q1Dat$InvSurv=(1/Q1Dat$Surv)
+Q1Tran <- aov(InvSurv ~ Pois * Med, data=Q1Dat)
+anova(Q1Tran)
+plot(Q1Tran$fitted.values, rstandard(Q1Tran))
+abline(h = 0)
+library(car)
+qqPlot(rstandard(Q1Tran))
+
+```
+
+The residual plot using the transformed data shows approximate equal variance, and so this assumption is satisfied. In this case we used the inverse transformation, $y^t$=1/y = 1/survTime. Also, the normality of residuals is attained with this transformation.
+
+Answer questions (E) through (H) based on the transformed data from (D):
+
+E) Make an interaction plot on your transformed data. What does this tell you, and why (be brief). 
+
+```{r}
+interaction.plot(Q1Dat$Med,trace.factor=Q1Dat$Pois, response=Q1Dat$InvSurv)
+
+```
+
+From the interaction plot, we see that both factors seem to have an effect, since the curves bounce up and down and are widely separated.However, they are approximately parallel, indicating interactions may be unimportant.
+
+F)	Perform a hypothesis test of the null hypothesis that the interaction between the two factors is not significant. Show the null and alternative hypotheses, the test statistic, the p-value, and state your conclusions. Use $\alpha$ = .05.
+
+Here we test 
+$$H_o: (\alpha\beta)_{ij} = 0 \ for \ all \ i,j \ vs \ H_a: Not \ H_o)$$
+TS = MS(Pois:Med)/(MSE) = 1.0904; P = P($F_{6,36}$ > 1.0904) = .387, so fail to reject $H_o$ at any reasonable alpha level, and conclude we have no evidence to say the interactions are not 0.
+
+G)	Perform a hypothesis test of the null hypothesis that the mean survival time is equal across all types of poisons.  Show the null and alternative hypotheses, the test statistic, the p-value, and state your conclusions. Use $\alpha$ = .05. 
+
+Here we test: 
+$$H_o: \alpha_{i} = 0 \ for \ all \ i, \ vs \ H_a: Not \ H_o)$$
+TS = MS(Pois)/(MSE) = 72.63; P = P($F_{2,36}$ > 72.63) = 2.31 x $10^-13$, so reject $H_o$ at any reasonable alpha level, and conclude that the different poisons have an effect on the different survival times.
+
+H)	Perform a hypothesis test of the null hypothesis that the mean survival time is equal across all medications. Show the null and alternative hypotheses, the test statistic, the p-value, and state your conclusions. Use $\alpha$ = .05.
+
+Here we test: 
+$$H_o: \beta_{j} = 0 \ for \ all \ j, \ vs \ H_a: Not \ H_o)$$
+TS = MS(Med)/(MSE) = 28.34; P = P($F_{3,36}$ > 28.34) = 1.38 x$10^-9$, so reject $H_o$ at any reasonable alpha level, and conclude that the different medications have an effect on the different survival times.
+
+I)	What medication would you recommend for each of the poisons? (Be careful; does your transformation effect the interpretation of results from the output?)
+
+```{r}
+TukeyHSD(Q1Tran, "Med")
+```
+
+Since taking the inverse of numbers, as we did in this transformation, changes the ordering, we look for the Med that produces the least InvSurv. From Tukey's table, we see that no medication is smaller than all the rest. We'll have to look at them individually for each poison.
+
+```{r}
+TukeyHSD(Q1Tran)
+```
+
+Examining all the combinations, we can conclude that for poison 1, medications 2, 3, or 4 could be best; for poison 2, medications 2 or 4 could be best, and for poison 3, medications 2 or 4 could be best. In each case, medications 2 or 4 could be best, so to find the best all-around medication, more data need to be collected to see if medication 2 or 4 is overall the best.
+\pagebreak
+
+#Question 2.
+
+An experiment was conducted to investigate the effect of four diets (1 = diet #1, 2 = diet #2, etc.) on weight gains of two breeds of cows. Twelve three-week-old cows, having the same birth date, were randomly selected from each of the two breeds. So, there were a total of 24 animals in this experiment. Three animals from each breed were randomly assigned to each of the four diets. After a period of five weeks, weight gain (pounds) was recorded for each animal. Data can be found in the file Hwk7Q2DatSp17.
+
+The herdsman wants to know: Which diets maximize the weight gain for these two breeds of cows? (Note that he needs all comparisons on mean weight gains to have a *combined* error rate of no more than 5%.
+
+Include the following parts in your answer:
+
+A) Formulation of the research question and choice of the appropriate statistical technique used to answer this question.
+
+Here we want to answer the question: Which diet produces maximum weight gain for each breed of cow? We will use a twoway ANOVA using Diet and Breed as factors, and use Tukey's multiple comparison method for finding the best diet for each breed.
+
+
+B) Notation for the random variable(s) and parameter(s) of interest; define these explicitly. Give the distributional assumptions for your random variable(s) and state all assumptions necessary for the statistical application you intend to use.
+
+$Y_{ijk}$ $\sim N(\mu + \alpha_i + \beta_j + (\alpha \beta)_{ij}, \sigma^2)$, so
+$Y_{ijk} = \mu + \alpha_i + \beta_j + (\alpha \beta)_{ij} + \epsilon_{ijk}$, where
+
+$Y_{ijk}$ = kth observation at level j of Breed and level i of Diet.
+$\alpha_i$ = effect of ith level of Diet
+$\beta_j$ = effect of jth level of Breed
+$(\alpha\beta)_{ij}$ = interaction effect at being at the ith level of Diet and jth level of Breed
+$\epsilon_{ijk}$ = error term of the kth observation at the jth level of factor B and the ith level of factor A.
+
+Constraints: $\sum_i \alpha_i = 0$, $\sum_j \beta_j = 0$, $\sum_i (\alpha\beta_{ij}) = 0$, $\sum_j (\alpha\beta_{ij}) = 0$
+Distribution of errors: $\epsilon_{ijk}\sim N\:(0\:, \sigma^2)$
+
+Additionally, observations must be independent, and outliers can't be driving our conclusions.
+
+C) Calculations for the analysis. For hypothesis and significance tests, formulate the null and the alternative hypotheses, calculate the value of your test statistic, and then calculate your p-value. For confidence intervals, show and apply the appropriate formula. Use $\alpha=0.05$ if not otherwise specified.
+
+```{r}
+library(readxl)
+Q2Dat <- read_excel("~/BTRY6020Sp17/Homework/Hwk7/Hwk7Q2DatSp17.xlsx")
+Diet.f <- as.factor(Q2Dat$Diet)
+Breed.f <- as.factor(Q2Dat$Breed)
+Cow1 <- aov(Weight ~ Breed.f * Diet.f, data=Q2Dat)
+anova(Cow1)
+```
+We see from the ANOVA table above that there exists a significant Breed-Diet interaction, so we must determine the optimal Diet for each Breed.
+
+```{r}
+TukeyHSD(Cow1)
+```
+From Tukey's output, we see that for Breed 1, Diet 3 produces greater weight gain over all other three diests.
+
+For Breed 2, it's  not so straight forward> Both Diets 1 and 3 are better than either 2 or 4, but there is no significant difference between Diets 1 and 3. Therefore, the best diet for Breed 2 could be either Diet 1 or Diet 3.
+
+D) Discuss whether the assumptions stated in Part B) above are met sufficiently for the validity of the statistical inferences; use graphs and other tools where applicable.
+
+The independence assumption is met by the random selection of cows and randomized assignment of cows to diets.
+
+```{r}
+plot(Cow1$fitted.values, rstandard(Cow1))
+abline(h = 0)
+```
+The constant variance assumption is met, from the residual plot, though there is some slight indication that variance increases as weight increases. However, this view is not pronounced and is based solely on a few data points, so this assumption is not violated.
+
+```{r}
+library(car)
+qqPlot(rstandard(Cow1))
+```
+The normality assumption is met as none of the points in our qqPlot deviate outside the 95% confidence bounds.
+
+Also, there are no outliers driving our conclusions, as none are apparent in either plot.
+
+E) Discuss the sampling scheme and whether or not it is sufficient to meet the objective of the study. Be sure to include whether or not subjective inference is necessary and if so, defend whether or not you believe it is valid.
+
+With the random selection of cows, and the random assignment of cows to diets, the sampling scheme here is sufficient. However, with only 3 animals from each breed assigned to each diet, power may be low, and with increasing sample size we may have been able to find a truly optimal diet for Breed 2 from the two diets we determined could be the best.
+
+F) State the conclusions of the analysis. These should be practical conclusions from the context of the problem, but should also be backed up with statistical criteria (like a p-value, etc.). Include any considerations such as limitations of the sampling scheme, impact of outliers, etc., that you feel must be considered when you state your conclusions.
+
+A two factor factorial experiment, with a completely randomized design, was done to determine which of four diets produced the greatest weight gain in two breeds of cows. We determined that for Breed 1, Diet 3 produced greater weight gains than all the other diets. However, for Breed 2, we could only determine that Diets 1 and 3 were better than Diets 2 and 4. We could not determine if Diet 1 or Diet 3 produced better weight gains for Breed 2, with only 3 animals per diet. We recommend that the experiment be redone with Breed 2 only and Diets 1 and 3 only, with more animals per diet, so as to be able to detect which of these two diets is optimal.
+
+However, there were no other issues with this experiment, and the conclusions we have drawn are sound.

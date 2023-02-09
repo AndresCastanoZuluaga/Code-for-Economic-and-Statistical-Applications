@@ -1,0 +1,83 @@
+---
+title: "BTRY 6020 Homework VI"
+output:  pdf_document 
+---
+
+
+
+#NAME: student name
+#NETID: student NetID
+#**DUE DATE: 8:40 am Monday April 24**  
+
+-----
+
+#Question 1.
+
+An experiment was run to study how long mung bean seeds should be soaked prior to planting in order to promote early growth of bean sprouts. The experiment was run using a completely randomized design. Soaking levels used in this experiment were as follows: A= low, B= medium, C = high, and D = very high. For each treatment level, 17 beans were used and the mean shoot length (Y in mm) was measured 48 hours following soaking. Data appears in the file Hwk7Quest4Sp04.txt.
+
+A)	Perform analysis of variance to test the hypothesis that the four treatments' means are equal. State carefully your conclusions.
+
+B)	Give a statistical model appropriate for describing the response variable in this study and explain each term in the model.
+
+C)	Assess the validity of assumptions underlying analysis of variance in this study.
+
+D)	i) Compare all pairs of means, using Bonferoni's method and make an interpretation of your results. Use $\alpha_{overall}$ = .05. 
+
+    ii) What are the advantages and disadvantages of using this method of pairwise comparisons?
+
+E)	i) Compare all pairs of means, using Tukey's method and make an interpretation of your results. Use $\alpha_{overall}$ = .05. 
+    
+    ii) What are the advantages and disadvantages of using this method of pairwise comparisons?
+
+F)	i) Compare all pairs of means, using Fisher's Protected LSD and make an interpretation of your results. Use $\alpha_{overall}$ = .05. 
+    
+    ii) What are the advantages and disadvantages of using this method of pairwise comparisons?
+    
+G) Consider the first two levels (low, medium) as "short" soaking periods and the two higher levels (High, very high) as "long" soaking periods. You want to determine the difference in mean sprout length between the short and long soaking periods.
+
+    i) Give a 90% confidence interval for the difference in mean sprout length between short and long soaking periods. 
+    
+    ii) Test to see if the long soaking periods produce higher mean sprout length than the short periods, using $\alpha$ = .05. State hypotheses, test statistic, p-value, and conclusions.
+    
+    
+## Question 1 continued on the following page.
+\pagebreak
+    
+H) Using the values corresponding to the levels of the treatments: A = 12 hours, B= 18 hours, C = 24 hours, and D = 30 hours,
+
+    i) Fit a polynomial regression in hours to this data; report what you get and how you got there (show all steps and tests).
+    
+    ii) Compare the MSE you got from using the treatments as categorical predictors and the polynoimial predictors; assess how much explained variation you lost by forcing the means to follow the regression "line" compared to letting them "float". 
+    
+    iii) What mean sprout length could you expect for 15 hours of soaking (use a 95% interval). Could you have gotten this by using the treatments as categorical predictors?
+    
+    
+#Question 2.
+
+For newly planted strawberries, the development of flower clusters decreases the plant vigor. It is common practice to remove the flower stalks by hand, but this is a laborious and time-consuming procedure. To investigate the effect of flower clusters on the plant vigor, an experiment consisting of four treatments was conducted. This experiment was completely randomized and consisted of the following treatments: A = Control (no flower removal), B = Hand removal, C = Regulator G1, and D = Regulator G2 (note that G1 and G2 are hormone-based regulators). A plot of 10 plants was treated and the average number of runners per mother plant, a measure of vigor, was recorded on each plot. 
+
+The layout of the experiment and the measures of vigor are provided below for each plot. 
+
+C. 3.6 (plot 1)	A. 1.4 (plot 6)	  A. 0.8 (plot 11)	B. 5.2 (plot 16)
+
+C. 2.4 (plot 2)	D. 7.3 (plot 7)	  B. 6.8 (plot 12)	C. 1.8 (plot 17)
+
+A. 0.6 (plot 3)	C. 4.6 (plot 8)	  B. 3.0 (plot 13)	D.6.2 (plot 18)
+
+D. 3.8 (plot 4)	D. 4.1 (plot 9)	  A. 1.2 (plot 14)	B. 5.0 (plot 19)
+
+B. 6.0 (plot 5)	B. 4.0 (plot 10)	A. 0.5 (plot 15)	A. 1.5 (plot 20)
+
+Note:  This data set is not provided, so you need to create it. 
+
+A) Construct a set of 3 contrasts that are suggested by the treatment structure in this experiment to be orthogonal. 
+
+B) Verbally define each of the three contrasts above. 
+
+C) Using the contrasts in a, assess the statistical significance of each contrast based on p-values from an appropriate test.
+
+D) Demonstrate that the three contrast sums of squares do not add up to the treatment sum of squares (there is more than one way to do this). Are you surprised by your results? Why or why not? Are these contrasts orthogonal? Why or why not?
+
+E) Remove the observations for plots 5, 10, 15, and 20. Re-compute the treatment and contrast sums of squares. Demonstrate that the three contrast sums of squares add up to the treatment sum of squares. Are you surprised by your results? Why or why not? Construct an ANOVA table which shows that with this balanced design, the sums of squares for treatments partitions into the sums of squares for the three contrasts. Are these contrasts now orthogonal? Why or why not?
+
+

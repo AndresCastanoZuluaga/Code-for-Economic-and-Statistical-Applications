@@ -1,0 +1,67 @@
+---
+title: "BTRY 6020 Homework VII"
+output:
+  pdf_document: default
+  html_document:
+    highlight: pygments
+    theme: cerulean
+  word_document: default
+---
+-----
+
+
+#NAME: student name
+#NETID: student NetID
+#**DUE DATE: May 1, 2017, by 8:40 am**  
+
+-----
+
+##Question 1.
+
+A study was designed to investigate the effects of certain toxic agents. Four medications (hypothesized poison antidotes) and 3 poisons were used in a completely randomized factorial experiment consisting of 12 treatment combinations (each poison with each antidote). The design was balanced with 4 animals randomly assigned to each of the 12 treatments. The two factors were fixed in this study as they were the only ones about which statistical inference was needed. For each animal, the survival time (in hours) was recorded following administration of the treatment combination. Data appears in file Hwk7Q1DatSp17.
+
+A)	What is the experimental unit in this experiment? 
+
+B)	Give the general linear model for this analysis and define each term. What constraints are imposed upon this model for the analysis?
+
+C) 	Without any data transformation, analyze the data and report the ANOVA table for the fixed effects model. 
+
+D)	Make a plot of standardized residuals against predicted values and assess the validity of the equal variance assumption. Is the assumption of equal variance satisfied? If this assumption is not satisfied, make an appropriate transformation. Which transformation stabilizes the variance of residuals (append your plot)?
+
+Answer questions (E) through (H) based on the transformed data from (D):
+
+E) Make an interaction plot on your transformed data. What does this tell you, and why (be brief).  
+
+F)	Perform a hypothesis test of the null hypothesis that the interaction between the two factors is not significant. Show the null and alternative hypotheses, the test statistic, the p-value, and state your conclusions. Use $\alpha$ = .05.
+
+G)	Perform a hypothesis test of the null hypothesis that the mean survival time is equal across all types of poisons.  Show the null and alternative hypotheses, the test statistic, the p-value, and state your conclusions. Use $\alpha$ = .05.  
+
+H)	Perform a hypothesis test of the null hypothesis that the mean survival time is equal across all medications. Show the null and alternative hypotheses, the test statistic, the p-value, and state your conclusions. Use $\alpha$ = .05.
+
+I)	What medication would you recommend for each of the poisons? (Be careful; does your transformation effect the interpretation of results from the output?)
+\pagebreak
+
+#Question 2.
+
+An experiment was conducted to investigate the effect of four diets (1 = diet #1, 2 = diet #2, etc.) on weight gains of two breeds of cows. Twelve three-week-old cows, having the same birth date, were randomly selected from each of the two breeds. So, there were a total of 24 animals in this experiment. Three animals from each breed were randomly assigned to each of the four diets. After a period of five weeks, weight gain (pounds) was recorded for each animal. Data can be found in the file Hwk7Q2DatSp17.
+
+The herdsman wants to know: Which diets maximize the weight gain for these two breeds of cows? (Note that he needs all comparisons on mean weight gains to have a *combined* error rate of no more than 5%.
+
+Include the following parts in your answer:
+
+A) Formulation of the research question and choice of the appropriate statistical technique used to answer this question.
+
+
+B) Notation for the random variable(s) and parameter(s) of interest; define these explicitly. Give the distributional assumptions for your random variable(s) and state all assumptions necessary for the statistical application you intend to use.
+
+
+C) Calculations for the analysis. For hypothesis and significance tests, formulate the null and the alternative hypotheses, calculate the value of your test statistic, and then calculate your p-value. For confidence intervals, show and apply the appropriate formula. Use $\alpha=0.05$ if not otherwise specified.
+
+
+D) Discuss whether the assumptions stated in Part B) above are met sufficiently for the validity of the statistical inferences; use graphs and other tools where applicable.
+
+
+E) Discuss the sampling scheme and whether or not it is sufficient to meet the objective of the study. Be sure to include whether or not subjective inference is necessary and if so, defend whether or not you believe it is valid.
+
+
+F) State the conclusions of the analysis. These should be practical conclusions from the context of the problem, but should also be backed up with statistical criteria (like a p-value, etc.). Include any considerations such as limitations of the sampling scheme, impact of outliers, etc., that you feel must be considered when you state your conclusions.

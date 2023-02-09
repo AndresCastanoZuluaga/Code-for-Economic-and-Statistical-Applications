@@ -1,0 +1,265 @@
+---
+title: "BTRY 6020 Homework V Solution"
+output:  pdf_document 
+---
+
+
+
+#NAME: student name
+#NETID: student NetID
+#**DUE DATE: 8:40 am Friday March 31**  
+
+-----
+
+
+#Question 1.
+
+Health officials wonder why some people get the flu shot while others don't. In a study designed to shed some light on this, researchers asked a random sample of patients if they had gotten aflu shot, recorded their age and gender, and also gave each a written questionnaire designed to evaluate their health awareness index. Data appear in Hwk5Q1DatSp17. Note here that Y = 1 means they received the flu shot and that males were coded as $X_3$ = 1, females coded as $X_3$ = 0.
+
+A) Obtain the maximum likelihood estimators of $\beta_0, \beta_1, \beta_2$ and $\beta_3$. State the fitted regression function.
+
+```{r}
+library(readxl)
+Q1DF <- read_excel("Hwk5Q1DatSp17.xlsx")
+Q1_logit <- glm(FShot ~ Age + Ind + Gen, data = Q1DF, family = "binomial")
+summary(Q1_logit)
+```
+
+The MLE of regression coefficients are $\hat\beta_0=1.17716, \hat\beta_1 = 0.07279, \hat\beta_2=0.09899$ and $\hat\beta_3=0.43397$.
+
+B) What is the estimated probability of getting the flu shot that a male clients aged 55 years with a health awareness score of 60?
+
+```{r}
+predict(Q1_logit, data.frame(Age = 55, Ind = 60, Gen = 1), type = "response")
+```
+
+The estimated probability of getting the flu shot is 0.06422197.
+
+C) Obtain the VIFs for the regression predictors. What conclusions can you reach from these statistics?
+
+```{r}
+library(car)
+vif(Q1_logit)
+```
+
+All VIFs are within 2 and therefore multicollinearity is not an issue.
+
+D) Get the standardized deviance residuals and plot against observation number. Does there appear to be any outliers?
+
+```{r}
+plot(rstandard(Q1_logit))
+```
+
+The 47th observation has large standardized residual, and sticks out above the rest, which may indicate it's an influential outlier.
+
+E) Get the Cook's distance numbers and plot against observation number. Do there appear to be any influential outliers? If so, check their effects.
+
+```{r}
+plot(Q1_logit, which = 4)
+```
+
+The 47th and the 123rd observations have large Cook's distance values, making them influential outliers. To evaluate the effects of these two outliers, we refit the logitstic regression after removing them from the data.
+
+```{r}
+Q1_logit2 <- glm(FShot ~ Age + Ind + Gen, data = Q1DF[-c(47, 123), ], family = "binomial")
+summary(Q1_logit2)
+```
+
+After removing the two outliers, the p-values of all three predictors become smaller which establishes more significance in these variables, though gender remains nonsignificant. The regression coefficients also got reinforced in respective direction, with the coefficient of Age increasing by 22.5% and that of index decreasing (becoming more significantly negative) by 14.1%.
+
+F) Can we drop Age and Gender if we keep the health awareness index in the model? State hypotheses, test statistic, p-value, and conclusions.
+
+The null and alternative hypotheses are as follows:
+
+$$H_0: \beta_1=\beta_3 = 0\quad \text{and}\quad H_a: \text{At least one of $\beta_1$ and $\beta_3$ is not zero}$$
+
+To test the hypotheses, we may conduct a likelihood ratio test where the full model is listed in part A) and the reduced model is 
+
+```{r}
+Q1_logit_reduced <- glm(FShot ~ Ind, data = Q1DF, family = "binomial")
+anova(Q1_logit_reduced, Q1_logit, test = "LRT")
+```
+
+With p-value being 0.0174 less than 0.05, we reject $H_0$ in favor of $H_a$ that at least one of Age and Gender is significant in explaining variations in the response. Hence, we cannot drop Age and Gender while keeping the health awareness index in the model.
+
+	
+G) Install the package "bestglm". Visit the following website:
+	
+https://cran.r-project.org/web/packages/bestglm/vignettes/bestglm.pdf
+
+to learn how to use this package. Don't forget the "library(bestglm)" command before you use it.
+
+	i) Find the best model for getting a flu shot according to the BIC criteria
+	
+```{r, message=F, warning=F}
+library(bestglm)
+bestBIC <- bestglm(Q1DF[c("Age", "Ind", "Gen", "FShot")], family = binomial, IC = "BIC")
+bestBIC
+```
+	
+The best model using BIC criteria is $$log(\frac{p}{1-p})=\beta_0 + \beta_1 Age + \beta_2 Ind$$
+	
+	ii) Find the best models for a 0, 1, 2, and 3 predictors using the Subsets command
+
+```{r, message=F, warning=F}
+bestBIC$Subsets
+# 0 predictor
+bestglm(Q1DF[c("Age", "Ind", "Gen", "FShot")], family = binomial, IC = "BIC", nvmax = 0)
+# 1 predictor
+bestglm(Q1DF[c("Age", "Ind", "Gen", "FShot")], family = binomial, IC = "BIC", nvmax = 1)
+# 2 predictors
+bestglm(Q1DF[c("Age", "Ind", "Gen", "FShot")], family = binomial, IC = "BIC", nvmax = 2)
+# 3 predictors
+summary(glm(FShot ~ Age + Ind + Gen, data = Q1DF, family = "binomial"))
+```
+	
+	iii) Find the best model for getting a flu shot according to the AIC criteria
+	
+```{r, message=F, warning=F}
+bestAIC <- bestglm(Q1DF[c("Age", "Ind", "Gen", "FShot")], family = binomial, IC = "AIC")
+bestAIC
+```
+
+The best model using AIC criteria is $$log(\frac{p}{1-p})=\beta_0 + \beta_1 Age + \beta_2 Ind$$
+
+	iv) Find the best models for a 0, 1, 2, and 3 predictors using the Subsets command
+
+```{r, message=F, warning=F}
+bestAIC$Subsets
+# 0 predictor
+bestglm(Q1DF[c("Age", "Ind", "Gen", "FShot")], family = binomial, IC = "AIC", nvmax = 0)
+# 1 predictor
+bestglm(Q1DF[c("Age", "Ind", "Gen", "FShot")], family = binomial, IC = "AIC", nvmax = 1)
+# 2 predictors
+bestglm(Q1DF[c("Age", "Ind", "Gen", "FShot")], family = binomial, IC = "AIC", nvmax = 2)
+# 3 predictors
+summary(glm(FShot ~ Age + Ind + Gen, data = Q1DF, family = "binomial"))
+```
+	
+  v) What model from the above models evaluated would you choose for this situation? Explain BRIEFLY; you may include data from all parts of Question 1.
+  
+I will choose $log(\frac{p}{1-p})=\beta_0 + \beta_1 Age + \beta_2 Ind$ since it's the best model using both AIC and BIC criteria.
+
+
+\pagebreak
+
+#Question 2.
+
+A disease outbreak has occurred in a certain city. Data have been collected on a random telephone survey of 196 people within city limits and the following data recorded: 1) Whether or not they have contracted the disease (Dis, =1 if they have, =0 if not), Age, Socioeconomic Status (SES, = 1 if upper, = 2 if middle, = 3 if lower), Sector of the city they live (Sect, either sector 1 or sector 2), and saving account status (Sav, = 1 if they have a savings account, = 0 if not). data appear in Hwk5Q2DatSp17
+
+Part A) Develop a logistic regression model for predicting the probability of contracting this disease, using the above variables. Be sure to check for polynomial effects of significant quantitative variables as well as interactions between significant predictor variables. When finished, explicitly state your prediction equation. Be sure to show significant steps in model development, using simultaneous tests when you want to omit/test more than one predictor.
+
+First, we consider up to cubic polynomial terms of Age, all three categorical variables (SES, Sect and Sav) and the interactions between Age and the categorical variables. The following is the logistic fit.
+
+```{r}
+# Read the data
+Q2DF <- read_excel("Hwk5Q2DatSp17.xlsx")
+Q2DF$SES <- factor(Q2DF$SES, levels = c(1,2,3))
+Q2DF$Sect <- factor(Q2DF$Sect, levels = c(1, 2))
+Q2DF$Sav <- factor(Q2DF$Sav, levels = c(0, 1))
+Q2_logit <- glm(Dis ~ Age + I(Age^2) + I(Age^3) + Age:SES + SES + Age:Sect + Sect + Age:Sav + Sav, data = Q2DF, family = binomial)
+summary(Q2_logit)
+```
+
+From the above fit, we consider removing all the interaction terms by conducting a LRT. The hypotheses and LRT test are as follows:
+
+$$H_0: \text{the partial slopes associated with all the interactions are all zero}.$$
+$$H_a: \text{at least one of the partial slopes associated with the interactiosn is not zero}.$$
+
+```{r}
+Q2_logit2 <- glm(Dis ~ Age + I(Age^2) + I(Age^3) + SES + Sect + Sav, data = Q2DF, family = binomial)
+summary(Q2_logit2)
+anova(Q2_logit2, Q2_logit, test = "LRT")
+```
+
+The p-value associated with the LRT is 0.8805 and hence we fail to reject $H_0$. Therefore, we can drop all the interaction terms. From the summary tabel for Q2_logit2, we notice $Age^3, SES$ and $Sav$ are not significant. We will do another LRT to test if we can drop them all at once.
+
+$$H_0: \text{the partial slopes associated with $Age^3, SES$ and $Sav$ are all zero}.$$
+$$H_a: \text{at least one of the partial slopes associated with $Age^3, SES$ and $Sav$ is not zero}.$$
+
+```{r}
+Q2_logit3 <- glm(Dis ~ Age + I(Age^2) + Sect, data = Q2DF, family = binomial)
+summary(Q2_logit3)
+anova(Q2_logit3, Q2_logit2, test = "LRT")
+```
+
+With p-value being 0.523, we fail to reject $H_0$ and drop $Age^3, SES$ and $Sav$ all at once.The final model equation is
+
+$$\log\left(\frac{\hat p_{disease}}{1-\hat p_{disease}}\right) = -3.282 + 0.113Age-0.001Age^2+ 1.279Sect$$
+
+
+Part B) Give a 90% confidence interval for the probability that a 64 year old patient, with middle socioeconomic status and a savings account that lives in sector 2 of the city, contracts the disease. 
+
+We use our final model to predict the porbability of that person contracting the disease:
+
+```{r}
+predict(Q2_logit3, newdata = data.frame(Age = 64, Sect = as.factor(2)), se.fit = T, type = "link")
+```
+
+A 90% confidence interval for the log-odds is $(0.365 - 1.645*0.4239, 0.365 + 1.645*0.4239)=(-0.3323, 1.0623)$. Thus, a 90% confidence interval for $p_{disease}$ is $\left(\frac{e^{-0.3323}}{1+e^{-0.3323}}, \frac{e^{1.0623}}{1+e^{1.0623}}  \right)=(0.41768, 0.74313)$.
+
+#Question 3.
+
+Multiple cohorts of subjects, some non-smokers and others smokers, were observed for several years. The number of cases (NumCases) of lung cancer diagnosed in the different cohorts was recorded, in addition to the following predictor variables:
+
+CigsperDay = Number of cigarettes smoked per day per individual in the cohort;
+Years = The number of years the individuals in the cohort had smoked.
+
+Additionally, the total number of years in which individuals in each category were observed (summed over all individuals) was recorded in the column PersonYears. (For example, if a cohort had 50 people that had been observed for 20 years, that would be 50 x 20 = 1000 PersonYears.) Data appear in Hwk5Q3DatSp17.
+
+A) Write down a Poisson regression model where the mean number of cases of observed lung cancer cases per cohort are a function of CigsperDay and Years. Your model should start like "$\mu$? = .", NOT "log($\mu$) = .".
+
+$$E[NumCases]=\exp\left(\beta_0 + \beta_1 \times CigsperDay + \beta_2 \times Years  \right).$$
+
+B) Fit the model above; include summary output. State your model of the estimated mean with the maximum likelihood estimators included.
+
+```{r}
+library(readxl)
+Q3DF <- read_excel("Hwk5Q3DatSp17.xlsx")
+Q3_poisson <- glm(NumCases ~ CigsperDay + Years, data = Q3DF, family = poisson)
+summary(Q3_poisson)
+```
+
+The fitted model is $$\hat E[NumCases]=\exp\left(-1.726048 + 0.040434 CigsperDay + 0.043769 Years  \right).$$
+
+C) Do a deviance goodness-of-fit test on your model; state hypotheses, test statistic, p-value, and conclusions.
+
+$$H_0: \text{the data are consistent under the specified model}$$
+$$H_a:\text{the data is not consistent under the specified model.}.$$
+The test statistic is residual deviance 88.13, which under the null follows a chisquare distribution with 32 degrees of freedom. The p-value is computed below.
+
+```{r}
+1-pchisq(88.13, 32)   
+```
+
+Since p-value is less than 0.05, we reject the null hypothesis and conclude that our model dosn't fit the data well.
+
+D) Does it make sense for your mean in Part A above to be proportional to the variable PersonYears? Explain briefly.
+
+Yes, the larger PersonYears in a cohort is, the more participants there are in a cohort. In a larger cohort we are more likely to observe more lung cancer cases, provided everything else stay the same. Therefore, the mean in Part A should be proportional to PersonYears.
+
+E) Write down a Poisson regression model where the mean number of cases of observed lung cancer cases per cohort are a function of CigsperDay and Years, but are also proportional to PersonYears. Your model should start like "? = .", NOT "log(?) = ."
+
+$$E[NumCases]=\exp\left(\beta_0 + \beta_1 \times CigsperDay + \beta_2 \times Years  \right)\times PersonYears.$$
+
+F) Fit the above model; include summary output. Perform a deviance goodness-of-fit test on this model; state hypotheses, test statistic, p-value, and conclusions.
+
+Note here we set offset as $0.001\times PersonYears$ in order for the glm algorithm to converge. This change won't invalidate the previous setup that the mean number of cases of observed lung cancer cases per cohort is proportional to PersonYears.
+
+```{r}
+Q3_poisson2 <- glm(NumCases ~ CigsperDay + Years, data = Q3DF, family = poisson, offset = log(PersonYears))
+summary(Q3_poisson2)
+```
+
+$$H_0: \text{the data are consistent under the specified model}$$
+$$H_a:\text{the data is not consistent under the specified model.}.$$
+The test statistic is residual deviance 88.13, which under the null follows a chisquare distribution with 32 degrees of freedom. The p-value is computed below.
+
+```{r}
+1-pchisq(106.48, 32)   
+```
+
+Since p-value is less than 0.05, we reject the null hypothesis and conclude that our model dosn't fit the data well. In fact, adding the reasonable offset seems to have made the model worse, with the residual deviance rising from 88.13 to 137.29. But you must consider the null deviance with these two different models. The $R^2$ analog in generalized linear models is 1-(Residual Deviance/Null Deviance). Without the offset, this equals 1-(88.13/137.29) = 35.8%, a small amount of the deviance in the number of cases. With the offset, this $R^2$ rises to 1-(43.347/250.712)=82.7% of the deviance in the number of cases, a MUCH better model.
+
+However, the lack of fit is still significant, and at this point if we're to do inferences, we should go back to a quasipoisson model and start over.
+
