@@ -1,0 +1,113 @@
+-----------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  /Users/Andres/Dropbox/CORNELL/Fall 2016/AEM 6700 Economics of Consumer Demand/In C
+> lass assignments/Blueberry Demand/BlueberryDemand.log
+  log type:  text
+ opened on:  16 Oct 2016, 00:09:18
+
+. * Import data from excel into Stata
+.   import excel BBDATA.xlsx, sheet("Sheet1") firstrow
+
+.         
+.         
+. ** Data Cleaning
+.   * Rename variables
+.     rename YEAR year
+
+.     rename CPIFORALLITEMS20141 cpi
+
+.     rename INFLATIONADJUSTEDGDP gdp
+
+.     rename REALBLUEBERRYPRICECENTSLB bbp
+
+.     rename USPOPULATIONINMILLIONS pop
+
+.     rename GENERICBLUEBERRYPROMOTIONEXPE prom
+
+.     rename PERCAPITABBCONSUMPTIONOUNCES cons
+
+.     rename NOMINALRASPBERRYPRICECENTSLB rsp_n 
+
+.     rename NOMINALSTRAWBERRYPRICECENTSL stp_n
+
+.   * Generate real(inflation adjusted) prices
+.     *gen bbp = bbp_n * cpi
+.     *label variable bbp "REAL BLUEBERRY PRICE CENTS/LB"
+.     gen rsp = rsp_n / cpi
+
+.     label variable rsp "REAL RASPBERRY PRICE CENTS/LB"
+
+.         gen stp = stp_n / cpi
+
+.     label variable stp "REAL STRAWBERRY PRICE CENTS/LB"
+
+.   * Generate per capita income 
+.     gen inc = gdp/pop
+
+.     lab variable inc "PER CAPITA INCOME, REAL, 1,000$"
+
+.   * Convert year from string variable to numerical variable
+.     destring year, replace
+year has all characters numeric; replaced as int
+
+.   * Declare data to be time-series data to use lag operator
+.     tsset year
+        time variable:  year, 1970 to 2014
+                delta:  1 unit
+
+.   * Generate log value of dependent and independent variabls to calculate elasticity
+.     gen lnbbp = log(bbp)
+
+.     gen lnprom = log(prom)
+
+.     gen lncons = log(cons)
+
+.     gen lnconsl = log(L.cons)
+(1 missing value generated)
+
+.     gen lnrsp = log(rsp)
+
+.     gen lnstp = log(stp)
+
+.     gen lninc = log(inc)
+
+. 
+. ** Run regression on log vars
+.         reg lncons lnconsl lnbbp lnrsp lnstp lninc lnprom
+
+      Source |       SS       df       MS              Number of obs =      44
+-------------+------------------------------           F(  6,    37) =  250.93
+       Model |  15.5084671     6  2.58474452           Prob > F      =  0.0000
+    Residual |  .381127967    37  .010300756           R-squared     =  0.9760
+-------------+------------------------------           Adj R-squared =  0.9721
+       Total |  15.8895951    43  .369525467           Root MSE      =  .10149
+
+------------------------------------------------------------------------------
+      lncons |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+     lnconsl |   .5841369   .1061711     5.50   0.000     .3690137      .79926
+       lnbbp |  -.1771892   .0940561    -1.88   0.067    -.3677649    .0133865
+       lnrsp |   .0214296   .0493605     0.43   0.667    -.0785843    .1214435
+       lnstp |   .5036339   .1866456     2.70   0.010      .125454    .8818138
+       lninc |   .7956801   .2750256     2.89   0.006     .2384253    1.352935
+      lnprom |   .1068492   .0452952     2.36   0.024     .0150724     .198626
+       _cons |  -3.887792   1.459277    -2.66   0.011    -6.844567   -.9310157
+------------------------------------------------------------------------------
+
+.         estat durbinalt
+
+Durbin's alternative test for autocorrelation
+---------------------------------------------------------------------------
+    lags(p)  |          chi2               df                 Prob > chi2
+-------------+-------------------------------------------------------------
+       1     |          6.901               1                   0.0086
+---------------------------------------------------------------------------
+                        H0: no serial correlation
+
+. log close
+      name:  <unnamed>
+       log:  /Users/Andres/Dropbox/CORNELL/Fall 2016/AEM 6700 Economics of Consumer Demand/In C
+> lass assignments/Blueberry Demand/BlueberryDemand.log
+  log type:  text
+ closed on:  16 Oct 2016, 00:09:18
+-----------------------------------------------------------------------------------------------

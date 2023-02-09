@@ -1,0 +1,2780 @@
+---------------------------------------------------
+      name:  <unnamed>
+       log:  /Users/Andres/Dropbox/CORNELL/Fall 201
+> 6/AEM 6700 Economics of Consumer Demand/In Class 
+> assignments/Meat Demand/MeatAIDS_Unrestricted.log
+  log type:  text
+ opened on:  28 Sep 2016, 09:16:27
+
+.   
+. * Import data
+.   import excel using "MeatAIDSData.xlsx", sheet("
+> meat") firstrow
+
+.   save AIDSMeats, replace
+(note: file AIDSMeats.dta not found)
+file AIDSMeats.dta saved
+
+. 
+end of do-file
+
+. do "/var/folders/hw/wmwf0vcd4jxdz_tmk5ft0p480000g
+> n/T//SD13255.000000"
+
+.   gen yrqtr = yq(year, qtr)
+
+.   format yrqtr %tq
+
+.   order yrqtr, a(qtr)
+
+.   tsset yrqtr
+        time variable:  yrqtr, 1975q1 to 1999q3
+                delta:  1 quarter
+
+. 
+end of do-file
+
+. do "/var/folders/hw/wmwf0vcd4jxdz_tmk5ft0p480000g
+> n/T//SD13255.000000"
+
+.   gen beef_pr = beef_p/cpi
+
+.   gen pork_pr = pork_p/cpi
+
+.   gen chick_pr = chick_p/cpi
+
+.   gen turkey_pr = turkey_p/cpi
+
+. 
+end of do-file
+
+. do "/var/folders/hw/wmwf0vcd4jxdz_tmk5ft0p480000g
+> n/T//SD13255.000000"
+
+. * Calcuate total expenditures on all meats (X) an
+> d shares of each meat
+.   gen ex_beef = beef_pr*beef_q
+
+.   gen ex_pork = pork_pr*pork_q
+
+.   gen ex_chick = chick_pr*chick_q
+
+.   gen ex_turkey = turkey_pr*turkey_q
+
+.   gen X = ex_beef + ex_pork + ex_chick + ex_turke
+> y  
+
+.   
+.   gen w_beef = ex_beef/X     // share of beef
+
+.   gen w_pork = ex_pork/X     // share of pork
+
+.   gen w_chick = ex_chick/X   // share of chick
+
+.   gen w_turkey = ex_turkey/X // share of turkey
+
+.   
+.   * Plot budget shares  
+.     twoway (connected w_beef yrqtr) (connected w_
+> pork yrqtr) ///
+>            (connected w_chick yrqtr) (connected w
+> _turkey yrqtr)
+
+.     graph export BudgetShares.png, replace
+(file BudgetShares.png written in PNG format)
+
+. 
+end of do-file
+
+. do "/var/folders/hw/wmwf0vcd4jxdz_tmk5ft0p480000g
+> n/T//SD13255.000000"
+
+.   gen lnX  = log(X)     
+
+.   gen lnpb = log(beef_pr)
+
+.   gen lnpp = log(pork_pr)
+
+.   gen lnpc = log(chick_pr)
+
+.   gen lnpt = log(turkey_pr)
+
+.   gen lnP  = w_beef*lnpb + w_pork*lnpp + w_chick*
+> lnpc + w_turkey*lnpt
+
+.   gen lnXP = lnX - lnP
+
+. 
+end of do-file
+
+. help nlsur
+
+. help lincom
+
+. findit sur
+
+. help quaids
+
+. help quaids
+
+. help aidsills
+
+. do "/var/folders/hw/wmwf0vcd4jxdz_tmk5ft0p480000g
+> n/T//SD13255.000000"
+
+. * AEM 6700
+. * Meat Demand (AIDS Model)
+. * Notes: with seasonality there is a command that
+>  gives you all the parameter estimated (look for)
+> .
+. /* Other commands:  
+> - sureg  for seemingly unrelated regressions 
+> - quaids
+> - aidsills 
+> */
+. 
+. clear
+
+. set more off
+
+. * Setting working directory
+.   cd "/Users/Andres/Dropbox/CORNELL/Fall 2016/AEM
+>  6700 Economics of Consumer Demand/In Class assig
+> nments/Meat Demand"
+/Users/Andres/Dropbox/CORNELL/Fall 2016/AEM 6700 Ec
+> onomics of Consumer Demand/In Class assignments/M
+> eat Demand
+
+.  
+. * Log file
+.   log using MeatAIDS_Unrestricted.log, replace
+log file already open
+r(604);
+
+end of do-file
+
+r(604);
+
+. do "/var/folders/hw/wmwf0vcd4jxdz_tmk5ft0p480000g
+> n/T//SD13255.000000"
+
+. * AEM 6700
+. * Meat Demand (AIDS Model)
+. * Notes: with seasonality there is a command that
+>  gives you all the parameter estimated (look for)
+> .
+. /* Other commands:  
+> - sureg  for seemingly unrelated regressions 
+> - quaids
+> - aidsills 
+> */
+. 
+. clear
+
+. set more off
+
+. * Setting working directory
+.   cd "/Users/Andres/Dropbox/CORNELL/Fall 2016/AEM
+>  6700 Economics of Consumer Demand/In Class assig
+> nments/Meat Demand"
+/Users/Andres/Dropbox/CORNELL/Fall 2016/AEM 6700 Ec
+> onomics of Consumer Demand/In Class assignments/M
+> eat Demand
+
+.  
+. * Log file
+.   *log using MeatAIDS_Unrestricted.log, replace
+.   
+. * Import data
+.   import excel using "MeatAIDSData.xlsx", sheet("
+> meat") firstrow
+
+.   save AIDSMeats, replace
+file AIDSMeats.dta saved
+
+.     
+. * Generate quarter index  
+.   gen yrqtr = yq(year, qtr)
+
+.   format yrqtr %tq
+
+.   order yrqtr, a(qtr)
+
+.   tsset yrqtr
+        time variable:  yrqtr, 1975q1 to 1999q3
+                delta:  1 quarter
+
+.   
+. * Generate real prices  
+.   gen beef_pr = beef_p/cpi
+
+.   gen pork_pr = pork_p/cpi
+
+.   gen chick_pr = chick_p/cpi
+
+.   gen turkey_pr = turkey_p/cpi
+
+.   
+. * Calcuate total expenditures on all meats (X) an
+> d shares of each meat
+.   gen ex_beef = beef_pr*beef_q
+
+.   gen ex_pork = pork_pr*pork_q
+
+.   gen ex_chick = chick_pr*chick_q
+
+.   gen ex_turkey = turkey_pr*turkey_q
+
+.   gen X = ex_beef + ex_pork + ex_chick + ex_turke
+> y  
+
+.   
+.   gen w_beef = ex_beef/X     // share of beef
+
+.   gen w_pork = ex_pork/X     // share of pork
+
+.   gen w_chick = ex_chick/X   // share of chick
+
+.   gen w_turkey = ex_turkey/X // share of turkey
+
+.   
+.   * Plot budget shares  
+.     twoway (connected w_beef yrqtr) (connected w_
+> pork yrqtr) ///
+>            (connected w_chick yrqtr) (connected w
+> _turkey yrqtr)
+
+.     graph export BudgetShares.png, replace
+(file BudgetShares.png written in PNG format)
+
+.   
+. * Generate logged values
+.   gen lnX  = log(X)     
+
+.   gen lnpb = log(beef_pr)
+
+.   gen lnpp = log(pork_pr)
+
+.   gen lnpc = log(chick_pr)
+
+.   gen lnpt = log(turkey_pr)
+
+.   gen lnP  = w_beef*lnpb + w_pork*lnpp + w_chick*
+> lnpc + w_turkey*lnpt
+
+.   gen lnXP = lnX - lnP
+
+. 
+. *------------------------------------------------
+> -------------------------------
+. * ADIS, Rotterdam, and OLS Model (Without Seasona
+> lity) 
+.  
+. * Estimate AIDS: -nlsur- 
+.   nlsur (w_beef ={ab}+{bb}*lnXP+{gbb}*lnpb+{gbp}*
+> lnpp+{gbc}*lnpc+{gbt}*lnpt) ///
+>         (w_pork ={ap}+{bp}*lnXP+{gpb}*lnpb+{gpp}*
+> lnpp+{gpc}*lnpc+{gpt}*lnpt) ///
+>                 (w_chick={ac}+{bc}*lnXP+{gcb}*lnp
+> b+{gcp}*lnpp+{gcc}*lnpc+{gct}*lnpt), ///
+>         ifgnls 
+(obs = 99)
+
+Calculating NLS estimates...
+Iteration 0:  Residual SS =  .0330108
+Iteration 1:  Residual SS =  .0330108
+Calculating FGNLS estimates...
+Iteration 0:  Scaled RSS =       297
+FGNLS iteration 2...
+Iteration 0:  Scaled RSS =       297
+Parameter change         =  1.167e-15
+Covariance matrix change =  1.355e-19
+
+FGNLS regression 
+---------------------------------------------------
+> ------------------
+       Equation |       Obs  Parms       RMSE      
+> R-sq                                             
+>          Constant
+----------------+----------------------------------
+> ------------------
+ 1       w_beef |        99      6   .0126932    0.
+> 9217                                             
+>                ab
+ 2       w_pork |        99      6   .0100804    0.
+> 5408                                             
+>                ap
+ 3      w_chick |        99      6   .0084089    0.
+> 9079                                             
+>                ac
+---------------------------------------------------
+> ------------------
+
+---------------------------------------------------
+> ---------------------------
+             |      Coef.   Std. Err.      z    P>|
+> z|                                               
+>        [95% Con                                  
+>                f. Interval]
+-------------+-------------------------------------
+> ---------------------------
+         /ab |   1.667069    .170483     9.78   0.0
+> 00                                               
+>        1.332929                                  
+>                     2.00121
+         /bb |  -.2867032   .0413545    -6.93   0.0
+> 00                                               
+>       -.3677566                                  
+>                   -.2056498
+        /gbb |   .0130599   .0206734     0.63   0.5
+> 28                                               
+>       -.0274591                                  
+>                    .0535789
+        /gbp |  -.0604328   .0190027    -3.18   0.0
+> 01                                               
+>       -.0976773                                  
+>                   -.0231883
+        /gbc |  -.0194879   .0228923    -0.85   0.3
+> 95                                               
+>        -.064356                                  
+>                    .0253803
+        /gbt |   .1752807   .0168482    10.40   0.0
+> 00                                               
+>        .1422587                                  
+>                    .2083026
+         /ap |  -.1063507   .1353903    -0.79   0.4
+> 32                                               
+>       -.3717108                                  
+>                    .1590094
+         /bp |   .0840614    .032842     2.56   0.0
+> 10                                               
+>        .0196922                                  
+>                    .1484305
+        /gpb |   .0157303   .0164179     0.96   0.3
+> 38                                               
+>       -.0164482                                  
+>                    .0479087
+        /gpp |   .0698489   .0150911     4.63   0.0
+> 00                                               
+>        .0402709                                  
+>                    .0994269
+        /gpc |  -.0505328   .0181801    -2.78   0.0
+> 05                                               
+>       -.0861652                                  
+>                   -.0149004
+        /gpt |  -.0461294   .0133802    -3.45   0.0
+> 01                                               
+>        -.072354                                  
+>                   -.0199048
+         /ac |   .4137502   .1129394     3.66   0.0
+> 00                                               
+>         .192393                                  
+>                    .6351074
+         /bc |  -.0443281    .027396    -1.62   0.1
+> 06                                               
+>       -.0980233                                  
+>                    .0093672
+        /gcb |   -.074118   .0136954    -5.41   0.0
+> 00                                               
+>       -.1009605                                  
+>                   -.0472754
+        /gcp |  -.0419704   .0125886    -3.33   0.0
+> 01                                               
+>       -.0666437                                  
+>                   -.0172972
+        /gcc |   .1309039   .0151654     8.63   0.0
+> 00                                               
+>        .1011802                                  
+>                    .1606276
+        /gct |  -.1227963   .0111614   -11.00   0.0
+> 00                                               
+>       -.1446723                                  
+>                   -.1009203
+---------------------------------------------------
+> ---------------------------
+
+. 
+end of do-file
+
+. do "/var/folders/hw/wmwf0vcd4jxdz_tmk5ft0p480000gn/T//SD13
+> 255.000000"
+
+.   nlsur (w_beef ={ab}+{bb}*lnXP+{gbb}*lnpb+{gbp}*lnpp+{gbc
+> }*lnpc+{gbt}*lnpt) ///
+>         (w_pork ={ap}+{bp}*lnXP+{gpb}*lnpb+{gpp}*lnpp+{gpc
+> }*lnpc+{gpt}*lnpt) ///
+>                 (w_chick={ac}+{bc}*lnXP+{gcb}*lnpb+{gcp}*l
+> npp+{gcc}*lnpc+{gct}*lnpt), ///
+>         ifgnls 
+(obs = 99)
+
+Calculating NLS estimates...
+Iteration 0:  Residual SS =  .0330108
+Iteration 1:  Residual SS =  .0330108
+Calculating FGNLS estimates...
+Iteration 0:  Scaled RSS =       297
+FGNLS iteration 2...
+Iteration 0:  Scaled RSS =       297
+Parameter change         =  1.167e-15
+Covariance matrix change =  1.355e-19
+
+FGNLS regression 
+------------------------------------------------------------
+> ---------
+       Equation |       Obs  Parms       RMSE      R-sq     
+> Constant
+----------------+-------------------------------------------
+> ---------
+ 1       w_beef |        99      6   .0126932    0.9217     
+>       ab
+ 2       w_pork |        99      6   .0100804    0.5408     
+>       ap
+ 3      w_chick |        99      6   .0084089    0.9079     
+>       ac
+------------------------------------------------------------
+> ---------
+
+------------------------------------------------------------
+> ------------------
+             |      Coef.   Std. Err.      z    P>|z|     [9
+> 5% Con                                                    
+>       f. Interval]
+-------------+----------------------------------------------
+> ------------------
+         /ab |   1.667069    .170483     9.78   0.000     1.
+> 332929                                                    
+>            2.00121
+         /bb |  -.2867032   .0413545    -6.93   0.000    -.3
+> 677566                                                    
+>          -.2056498
+        /gbb |   .0130599   .0206734     0.63   0.528    -.0
+> 274591                                                    
+>           .0535789
+        /gbp |  -.0604328   .0190027    -3.18   0.001    -.0
+> 976773                                                    
+>          -.0231883
+        /gbc |  -.0194879   .0228923    -0.85   0.395     -.
+> 064356                                                    
+>           .0253803
+        /gbt |   .1752807   .0168482    10.40   0.000     .1
+> 422587                                                    
+>           .2083026
+         /ap |  -.1063507   .1353903    -0.79   0.432    -.3
+> 717108                                                    
+>           .1590094
+         /bp |   .0840614    .032842     2.56   0.010     .0
+> 196922                                                    
+>           .1484305
+        /gpb |   .0157303   .0164179     0.96   0.338    -.0
+> 164482                                                    
+>           .0479087
+        /gpp |   .0698489   .0150911     4.63   0.000     .0
+> 402709                                                    
+>           .0994269
+        /gpc |  -.0505328   .0181801    -2.78   0.005    -.0
+> 861652                                                    
+>          -.0149004
+        /gpt |  -.0461294   .0133802    -3.45   0.001     -.
+> 072354                                                    
+>          -.0199048
+         /ac |   .4137502   .1129394     3.66   0.000      .
+> 192393                                                    
+>           .6351074
+         /bc |  -.0443281    .027396    -1.62   0.106    -.0
+> 980233                                                    
+>           .0093672
+        /gcb |   -.074118   .0136954    -5.41   0.000    -.1
+> 009605                                                    
+>          -.0472754
+        /gcp |  -.0419704   .0125886    -3.33   0.001    -.0
+> 666437                                                    
+>          -.0172972
+        /gcc |   .1309039   .0151654     8.63   0.000     .1
+> 011802                                                    
+>           .1606276
+        /gct |  -.1227963   .0111614   -11.00   0.000    -.1
+> 446723                                                    
+>          -.1009203
+------------------------------------------------------------
+> ------------------
+
+. 
+end of do-file
+
+. do "/var/folders/hw/wmwf0vcd4jxdz_tmk5ft0p480000gn/T//SD13255.000000"
+
+. * AEM 6700
+. * Meat Demand (AIDS Model)
+. * Notes: with seasonality there is a command that gives you all the parameter estimated (look
+>  for).
+. /* Other commands:  
+> - sureg  for seemingly unrelated regressions 
+> - quaids
+> - aidsills 
+> */
+. 
+. clear
+
+. set more off
+
+. * Setting working directory
+.   cd "/Users/Andres/Dropbox/CORNELL/Fall 2016/AEM 6700 Economics of Consumer Demand/In Class 
+> assignments/Meat Demand"
+/Users/Andres/Dropbox/CORNELL/Fall 2016/AEM 6700 Economics of Consumer Demand/In Class assignme
+> nts/Meat Demand
+
+.  
+. * Log file
+.   *log using MeatAIDS_Unrestricted.log, replace
+.   
+. * Import data
+.   import excel using "MeatAIDSData.xlsx", sheet("meat") firstrow
+
+.   save AIDSMeats, replace
+file AIDSMeats.dta saved
+
+.     
+. * Generate quarter index  
+.   gen yrqtr = yq(year, qtr)
+
+.   format yrqtr %tq
+
+.   order yrqtr, a(qtr)
+
+.   tsset yrqtr
+        time variable:  yrqtr, 1975q1 to 1999q3
+                delta:  1 quarter
+
+.   
+. * Generate real prices  
+.   gen beef_pr = beef_p/cpi
+
+.   gen pork_pr = pork_p/cpi
+
+.   gen chick_pr = chick_p/cpi
+
+.   gen turkey_pr = turkey_p/cpi
+
+.   
+. * Calcuate total expenditures on all meats (X) and shares of each meat
+.   gen ex_beef = beef_pr*beef_q
+
+.   gen ex_pork = pork_pr*pork_q
+
+.   gen ex_chick = chick_pr*chick_q
+
+.   gen ex_turkey = turkey_pr*turkey_q
+
+.   gen X = ex_beef + ex_pork + ex_chick + ex_turkey  
+
+.   
+.   gen w_beef = ex_beef/X     // share of beef
+
+.   gen w_pork = ex_pork/X     // share of pork
+
+.   gen w_chick = ex_chick/X   // share of chick
+
+.   gen w_turkey = ex_turkey/X // share of turkey
+
+.   
+.   * Plot budget shares  
+.     twoway (connected w_beef yrqtr) (connected w_pork yrqtr) ///
+>            (connected w_chick yrqtr) (connected w_turkey yrqtr)
+
+.     graph export BudgetShares.png, replace
+(file BudgetShares.png written in PNG format)
+
+.   
+. * Generate logged values
+.   gen lnX  = log(X)     
+
+.   gen lnpb = log(beef_pr)
+
+.   gen lnpp = log(pork_pr)
+
+.   gen lnpc = log(chick_pr)
+
+.   gen lnpt = log(turkey_pr)
+
+.   gen lnP  = w_beef*lnpb + w_pork*lnpp + w_chick*lnpc + w_turkey*lnpt
+
+.   gen lnXP = lnX - lnP
+
+. 
+. *-------------------------------------------------------------------------------
+. * ADIS, Rotterdam, and OLS Model (Without Seasonality) 
+.  
+. * Estimate AIDS: -nlsur- 
+.   nlsur (w_beef ={ab}+{bb}*lnXP+{gbb}*lnpb+{gbp}*lnpp+{gbc}*lnpc+{gbt}*lnpt) ///
+>         (w_pork ={ap}+{bp}*lnXP+{gpb}*lnpb+{gpp}*lnpp+{gpc}*lnpc+{gpt}*lnpt) ///
+>                 (w_chick={ac}+{bc}*lnXP+{gcb}*lnpb+{gcp}*lnpp+{gcc}*lnpc+{gct}*lnpt), ///
+>         ifgnls 
+(obs = 99)
+
+Calculating NLS estimates...
+Iteration 0:  Residual SS =  .0330108
+Iteration 1:  Residual SS =  .0330108
+Calculating FGNLS estimates...
+Iteration 0:  Scaled RSS =       297
+FGNLS iteration 2...
+Iteration 0:  Scaled RSS =       297
+Parameter change         =  1.167e-15
+Covariance matrix change =  1.355e-19
+
+FGNLS regression 
+---------------------------------------------------------------------
+       Equation |       Obs  Parms       RMSE      R-sq     Constant
+----------------+----------------------------------------------------
+ 1       w_beef |        99      6   .0126932    0.9217           ab
+ 2       w_pork |        99      6   .0100804    0.5408           ap
+ 3      w_chick |        99      6   .0084089    0.9079           ac
+---------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+             |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+         /ab |   1.667069    .170483     9.78   0.000     1.332929     2.00121
+         /bb |  -.2867032   .0413545    -6.93   0.000    -.3677566   -.2056498
+        /gbb |   .0130599   .0206734     0.63   0.528    -.0274591    .0535789
+        /gbp |  -.0604328   .0190027    -3.18   0.001    -.0976773   -.0231883
+        /gbc |  -.0194879   .0228923    -0.85   0.395     -.064356    .0253803
+        /gbt |   .1752807   .0168482    10.40   0.000     .1422587    .2083026
+         /ap |  -.1063507   .1353903    -0.79   0.432    -.3717108    .1590094
+         /bp |   .0840614    .032842     2.56   0.010     .0196922    .1484305
+        /gpb |   .0157303   .0164179     0.96   0.338    -.0164482    .0479087
+        /gpp |   .0698489   .0150911     4.63   0.000     .0402709    .0994269
+        /gpc |  -.0505328   .0181801    -2.78   0.005    -.0861652   -.0149004
+        /gpt |  -.0461294   .0133802    -3.45   0.001     -.072354   -.0199048
+         /ac |   .4137502   .1129394     3.66   0.000      .192393    .6351074
+         /bc |  -.0443281    .027396    -1.62   0.106    -.0980233    .0093672
+        /gcb |   -.074118   .0136954    -5.41   0.000    -.1009605   -.0472754
+        /gcp |  -.0419704   .0125886    -3.33   0.001    -.0666437   -.0172972
+        /gcc |   .1309039   .0151654     8.63   0.000     .1011802    .1606276
+        /gct |  -.1227963   .0111614   -11.00   0.000    -.1446723   -.1009203
+------------------------------------------------------------------------------
+
+. 
+end of do-file
+
+. do "/var/folders/hw/wmwf0vcd4jxdz_tmk5ft0p480000gn/T//SD13255.000000"
+
+.   * Calculate parameters of the fourth equation
+.     lincom 1 - [ab]_cons - [ap]_cons - [ac]_cons    //at HOD1
+
+ ( 1)  - [ab]_cons - [ap]_cons - [ac]_cons = -1
+
+------------------------------------------------------------------------------
+             |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+         (1) |  -.9744689   .1131106    -8.62   0.000    -1.196162   -.7527762
+------------------------------------------------------------------------------
+
+.         lincom 0 - _b[/bb]  - _b[/bp]  - _b[/bc]        //bt HOD0  
+
+ ( 1)  - [bb]_cons - [bp]_cons - [bc]_cons = 0
+
+------------------------------------------------------------------------------
+             |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+         (1) |   .2469698   .0274376     9.00   0.000     .1931932    .3007465
+------------------------------------------------------------------------------
+
+.         lincom 0 - _b[/gbb] - _b[/gpb] - _b[/gcb]       //gtb
+
+ ( 1)  - [gbb]_cons - [gpb]_cons - [gcb]_cons = 0
+
+------------------------------------------------------------------------------
+             |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+         (1) |   .0453278   .0137162     3.30   0.001     .0184446     .072211
+------------------------------------------------------------------------------
+
+.     lincom 0 - _b[/gbp] - _b[/gpp] - _b[/gcp]       //gtp
+
+ ( 1)  - [gbp]_cons - [gpp]_cons - [gcp]_cons = 0
+
+------------------------------------------------------------------------------
+             |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+         (1) |   .0325543   .0126077     2.58   0.010     .0078437     .057265
+------------------------------------------------------------------------------
+
+.     lincom 0 - _b[/gbc] - _b[/gpc] - _b[/gcc]       //gtc
+
+ ( 1)  - [gbc]_cons - [gpc]_cons - [gcc]_cons = 0
+
+------------------------------------------------------------------------------
+             |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+         (1) |  -.0608833   .0151884    -4.01   0.000     -.090652   -.0311145
+------------------------------------------------------------------------------
+
+.         lincom _b[/gbb]+_b[/gbp]+_b[/gbc]+_b[/gpb]+_b[/gpp]+_b[/gpc]+_b[/gcb]+_b[/gcp]+_b[/gc
+> c]    //gtt
+
+ ( 1)  [gbb]_cons + [gbp]_cons + [gbc]_cons + [gpb]_cons + [gpp]_cons + [gpc]_cons + [gcb]_cons
+       + [gcp]_cons + [gcc]_cons = 0
+
+------------------------------------------------------------------------------
+             |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+         (1) |  -.0169989   .0178049    -0.95   0.340    -.0518959    .0178981
+------------------------------------------------------------------------------
+
+.         
+.   * Test symmetry restrictions
+.     test _b[/gbp]=_b[/gpb]
+
+ ( 1)  [gbp]_cons - [gpb]_cons = 0
+
+           chi2(  1) =    8.93
+         Prob > chi2 =    0.0028
+
+.     test _b[/gbc]=_b[/gcb]
+
+ ( 1)  [gbc]_cons - [gcb]_cons = 0
+
+           chi2(  1) =    4.20
+         Prob > chi2 =    0.0404
+
+.     test _b[/gpc]=_b[/gcp]      
+
+ ( 1)  [gpc]_cons - [gcp]_cons = 0
+
+           chi2(  1) =    0.20
+         Prob > chi2 =    0.6510
+
+.         test _b[/gbt]=0 - _b[/gbb] - _b[/gpb] - _b[/gcb] // gbt=gtb
+
+ ( 1)  [gbb]_cons + [gbt]_cons + [gpb]_cons + [gcb]_cons = 0
+
+           chi2(  1) =   52.75
+         Prob > chi2 =    0.0000
+
+.         test _b[/gpt]=0 - _b[/gbp] - _b[/gpp] - _b[/gcp] // gpt=gtp
+
+ ( 1)  [gbp]_cons + [gpp]_cons + [gpt]_cons + [gcp]_cons = 0
+
+           chi2(  1) =   17.67
+         Prob > chi2 =    0.0000
+
+.         test _b[/gct]=0 - _b[/gbc] - _b[/gpc] - _b[/gcc] // gct=gtc     
+
+ ( 1)  [gbc]_cons + [gpc]_cons + [gcc]_cons + [gct]_cons = 0
+
+           chi2(  1) =   13.52
+         Prob > chi2 =    0.0002
+
+.         
+.   * Saving estimated coefficients as matrixs
+.     * alpha = [ab, ap, ac, at]
+.           scalar at = 1 - [ab]_cons - [ap]_cons - [ac]_cons
+
+.           matrix alpha = [[ab]_cons\ [ap]_cons\ [ac]_cons\ at]
+
+.           matrix rownames alpha = beef, pork, chick, turkey
+
+.           matrix colnames alpha = alpha
+
+.           matrix list alpha
+
+alpha[4,1]
+             alpha
+ beef,   1.6670695
+ pork,  -.10635073
+chick,   .41375022
+turkey  -.97446894
+
+.           
+.         * beta = [bb, bp, bc, bt]
+.           scalar bt = 0 - _b[/bb]  - _b[/bp]  - _b[/bc]
+
+.           matrix beta = [_b[/bb]\ _b[/bp]\ _b[/bc]\ bt]
+
+.           matrix rownames beta = beef, pork, chick, turkey
+
+.           matrix colnames beta = beta
+
+.           matrix list beta       
+
+beta[4,1]
+              beta
+ beef,  -.28670319
+ pork,   .08406139
+chick,  -.04432805
+turkey   .24696985
+
+. 
+end of do-file
+
+. do "/var/folders/hw/wmwf0vcd4jxdz_tmk5ft0p480000gn/T//SD13255.000000"
+
+.           scalar gtb = 0 - _b[/gbb] - _b[/gpb] - _b[/gcb]
+
+.           scalar gtp = 0 - _b[/gbp] - _b[/gpp] - _b[/gcp]
+
+.           scalar gtc = 0 - _b[/gbc] - _b[/gpc] - _b[/gcc] 
+
+.           scalar gtt = _b[/gbb]+_b[/gbp]+_b[/gbc]+_b[/gpb]+_b[/gpp]+_b[/gpc]+_b[/gcb]+_b[/gcp
+> ]+_b[/gcc]
+
+.           matrix gamma_b = [_b[/gbb], _b[/gbp], _b[/gbc], _b[/gbt]]
+
+.           matrix gamma_p = [_b[/gpb], _b[/gpp], _b[/gpc], _b[/gpt]]
+
+.           matrix gamma_c = [_b[/gcb], _b[/gcp], _b[/gcc], _b[/gct]]
+
+.           matrix gamma_t = [gtb, gtp, gtc, gtt]  
+
+.           matrix gamma = [gamma_b\ gamma_p\ gamma_c\ gamma_t]
+
+.           matrix rownames gamma = beef, pork, chick, turkey
+
+.           matrix colnames gamma = gamma_beef, gamma_pork, gamma_chick, gamma_turkey
+
+.           matrix list gamma
+
+gamma[4,4]
+         gamma_beef,   gamma_pork,  gamma_chick,  gamma_turkey
+ beef,     .01305989    -.06043283    -.01948786     .17528066
+ pork,     .01573027     .06984894     -.0505328    -.04612941
+chick,    -.07411798    -.04197045     .13090392    -.12279631
+turkey     .04532782     .03255434    -.06088326    -.01699891
+
+.         
+.         * alpha, beta, gamma  
+.       matrix AIDS_Parameters = [alpha, beta, gamma]
+
+.           matrix list AIDS_Parameters
+
+AIDS_Parameters[4,6]
+               alpha          beta   gamma_beef,   gamma_pork,  gamma_chick,  gamma_turkey
+ beef,     1.6670695    -.28670319     .01305989    -.06043283    -.01948786     .17528066
+ pork,    -.10635073     .08406139     .01573027     .06984894     -.0505328    -.04612941
+chick,     .41375022    -.04432805    -.07411798    -.04197045     .13090392    -.12279631
+turkey    -.97446894     .24696985     .04532782     .03255434    -.06088326    -.01699891
+
+. 
+end of do-file
+
+. do "/var/folders/hw/wmwf0vcd4jxdz_tmk5ft0p480000gn/T//SD13255.000000"
+
+.     sum w_beef
+
+    Variable |       Obs        Mean    Std. Dev.       Min        Max
+-------------+--------------------------------------------------------
+      w_beef |        99    .5358169    .0456045   .4345754   .6059664
+
+.         scalar w_b = r(mean)
+
+.         sum w_pork
+
+    Variable |       Obs        Mean    Std. Dev.       Min        Max
+-------------+--------------------------------------------------------
+      w_pork |        99    .2851895     .014952   .2534431   .3229213
+
+.         scalar w_p = r(mean)
+
+.         sum w_chick
+
+    Variable |       Obs        Mean    Std. Dev.       Min        Max
+-------------+--------------------------------------------------------
+     w_chick |        99    .1403944    .0278465   .0956761   .2018992
+
+.         scalar w_c = r(mean)
+
+.     sum w_turkey
+
+    Variable |       Obs        Mean    Std. Dev.       Min        Max
+-------------+--------------------------------------------------------
+    w_turkey |        99    .0385991    .0135901   .0151217   .0646151
+
+.         scalar w_t = r(mean)
+
+.         matrix w = [w_b\ w_p\ w_c\ w_t]
+
+.         matrix rownames w = beef, pork, chick, turkey
+
+.         matrix colnames w = ExpShare
+
+.         matrix list w
+
+w[4,1]
+         ExpShare
+ beef,  .53581693
+ pork,  .28518952
+chick,  .14039443
+turkey  .03859913
+
+.         
+.         sum lnpb
+
+    Variable |       Obs        Mean    Std. Dev.       Min        Max
+-------------+--------------------------------------------------------
+        lnpb |        99     .789998    .1636445   .5241028   1.175302
+
+.         scalar lnpb = r(mean)
+
+.         sum lnpp
+
+    Variable |       Obs        Mean    Std. Dev.       Min        Max
+-------------+--------------------------------------------------------
+        lnpp |        99    .5495617    .1823542    .279104   1.074855
+
+.         scalar lnpp = r(mean)
+
+.         sum lnpc
+
+    Variable |       Obs        Mean    Std. Dev.       Min        Max
+-------------+--------------------------------------------------------
+        lnpc |        99    -.291807    .1940612  -.5217258    .237279
+
+.         scalar lnpc = r(mean)
+
+.         sum lnpt
+
+    Variable |       Obs        Mean    Std. Dev.       Min        Max
+-------------+--------------------------------------------------------
+        lnpt |        99   -.1248003    .2605864  -.5364212   .3486581
+
+.         scalar lnpt = r(mean)   
+
+.         matrix lnP = [lnpb\ lnpp\ lnpc\ lnpt]
+
+.         matrix rownames lnP = beef, pork, chick, turkey
+
+.         matrix colnames lnP = LogPrice
+
+.         matrix list lnP
+
+lnP[4,1]
+          LogPrice
+ beef,   .78999803
+ pork,   .54956166
+chick,    -.291807
+turkey  -.12480026
+
+.         
+.         matrix delta = I(4)
+
+.         
+.         matrix A = J(4,4,.)
+
+.         forvalues i = 1/4 {
+  2.                   forvalues j = 1/4 {
+  3.                                     matrix A[`i',`j'] = - delta[`i',`j'] + /// 
+>                                                 gamma[`i',`j']/w[`i',1] - beta[`i',1]*w[`j',1
+> ]/w[`i',1]
+  4.                 }
+  5.         }
+
+.     matrix list A
+
+A[4,4]
+            c1          c2          c3          c4
+r1  -.68892302   .03981194   .03875142   .34778138
+r2  -.10277816  -.83914026  -.21857239  -.17312737
+r3  -.35874823  -.20890111  -.02327084  -.86246504
+r4  -2.2540096  -.98134002  -2.4756115  -1.6873659
+
+.         
+.         matrix B = J(4,1,.)
+
+.         forvalues i = 1/4 {
+  2.                           matrix B[`i',1] = beta[`i',1]/w[`i',1]
+  3.         }
+
+.     matrix list B
+
+B[4,1]
+            c1
+r1  -.53507677
+r2   .29475626
+r3   -.3157394
+r4    6.398327
+
+.         
+.         matrix C = J(1,4,.)
+
+.         forvalues j = 1/4 {
+  2.                           matrix C[1,`j'] = w[`j',1]*lnP[`j',1]
+  3.         }       
+
+.         matrix list C
+
+C[1,4]
+            c1          c2          c3          c4
+r1   .42329432   .15672922  -.04096808  -.00481718
+
+. 
+end of do-file
+
+. do "/var/folders/hw/wmwf0vcd4jxdz_tmk5ft0p480000gn/T//SD13255.000000"
+
+. * AEM 6700
+. * Meat Demand (AIDS Model)
+. * Notes: with seasonality there is a command that gives you all the parameter estimated (look
+>  for).
+. /* Other commands:  
+> - sureg  for seemingly unrelated regressions 
+> - quaids
+> - aidsills 
+> */
+. 
+. clear
+
+. set more off
+
+. * Setting working directory
+.   cd "/Users/Andres/Dropbox/CORNELL/Fall 2016/AEM 6700 Economics of Consumer Demand/In Class 
+> assignments/Meat Demand"
+/Users/Andres/Dropbox/CORNELL/Fall 2016/AEM 6700 Economics of Consumer Demand/In Class assignme
+> nts/Meat Demand
+
+.  
+. * Log file
+.   *log using MeatAIDS_Unrestricted.log, replace
+.   
+. * Import data
+.   import excel using "MeatAIDSData.xlsx", sheet("meat") firstrow
+
+.   save AIDSMeats, replace
+file AIDSMeats.dta saved
+
+.     
+. * Generate quarter index  
+.   gen yrqtr = yq(year, qtr)
+
+.   format yrqtr %tq
+
+.   order yrqtr, a(qtr)
+
+.   tsset yrqtr
+        time variable:  yrqtr, 1975q1 to 1999q3
+                delta:  1 quarter
+
+.   
+. * Generate real prices  
+.   gen beef_pr = beef_p/cpi
+
+.   gen pork_pr = pork_p/cpi
+
+.   gen chick_pr = chick_p/cpi
+
+.   gen turkey_pr = turkey_p/cpi
+
+.   
+. * Calcuate total expenditures on all meats (X) and shares of each meat
+.   gen ex_beef = beef_pr*beef_q
+
+.   gen ex_pork = pork_pr*pork_q
+
+.   gen ex_chick = chick_pr*chick_q
+
+.   gen ex_turkey = turkey_pr*turkey_q
+
+.   gen X = ex_beef + ex_pork + ex_chick + ex_turkey  
+
+.   
+.   gen w_beef = ex_beef/X     // share of beef
+
+.   gen w_pork = ex_pork/X     // share of pork
+
+.   gen w_chick = ex_chick/X   // share of chick
+
+.   gen w_turkey = ex_turkey/X // share of turkey
+
+.   
+. * Plot budget shares  
+.   twoway (connected w_beef yrqtr) (connected w_pork yrqtr) ///
+>          (connected w_chick yrqtr) (connected w_turkey yrqtr)
+
+.   graph export BudgetShares.png, replace
+(file BudgetShares.png written in PNG format)
+
+.   
+. * Generate logged values
+.   gen lnX  = log(X)     
+
+.   gen lnpb = log(beef_pr)
+
+.   gen lnpp = log(pork_pr)
+
+.   gen lnpc = log(chick_pr)
+
+.   gen lnpt = log(turkey_pr)
+
+.   gen lnP  = w_beef*lnpb + w_pork*lnpp + w_chick*lnpc + w_turkey*lnpt
+
+.   gen lnXP = lnX - lnP
+
+. 
+. *-------------------------------------------------------------------------------
+. * ADIS, Rotterdam, and OLS Model (Without Seasonality) 
+.  
+. * Estimate AIDS: -nlsur- 
+.   nlsur (w_beef ={ab}+{bb}*lnXP+{gbb}*lnpb+{gbp}*lnpp+{gbc}*lnpc+{gbt}*lnpt) ///
+>         (w_pork ={ap}+{bp}*lnXP+{gpb}*lnpb+{gpp}*lnpp+{gpc}*lnpc+{gpt}*lnpt) ///
+>                 (w_chick={ac}+{bc}*lnXP+{gcb}*lnpb+{gcp}*lnpp+{gcc}*lnpc+{gct}*lnpt), ///
+>         ifgnls 
+(obs = 99)
+
+Calculating NLS estimates...
+Iteration 0:  Residual SS =  .0330108
+Iteration 1:  Residual SS =  .0330108
+Calculating FGNLS estimates...
+Iteration 0:  Scaled RSS =       297
+FGNLS iteration 2...
+Iteration 0:  Scaled RSS =       297
+Parameter change         =  1.167e-15
+Covariance matrix change =  1.355e-19
+
+FGNLS regression 
+---------------------------------------------------------------------
+       Equation |       Obs  Parms       RMSE      R-sq     Constant
+----------------+----------------------------------------------------
+ 1       w_beef |        99      6   .0126932    0.9217           ab
+ 2       w_pork |        99      6   .0100804    0.5408           ap
+ 3      w_chick |        99      6   .0084089    0.9079           ac
+---------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+             |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+         /ab |   1.667069    .170483     9.78   0.000     1.332929     2.00121
+         /bb |  -.2867032   .0413545    -6.93   0.000    -.3677566   -.2056498
+        /gbb |   .0130599   .0206734     0.63   0.528    -.0274591    .0535789
+        /gbp |  -.0604328   .0190027    -3.18   0.001    -.0976773   -.0231883
+        /gbc |  -.0194879   .0228923    -0.85   0.395     -.064356    .0253803
+        /gbt |   .1752807   .0168482    10.40   0.000     .1422587    .2083026
+         /ap |  -.1063507   .1353903    -0.79   0.432    -.3717108    .1590094
+         /bp |   .0840614    .032842     2.56   0.010     .0196922    .1484305
+        /gpb |   .0157303   .0164179     0.96   0.338    -.0164482    .0479087
+        /gpp |   .0698489   .0150911     4.63   0.000     .0402709    .0994269
+        /gpc |  -.0505328   .0181801    -2.78   0.005    -.0861652   -.0149004
+        /gpt |  -.0461294   .0133802    -3.45   0.001     -.072354   -.0199048
+         /ac |   .4137502   .1129394     3.66   0.000      .192393    .6351074
+         /bc |  -.0443281    .027396    -1.62   0.106    -.0980233    .0093672
+        /gcb |   -.074118   .0136954    -5.41   0.000    -.1009605   -.0472754
+        /gcp |  -.0419704   .0125886    -3.33   0.001    -.0666437   -.0172972
+        /gcc |   .1309039   .0151654     8.63   0.000     .1011802    .1606276
+        /gct |  -.1227963   .0111614   -11.00   0.000    -.1446723   -.1009203
+------------------------------------------------------------------------------
+
+.                 
+.   * Calculate parameters of the fourth equation
+.     lincom 1 - [ab]_cons - [ap]_cons - [ac]_cons    //at HOD1
+
+ ( 1)  - [ab]_cons - [ap]_cons - [ac]_cons = -1
+
+------------------------------------------------------------------------------
+             |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+         (1) |  -.9744689   .1131106    -8.62   0.000    -1.196162   -.7527762
+------------------------------------------------------------------------------
+
+.         lincom 0 - _b[/bb]  - _b[/bp]  - _b[/bc]        //bt HOD0  
+
+ ( 1)  - [bb]_cons - [bp]_cons - [bc]_cons = 0
+
+------------------------------------------------------------------------------
+             |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+         (1) |   .2469698   .0274376     9.00   0.000     .1931932    .3007465
+------------------------------------------------------------------------------
+
+.         lincom 0 - _b[/gbb] - _b[/gpb] - _b[/gcb]       //gtb
+
+ ( 1)  - [gbb]_cons - [gpb]_cons - [gcb]_cons = 0
+
+------------------------------------------------------------------------------
+             |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+         (1) |   .0453278   .0137162     3.30   0.001     .0184446     .072211
+------------------------------------------------------------------------------
+
+.     lincom 0 - _b[/gbp] - _b[/gpp] - _b[/gcp]       //gtp
+
+ ( 1)  - [gbp]_cons - [gpp]_cons - [gcp]_cons = 0
+
+------------------------------------------------------------------------------
+             |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+         (1) |   .0325543   .0126077     2.58   0.010     .0078437     .057265
+------------------------------------------------------------------------------
+
+.     lincom 0 - _b[/gbc] - _b[/gpc] - _b[/gcc]       //gtc
+
+ ( 1)  - [gbc]_cons - [gpc]_cons - [gcc]_cons = 0
+
+------------------------------------------------------------------------------
+             |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+         (1) |  -.0608833   .0151884    -4.01   0.000     -.090652   -.0311145
+------------------------------------------------------------------------------
+
+.         lincom _b[/gbb]+_b[/gbp]+_b[/gbc]+_b[/gpb]+_b[/gpp]+_b[/gpc]+_b[/gcb]+_b[/gcp]+_b[/gc
+> c]    //gtt
+
+ ( 1)  [gbb]_cons + [gbp]_cons + [gbc]_cons + [gpb]_cons + [gpp]_cons + [gpc]_cons + [gcb]_cons
+       + [gcp]_cons + [gcc]_cons = 0
+
+------------------------------------------------------------------------------
+             |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+         (1) |  -.0169989   .0178049    -0.95   0.340    -.0518959    .0178981
+------------------------------------------------------------------------------
+
+.         
+.   * Test symmetry restrictions
+.     test _b[/gbp]=_b[/gpb]
+
+ ( 1)  [gbp]_cons - [gpb]_cons = 0
+
+           chi2(  1) =    8.93
+         Prob > chi2 =    0.0028
+
+.     test _b[/gbc]=_b[/gcb]
+
+ ( 1)  [gbc]_cons - [gcb]_cons = 0
+
+           chi2(  1) =    4.20
+         Prob > chi2 =    0.0404
+
+.     test _b[/gpc]=_b[/gcp]      
+
+ ( 1)  [gpc]_cons - [gcp]_cons = 0
+
+           chi2(  1) =    0.20
+         Prob > chi2 =    0.6510
+
+.         test _b[/gbt]=0 - _b[/gbb] - _b[/gpb] - _b[/gcb] // gbt=gtb
+
+ ( 1)  [gbb]_cons + [gbt]_cons + [gpb]_cons + [gcb]_cons = 0
+
+           chi2(  1) =   52.75
+         Prob > chi2 =    0.0000
+
+.         test _b[/gpt]=0 - _b[/gbp] - _b[/gpp] - _b[/gcp] // gpt=gtp
+
+ ( 1)  [gbp]_cons + [gpp]_cons + [gpt]_cons + [gcp]_cons = 0
+
+           chi2(  1) =   17.67
+         Prob > chi2 =    0.0000
+
+.         test _b[/gct]=0 - _b[/gbc] - _b[/gpc] - _b[/gcc] // gct=gtc     
+
+ ( 1)  [gbc]_cons + [gpc]_cons + [gcc]_cons + [gct]_cons = 0
+
+           chi2(  1) =   13.52
+         Prob > chi2 =    0.0002
+
+.         
+.   * Saving estimated coefficients as matrixs
+.     * alpha = [ab, ap, ac, at]
+.           scalar at = 1 - [ab]_cons - [ap]_cons - [ac]_cons
+
+.           matrix alpha = [[ab]_cons\ [ap]_cons\ [ac]_cons\ at]
+
+.           matrix rownames alpha = beef, pork, chick, turkey
+
+.           matrix colnames alpha = alpha
+
+.           matrix list alpha
+
+alpha[4,1]
+             alpha
+ beef,   1.6670695
+ pork,  -.10635073
+chick,   .41375022
+turkey  -.97446894
+
+.           
+.         * beta = [bb, bp, bc, bt]
+.           scalar bt = 0 - _b[/bb]  - _b[/bp]  - _b[/bc]
+
+.           matrix beta = [_b[/bb]\ _b[/bp]\ _b[/bc]\ bt]
+
+.           matrix rownames beta = beef, pork, chick, turkey
+
+.           matrix colnames beta = beta
+
+.           matrix list beta       
+
+beta[4,1]
+              beta
+ beef,  -.28670319
+ pork,   .08406139
+chick,  -.04432805
+turkey   .24696985
+
+.           
+.         * gamma = [gbb, gbp, gbc, gbt;
+.         *          gpb, gpp, gpc, gpt;
+.         *          gcb, gcp, gcc, gct;
+.         *          gtb, gtp, gtc, gtt]
+.           scalar gtb = 0 - _b[/gbb] - _b[/gpb] - _b[/gcb]
+
+.           scalar gtp = 0 - _b[/gbp] - _b[/gpp] - _b[/gcp]
+
+.           scalar gtc = 0 - _b[/gbc] - _b[/gpc] - _b[/gcc] 
+
+.           scalar gtt = _b[/gbb]+_b[/gbp]+_b[/gbc]+_b[/gpb]+_b[/gpp]+_b[/gpc]+_b[/gcb]+_b[/gcp
+> ]+_b[/gcc]
+
+.           matrix gamma_b = [_b[/gbb], _b[/gbp], _b[/gbc], _b[/gbt]]
+
+.           matrix gamma_p = [_b[/gpb], _b[/gpp], _b[/gpc], _b[/gpt]]
+
+.           matrix gamma_c = [_b[/gcb], _b[/gcp], _b[/gcc], _b[/gct]]
+
+.           matrix gamma_t = [gtb, gtp, gtc, gtt]  
+
+.           matrix gamma = [gamma_b\ gamma_p\ gamma_c\ gamma_t]
+
+.           matrix rownames gamma = beef, pork, chick, turkey
+
+.           matrix colnames gamma = gamma_beef, gamma_pork, gamma_chick, gamma_turkey
+
+.           matrix list gamma
+
+gamma[4,4]
+         gamma_beef,   gamma_pork,  gamma_chick,  gamma_turkey
+ beef,     .01305989    -.06043283    -.01948786     .17528066
+ pork,     .01573027     .06984894     -.0505328    -.04612941
+chick,    -.07411798    -.04197045     .13090392    -.12279631
+turkey     .04532782     .03255434    -.06088326    -.01699891
+
+.         
+.         * alpha, beta, gamma  
+.       matrix AIDS_Parameters = [alpha, beta, gamma]
+
+.           matrix list AIDS_Parameters
+
+AIDS_Parameters[4,6]
+               alpha          beta   gamma_beef,   gamma_pork,  gamma_chick,  gamma_turkey
+ beef,     1.6670695    -.28670319     .01305989    -.06043283    -.01948786     .17528066
+ pork,    -.10635073     .08406139     .01573027     .06984894     -.0505328    -.04612941
+chick,     .41375022    -.04432805    -.07411798    -.04197045     .13090392    -.12279631
+turkey    -.97446894     .24696985     .04532782     .03255434    -.06088326    -.01699891
+
+. 
+.   * Create matrixs A B & C in Green & Alston (1990):
+.     sum w_beef
+
+    Variable |       Obs        Mean    Std. Dev.       Min        Max
+-------------+--------------------------------------------------------
+      w_beef |        99    .5358169    .0456045   .4345754   .6059664
+
+.         scalar w_b = r(mean)
+
+.         sum w_pork
+
+    Variable |       Obs        Mean    Std. Dev.       Min        Max
+-------------+--------------------------------------------------------
+      w_pork |        99    .2851895     .014952   .2534431   .3229213
+
+.         scalar w_p = r(mean)
+
+.         sum w_chick
+
+    Variable |       Obs        Mean    Std. Dev.       Min        Max
+-------------+--------------------------------------------------------
+     w_chick |        99    .1403944    .0278465   .0956761   .2018992
+
+.         scalar w_c = r(mean)
+
+.     sum w_turkey
+
+    Variable |       Obs        Mean    Std. Dev.       Min        Max
+-------------+--------------------------------------------------------
+    w_turkey |        99    .0385991    .0135901   .0151217   .0646151
+
+.         scalar w_t = r(mean)
+
+.         matrix w = [w_b\ w_p\ w_c\ w_t]
+
+.         matrix rownames w = beef, pork, chick, turkey
+
+.         matrix colnames w = ExpShare
+
+.         matrix list w
+
+w[4,1]
+         ExpShare
+ beef,  .53581693
+ pork,  .28518952
+chick,  .14039443
+turkey  .03859913
+
+.         
+.         sum lnpb
+
+    Variable |       Obs        Mean    Std. Dev.       Min        Max
+-------------+--------------------------------------------------------
+        lnpb |        99     .789998    .1636445   .5241028   1.175302
+
+.         scalar lnpb = r(mean)
+
+.         sum lnpp
+
+    Variable |       Obs        Mean    Std. Dev.       Min        Max
+-------------+--------------------------------------------------------
+        lnpp |        99    .5495617    .1823542    .279104   1.074855
+
+.         scalar lnpp = r(mean)
+
+.         sum lnpc
+
+    Variable |       Obs        Mean    Std. Dev.       Min        Max
+-------------+--------------------------------------------------------
+        lnpc |        99    -.291807    .1940612  -.5217258    .237279
+
+.         scalar lnpc = r(mean)
+
+.         sum lnpt
+
+    Variable |       Obs        Mean    Std. Dev.       Min        Max
+-------------+--------------------------------------------------------
+        lnpt |        99   -.1248003    .2605864  -.5364212   .3486581
+
+.         scalar lnpt = r(mean)   
+
+.         matrix lnP = [lnpb\ lnpp\ lnpc\ lnpt]
+
+.         matrix rownames lnP = beef, pork, chick, turkey
+
+.         matrix colnames lnP = LogPrice
+
+.         matrix list lnP
+
+lnP[4,1]
+          LogPrice
+ beef,   .78999803
+ pork,   .54956166
+chick,    -.291807
+turkey  -.12480026
+
+.         
+.         matrix delta = I(4)
+
+.         
+.         matrix A = J(4,4,.)
+
+.         forvalues i = 1/4 {
+  2.                   forvalues j = 1/4 {
+  3.                                     matrix A[`i',`j'] = - delta[`i',`j'] + /// 
+>                                                 gamma[`i',`j']/w[`i',1] - beta[`i',1]*w[`j',1
+> ]/w[`i',1]
+  4.                 }
+  5.         }
+
+.     matrix list A
+
+A[4,4]
+            c1          c2          c3          c4
+r1  -.68892302   .03981194   .03875142   .34778138
+r2  -.10277816  -.83914026  -.21857239  -.17312737
+r3  -.35874823  -.20890111  -.02327084  -.86246504
+r4  -2.2540096  -.98134002  -2.4756115  -1.6873659
+
+.         
+.         matrix B = J(4,1,.)
+
+.         forvalues i = 1/4 {
+  2.                           matrix B[`i',1] = beta[`i',1]/w[`i',1]
+  3.         }
+
+.     matrix list B
+
+B[4,1]
+            c1
+r1  -.53507677
+r2   .29475626
+r3   -.3157394
+r4    6.398327
+
+.         
+.         matrix C = J(1,4,.)
+
+.         forvalues j = 1/4 {
+  2.                           matrix C[1,`j'] = w[`j',1]*lnP[`j',1]
+  3.         }       
+
+.         matrix list C
+
+C[1,4]
+            c1          c2          c3          c4
+r1   .42329432   .15672922  -.04096808  -.00481718
+
+.   
+.   * Calculating compensated (Hicksian) price elasticities:
+.     matrix E_AIDS = inv(B*C+delta)*(A+delta)-delta // Equation 11 in Green & Alston (1990)
+
+.         matrix rownames E_AIDS = beef, pork, chick, turkey
+
+.         matrix colnames E_AIDS = beef, pork, chick, turkey      
+
+.         matrix list E_AIDS
+
+E_AIDS[4,4]
+             beef,       pork,      chick,      turkey
+ beef,  -.59474651   .07674819   .00809242   .45370325
+ pork,  -.15465691  -.85948723  -.20168335  -.23147625
+chick,  -.30317633  -.18710568  -.04136218   -.7999624
+turkey  -3.3801509  -1.4230153  -2.1089981  -2.9539557
+
+.         
+.   * Calculating expenditure (income) elasticities:
+.     matrix One = J(4,1,1)
+
+.         matrix IncE_AIDS = inv(delta+B*C)*B + One
+
+.         matrix rownames IncE_AIDS = beef, pork, chick, turkey
+
+.         matrix colnames IncE_AIDS = IncomeElasticities  
+
+.         matrix list IncE_AIDS
+
+IncE_AIDS[4,1]
+        IncomeElas~s
+ beef,      .3326683
+ pork,     1.3676112
+chick,     .60621929
+turkey     8.9798016
+
+.         
+.   * Calculating uncompenstated (Marshallian) price elasticities:
+.         matrix E_AIDS_Mar = J(4,4,.)
+
+.         forvalues i = 1/4 {
+  2.                   forvalues j = 1/4 {
+  3.                                     matrix E_AIDS_Mar[`i',`j'] = E_AIDS[`i',`j'] + /// 
+>                                                 (1 + beta[`i',1]*w[`j',1]) * w[`j',1]
+  4.                 }
+  5.         }
+
+.         matrix rownames E_AIDS_Mar = beef, pork, chick, turkey
+
+.         matrix colnames E_AIDS_Mar = beef, pork, chick, turkey  
+
+.     matrix list E_AIDS_Mar
+
+E_AIDS_Mar[4,4]
+             beef,       pork,      chick,      turkey
+ beef,  -.14124201   .33861926   .14283576   .49187522
+ pork,   .40529403  -.56746074  -.05963202  -.19275188
+chick,   .21991402    .0944785   .09815852  -.76142932
+turkey   -2.773429   -1.117739  -1.9637357  -2.9149886
+
+.  
+.   * There are other Stata packages which can estimate AIDS model more easily.
+.   * For example: check command -quaids- or -aidsills-. 
+. 
+.         
+. *-------------------------------------------------------------------------------
+. * OLS Model (Without Seasonality)  
+.   gen lnqb = log(beef_q)
+
+.   gen lnqp = log(pork_q)
+
+.   gen lnqc = log(chick_q)
+
+.   gen lnqt = log(turkey_q)
+
+.   reg lnqb lnpb lnpp lnpc lnpt
+
+      Source |       SS       df       MS              Number of obs =      99
+-------------+------------------------------           F(  4,    94) =  247.71
+       Model |  1.09091634     4  .272729086           Prob > F      =  0.0000
+    Residual |  .103496162    94  .001101023           R-squared     =  0.9133
+-------------+------------------------------           Adj R-squared =  0.9097
+       Total |  1.19441251    98  .012187883           Root MSE      =  .03318
+
+------------------------------------------------------------------------------
+        lnqb |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+        lnpb |  -.4505679   .0466737    -9.65   0.000    -.5432395   -.3578962
+        lnpp |   .1336112   .0490114     2.73   0.008      .036298    .2309245
+        lnpc |   .0344722   .0576314     0.60   0.551    -.0799564    .1489007
+        lnpt |   .5300676   .0440148    12.04   0.000     .4426751      .61746
+       _cons |   3.284285   .0546865    60.06   0.000     3.175703    3.392866
+------------------------------------------------------------------------------
+
+.   matrix E_OLS_b=e(b)
+
+.   reg lnqp lnpb lnpp lnpc lnpt
+
+      Source |       SS       df       MS              Number of obs =      99
+-------------+------------------------------           F(  4,    94) =   33.70
+       Model |  .354441557     4  .088610389           Prob > F      =  0.0000
+    Residual |  .247167749    94  .002629444           R-squared     =  0.5892
+-------------+------------------------------           Adj R-squared =  0.5717
+       Total |  .601609305    98   .00613887           Root MSE      =  .05128
+
+------------------------------------------------------------------------------
+        lnqp |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+        lnpb |     .36763   .0721283     5.10   0.000     .2244176    .5108425
+        lnpp |  -.5701544   .0757409    -7.53   0.000    -.7205398    -.419769
+        lnpc |   .0327498   .0890622     0.37   0.714    -.1440852    .2095848
+        lnpt |   .0182746   .0680194     0.27   0.789    -.1167794    .1533287
+       _cons |   2.572408   .0845111    30.44   0.000     2.404609    2.740207
+------------------------------------------------------------------------------
+
+.   matrix E_OLS_p=e(b)  
+
+.   reg lnqc lnpb lnpp lnpc lnpt
+
+      Source |       SS       df       MS              Number of obs =      99
+-------------+------------------------------           F(  4,    94) =  279.47
+       Model |   3.5164386     4   .87910965           Prob > F      =  0.0000
+    Residual |    .2956865    94  .003145601           R-squared     =  0.9224
+-------------+------------------------------           Adj R-squared =  0.9191
+       Total |   3.8121251    98  .038899236           Root MSE      =  .05609
+
+------------------------------------------------------------------------------
+        lnqc |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+        lnpb |  -.0314905   .0788907    -0.40   0.691    -.1881298    .1251487
+        lnpp |  -.0948244    .082842    -1.14   0.255    -.2593091    .0696603
+        lnpc |   .0265026   .0974121     0.27   0.786    -.1669115    .2199167
+        lnpt |  -.6682665   .0743965    -8.98   0.000    -.8159825   -.5205505
+       _cons |   2.653734   .0924344    28.71   0.000     2.470203    2.837265
+------------------------------------------------------------------------------
+
+.   matrix E_OLS_c=e(b)  
+
+.   reg lnqt lnpb lnpp lnpc lnpt
+
+      Source |       SS       df       MS              Number of obs =      99
+-------------+------------------------------           F(  4,    94) =   24.11
+       Model |  10.0124059     4  2.50310148           Prob > F      =  0.0000
+    Residual |  9.76020633    94  .103831982           R-squared     =  0.5064
+-------------+------------------------------           Adj R-squared =  0.4854
+       Total |  19.7726123    98   .20176135           Root MSE      =  .32223
+
+------------------------------------------------------------------------------
+        lnqt |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+        lnpb |  -.0537606   .4532516    -0.12   0.906    -.9537022    .8461811
+        lnpp |   .5026871   .4759532     1.06   0.294    -.4423292    1.447703
+        lnpc |  -.6348505   .5596633    -1.13   0.260    -1.746075    .4763741
+        lnpt |  -1.059007   .4274313    -2.48   0.015    -1.907681   -.2103319
+       _cons |   .5950444   .5310648     1.12   0.265    -.4593973    1.649486
+------------------------------------------------------------------------------
+
+.   matrix E_OLS_t=e(b) 
+
+.   matrix E_OLS = [E_OLS_b\ E_OLS_p\ E_OLS_c\ E_OLS_t]
+
+.   matrix E_OLS = E_OLS[1..4,1..4]
+
+.   matrix rownames E_OLS = beef, pork, chick, turkey
+
+.   matrix colnames E_OLS = beef, pork, chick, turkey  
+
+. 
+. 
+. *-------------------------------------------------------------------------------
+. * Rotterdam Model (Without Seasonality)
+. 
+. * Estimation equation:  
+. * w_bar_it*D.lnq_it = sum_j(c_ij*D.lnp_jt) + b_i*(D.lnX_t- sum_j(w_bar_jt*D.lnp_jt)) 
+. 
+. * Generate w_bar_it
+.   gen w_bar_b = 0.5 * (w_beef   + L.w_beef)   //beef
+(1 missing value generated)
+
+.   gen w_bar_p = 0.5 * (w_pork   + L.w_pork)   //pork
+(1 missing value generated)
+
+.   gen w_bar_c = 0.5 * (w_chick  + L.w_chick)  //chick
+(1 missing value generated)
+
+.   gen w_bar_t = 0.5 * (w_turkey + L.w_turkey) //turkey 
+(1 missing value generated)
+
+. 
+. * Generate dependent variables
+.   gen Dep_beef   = w_bar_b * D.lnqb //beef
+(1 missing value generated)
+
+.   gen Dep_pork   = w_bar_p * D.lnqp //pork
+(1 missing value generated)
+
+.   gen Dep_chick  = w_bar_c * D.lnqc //chick
+(1 missing value generated)
+
+.   gen Dep_turkey = w_bar_t * D.lnqt //turkey
+(1 missing value generated)
+
+.   
+. * Generate logged nominal prices
+.   * notice that we need to use nominal price here (vs. real price in AIDS model)
+.   gen lnnpb = log(beef_p)
+
+.   gen lnnpp = log(pork_p)
+
+.   gen lnnpc = log(chick_p)
+
+.   gen lnnpt = log(turkey_p)
+
+. 
+. * Estimate Rotterdam: -nlsur- 
+.   nlsur (Dep_beef  = {bb}*(D.lnX-w_bar_b*D.lnnpb-w_bar_p*D.lnnpp-w_bar_c*D.lnnpc-w_bar_t*D.ln
+> npt) ///
+>                    + {cbb}*D.lnnpb+{cbp}*D.lnnpp+{cbc}*D.lnnpc+{cbt}*D.lnnpt) ///
+>         (Dep_pork  = {bp}*(D.lnX-w_bar_b*D.lnnpb-w_bar_p*D.lnnpp-w_bar_c*D.lnnpc-w_bar_t*D.ln
+> npt) ///
+>                    + {cpb}*D.lnnpb+{cpp}*D.lnnpp+{cpc}*D.lnnpc+{cpt}*D.lnnpt) ///
+>         (Dep_chick = {bc}*(D.lnX-w_bar_b*D.lnnpb-w_bar_p*D.lnnpp-w_bar_c*D.lnnpc-w_bar_t*D.ln
+> npt) ///
+>                    + {ccb}*D.lnnpb+{ccp}*D.lnnpp+{ccc}*D.lnnpc+{cct}*D.lnnpt), ///
+>         ifgnls  
+(obs = 98)
+
+Calculating NLS estimates...
+Iteration 0:  Residual SS =  .0469214
+Iteration 1:  Residual SS =  .0469214
+Calculating FGNLS estimates...
+Iteration 0:  Scaled RSS =       294
+FGNLS iteration 2...
+Iteration 0:  Scaled RSS =       294
+Parameter change         =  9.796e-12
+Covariance matrix change =  5.420e-20
+
+FGNLS regression 
+---------------------------------------------------------------------
+       Equation |       Obs  Parms       RMSE      R-sq     Constant
+----------------+----------------------------------------------------
+ 1     Dep_beef |        98      5   .0164006    0.4118*      (none)
+ 2     Dep_pork |        98      5    .013312    0.5012*      (none)
+ 3    Dep_chick |        98      5   .0057098    0.1340*      (none)
+---------------------------------------------------------------------
+* Uncentered R-sq
+
+------------------------------------------------------------------------------
+             |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+         /bb |   .1831909   .0502826     3.64   0.000     .0846389     .281743
+        /cbb |  -.2158575   .0599906    -3.60   0.000    -.3334368   -.0982781
+        /cbp |   .0822578   .0456753     1.80   0.072    -.0072641    .1717797
+        /cbc |   .0640568   .0444542     1.44   0.150    -.0230718    .1511854
+        /cbt |   .1966492   .0476225     4.13   0.000     .1033109    .2899875
+         /bp |   .3172437   .0408132     7.77   0.000     .2372512    .3972362
+        /cpb |   .1185271    .048693     2.43   0.015     .0230905    .2139636
+        /cpp |  -.1046731   .0370736    -2.82   0.005     -.177336   -.0320102
+        /cpc |  -.0378386   .0360825    -1.05   0.294    -.1085589    .0328818
+        /cpt |  -.0916208   .0386541    -2.37   0.018    -.1673814   -.0158602
+         /bc |  -.0257712   .0175058    -1.47   0.141     -.060082    .0085396
+        /ccb |    .049204   .0208857     2.36   0.018     .0082689    .0901392
+        /ccp |  -.0225931   .0159018    -1.42   0.155    -.0537601    .0085738
+        /ccc |  -.0111157   .0154767    -0.72   0.473    -.0414495     .019218
+        /cct |   .0248787   .0165797     1.50   0.133    -.0076169    .0573744
+------------------------------------------------------------------------------
+
+.                 
+.   * Calculate parameters of the fourth equation
+.         lincom 1 - _b[/bb]  - _b[/bp]  - _b[/bc]        //bt HOD0  
+
+ ( 1)  - [bb]_cons - [bp]_cons - [bc]_cons = -1
+
+------------------------------------------------------------------------------
+             |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+         (1) |   .5253365   .0395886    13.27   0.000     .4477443    .6029288
+------------------------------------------------------------------------------
+
+.         lincom 0 - _b[/cbb] - _b[/cpb] - _b[/ccb]       //ctb
+
+ ( 1)  - [cbb]_cons - [cpb]_cons - [ccb]_cons = 0
+
+------------------------------------------------------------------------------
+             |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+         (1) |   .0481264   .0472319     1.02   0.308    -.0444465    .1406993
+------------------------------------------------------------------------------
+
+.     lincom 0 - _b[/cbp] - _b[/cpp] - _b[/ccp]       //ctp
+
+ ( 1)  - [cbp]_cons - [cpp]_cons - [ccp]_cons = 0
+
+------------------------------------------------------------------------------
+             |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+         (1) |   .0450084   .0359612     1.25   0.211    -.0254742     .115491
+------------------------------------------------------------------------------
+
+.     lincom 0 - _b[/cbc] - _b[/cpc] - _b[/ccc]       //ctc
+
+ ( 1)  - [cbc]_cons - [cpc]_cons - [ccc]_cons = 0
+
+------------------------------------------------------------------------------
+             |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+         (1) |  -.0151025   .0349998    -0.43   0.666    -.0837008    .0534958
+------------------------------------------------------------------------------
+
+.         lincom _b[/cbb]+_b[/cbp]+_b[/cbc]+_b[/cpb]+_b[/cpp]+_b[/cpc]+_b[/ccb]+_b[/ccp]+_b[/cc
+> c]    //ctt
+
+ ( 1)  [cbb]_cons + [cbp]_cons + [cbc]_cons + [cpb]_cons + [cpp]_cons + [cpc]_cons + [ccb]_cons
+       + [ccp]_cons + [ccc]_cons = 0
+
+------------------------------------------------------------------------------
+             |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+         (1) |  -.0780323   .0475859    -1.64   0.101    -.1712989    .0152343
+------------------------------------------------------------------------------
+
+.         
+.   * Test symmetry restrictions
+.     test _b[/cbp]=_b[/cpb]
+
+ ( 1)  [cbp]_cons - [cpb]_cons = 0
+
+           chi2(  1) =    0.36
+         Prob > chi2 =    0.5512
+
+.     test _b[/cbc]=_b[/ccb]
+
+ ( 1)  [cbc]_cons - [ccb]_cons = 0
+
+           chi2(  1) =    0.09
+         Prob > chi2 =    0.7703
+
+.     test _b[/cpc]=_b[/ccp]      
+
+ ( 1)  [cpc]_cons - [ccp]_cons = 0
+
+           chi2(  1) =    0.19
+         Prob > chi2 =    0.6625
+
+.         test _b[/cbt]=0 - _b[/cbb] - _b[/cpb] - _b[/ccb] // cbt=ctb
+
+ ( 1)  [cbb]_cons + [cbt]_cons + [cpb]_cons + [ccb]_cons = 0
+
+           chi2(  1) =    4.93
+         Prob > chi2 =    0.0264
+
+.         test _b[/cpt]=0 - _b[/cbp] - _b[/cpp] - _b[/ccp] // cpt=ctp
+
+ ( 1)  [cbp]_cons + [cpp]_cons + [cpt]_cons + [ccp]_cons = 0
+
+           chi2(  1) =    6.49
+         Prob > chi2 =    0.0108
+
+.         test _b[/cct]=0 - _b[/cbc] - _b[/cpc] - _b[/ccc] // cct=ctc     
+
+ ( 1)  [cbc]_cons + [cpc]_cons + [ccc]_cons + [cct]_cons = 0
+
+           chi2(  1) =    1.17
+         Prob > chi2 =    0.2791
+
+.         
+.     scalar bt = 1 - _b[/bb]  - _b[/bp]  - _b[/bc]
+
+.     scalar ctb = 0 - _b[/cbb] - _b[/cpb] - _b[/ccb]
+
+.     scalar ctp = 0 - _b[/cbp] - _b[/cpp] - _b[/ccp]
+
+.     scalar ctc = 0 - _b[/cbc] - _b[/cpc] - _b[/ccc] 
+
+.     scalar ctt = _b[/cbb]+_b[/cbp]+_b[/cbc]+_b[/cpb]+_b[/cpp]+_b[/cpc]+_b[/ccb]+_b[/ccp]+_b[/
+> ccc]
+
+.   
+.   * Calculating income/expenditure elasticities
+.     matrix b = [_b[/bb]\ _b[/bp]\ _b[/bc]\ bt] 
+
+.     matrix list b
+
+b[4,1]
+            c1
+r1   .18319092
+r2   .31724373
+r3  -.02577117
+r4   .52533651
+
+.     matrix IncE_Rdam = J(4,1,.)
+
+.     forvalues i = 1/4 {
+  2.                         matrix IncE_Rdam[`i',1] = b[`i',1] / w[`i',1]
+  3.     }
+
+.     matrix rownames IncE_Rdam = beef, pork, chick, turkey 
+
+.     matrix colnames IncE_Rdam = IncomeElasticityRotterdam
+
+.     matrix list IncE_Rdam
+
+IncE_Rdam[4,1]
+        IncomeElas~m
+ beef,     .34189088
+ pork,     1.1123962
+chick,    -.18356259
+turkey     13.610061
+
+.   
+.   * Calculating uncompensated/Marshallian elasticities
+.     matrix c = [_b[/cbb], _b[/cbp], _b[/cbc], _b[/cbt]\ ///
+>                 _b[/cpb], _b[/cpp], _b[/cpc], _b[/cpt]\ ///
+>                         _b[/ccb], _b[/ccp], _b[/ccc], _b[/cct]\ ///
+>                                 ctb,      ctp,      ctc,      ctt]
+
+.   matrix E_Rdam_Mar = J(4,4,.)
+
+.   forvalues i = 1/4 {
+  2.                   forvalues j = 1/4 {
+  3.                                     matrix E_Rdam_Mar[`i',`j'] = c[`i',`j']/w[`i',1] 
+  4.                 }
+  5.   }
+
+.   matrix rownames E_Rdam_Mar = beef, pork, chick, turkey
+
+.   matrix colnames E_Rdam_Mar = beef, pork, chick, turkey  
+
+.   matrix list E_Rdam_Mar
+
+E_Rdam_Mar[4,4]
+             beef,       pork,      chick,      turkey
+ beef,  -.40285676    .1535185    .1195498   .36700822
+ pork,   .41560807  -.36702997  -.13267876  -.32126286
+chick,   .35046999  -.16092618  -.07917492    .1772059
+turkey   1.2468253   1.1660477  -.39126519  -2.0216079
+
+.  
+. *-------------------------------------------------------------------------------  
+. * Comparing OLS, AIDS and Rotterdam Elasticities:  
+.   dis "The Price Elasticities calculated from OLS model are:"
+The Price Elasticities calculated from OLS model are:
+
+.   matrix list E_OLS 
+
+E_OLS[4,4]
+             beef,       pork,      chick,      turkey
+ beef,  -.45056785   .13361123   .03447218   .53006756
+ pork,   .36763003  -.57015437   .03274977   .01827463
+chick,  -.03149053   -.0948244    .0265026  -.66826652
+turkey  -.05376055   .50268705  -.63485049  -1.0590066
+
+.   dis "The Price Elasticities (Marshallian) calculated from Rotterdam model are:"
+The Price Elasticities (Marshallian) calculated from Rotterdam model are:
+
+.   matrix list E_Rdam_Mar 
+
+E_Rdam_Mar[4,4]
+             beef,       pork,      chick,      turkey
+ beef,  -.40285676    .1535185    .1195498   .36700822
+ pork,   .41560807  -.36702997  -.13267876  -.32126286
+chick,   .35046999  -.16092618  -.07917492    .1772059
+turkey   1.2468253   1.1660477  -.39126519  -2.0216079
+
+.   dis "The Price Elasticities (Marshallian) calculated from AIDS model are:"
+The Price Elasticities (Marshallian) calculated from AIDS model are:
+
+.   matrix list E_AIDS_Mar
+
+E_AIDS_Mar[4,4]
+             beef,       pork,      chick,      turkey
+ beef,  -.14124201   .33861926   .14283576   .49187522
+ pork,   .40529403  -.56746074  -.05963202  -.19275188
+chick,   .21991402    .0944785   .09815852  -.76142932
+turkey   -2.773429   -1.117739  -1.9637357  -2.9149886
+
+. 
+.   
+. *-------------------------------------------------------------------------------
+. * Seasonality
+.   gen t = _n
+
+.   gen cos = cos(_pi*t/2)
+
+.   gen sin = sin(_pi*t/2)
+
+.   
+.   * AIDS-Seasonality
+.         nlsur (w_beef ={ab}+{bb}*lnXP+{gbb}*lnpb+{gbp}*lnpp+{gbc}*lnpc+{gbt}*lnpt+{btrend}*t+
+> {bcos}*cos+{bsin}*sin) ///
+>           (w_pork ={ap}+{bp}*lnXP+{gpb}*lnpb+{gpp}*lnpp+{gpc}*lnpc+{gpt}*lnpt+{ptrend}*t+{pco
+> s}*cos+{psin}*sin) ///
+>                   (w_chick={ac}+{bc}*lnXP+{gcb}*lnpb+{gcp}*lnpp+{gcc}*lnpc+{gct}*lnpt+{ctrend
+> }*t+{ccos}*cos+{csin}*sin), ///
+>           ifgnls          
+(obs = 99)
+
+Calculating NLS estimates...
+Iteration 0:  Residual SS =  .0130354
+Iteration 1:  Residual SS =  .0130354
+Calculating FGNLS estimates...
+Iteration 0:  Scaled RSS =       297
+FGNLS iteration 2...
+Iteration 0:  Scaled RSS =       297
+Parameter change         =  2.069e-16
+Covariance matrix change =  1.355e-19
+
+FGNLS regression 
+---------------------------------------------------------------------
+       Equation |       Obs  Parms       RMSE      R-sq     Constant
+----------------+----------------------------------------------------
+ 1       w_beef |        99      9   .0086378    0.9638           ab
+ 2       w_pork |        99      9   .0065899    0.8038           ap
+ 3      w_chick |        99      9   .0036923    0.9822           ac
+---------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+             |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+         /ab |   1.146646   .1579082     7.26   0.000     .8371519    1.456141
+         /bb |  -.1390874   .0390902    -3.56   0.000    -.2157027   -.0624721
+        /gbb |   .0017349   .0157048     0.11   0.912     -.029046    .0325158
+        /gbp |  -.0472327   .0134907    -3.50   0.000     -.073674   -.0207914
+        /gbc |  -.0311703   .0164437    -1.90   0.058    -.0633994    .0010588
+        /gbt |   .0745567   .0209723     3.56   0.000     .0334517    .1156618
+     /btrend |  -.0011264   .0001875    -6.01   0.000    -.0014938   -.0007589
+       /bcos |  -.0123533   .0015591    -7.92   0.000     -.015409   -.0092976
+       /bsin |  -.0047025    .001394    -3.37   0.001    -.0074346   -.0019704
+         /ap |    .053542   .1204712     0.44   0.657    -.1825772    .2896612
+         /bp |   .0483862   .0298226     1.62   0.105    -.0100651    .1068375
+        /gpb |   .0057156   .0119815     0.48   0.633    -.0177677     .029199
+        /gpp |   .0575207   .0102923     5.59   0.000     .0373481    .0776933
+        /gpc |  -.0339316   .0125452    -2.70   0.007    -.0585198   -.0093434
+        /gpt |  -.0612857   .0160002    -3.83   0.000    -.0926455   -.0299259
+     /ptrend |  -.0001253    .000143    -0.88   0.381    -.0004057     .000155
+       /pcos |   .0084331   .0011894     7.09   0.000     .0061019    .0107644
+       /psin |   .0067663   .0010635     6.36   0.000      .004682    .0088507
+         /ac |   .1878823   .0674988     2.78   0.005     .0555871    .3201776
+         /bc |  -.0141588   .0167093    -0.85   0.397    -.0469085    .0185909
+        /gcb |  -.0237869   .0067131    -3.54   0.000    -.0369444   -.0106294
+        /gcp |  -.0197303   .0057667    -3.42   0.001    -.0310328   -.0084278
+        /gcc |   .0959127    .007029    13.65   0.000     .0821362    .1096892
+        /gct |   .0007911   .0089647     0.09   0.930    -.0167794    .0183617
+     /ctrend |   .0012822   .0000801    16.00   0.000     .0011251    .0014392
+       /ccos |  -.0061938   .0006664    -9.29   0.000    -.0074999   -.0048876
+       /csin |   .0001345   .0005959     0.23   0.821    -.0010334    .0013024
+------------------------------------------------------------------------------
+
+.         
+.     * Calculate parameters of the fourth equation
+.       lincom 1 - [ab]_cons - [ap]_cons - [ac]_cons    //at HOD1
+
+ ( 1)  - [ab]_cons - [ap]_cons - [ac]_cons = -1
+
+------------------------------------------------------------------------------
+             |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+         (1) |  -.3880706   .1127938    -3.44   0.001    -.6091425   -.1669987
+------------------------------------------------------------------------------
+
+.           lincom 0 - _b[/bb]  - _b[/bp]  - _b[/bc]        //bt HOD0  
+
+ ( 1)  - [bb]_cons - [bp]_cons - [bc]_cons = 0
+
+------------------------------------------------------------------------------
+             |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+         (1) |     .10486   .0279221     3.76   0.000     .0501337    .1595863
+------------------------------------------------------------------------------
+
+.           lincom 0 - _b[/gbb] - _b[/gpb] - _b[/gcb]       //gtb
+
+ ( 1)  - [gbb]_cons - [gpb]_cons - [gcb]_cons = 0
+
+------------------------------------------------------------------------------
+             |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+         (1) |   .0163364    .011218     1.46   0.145    -.0056504    .0383232
+------------------------------------------------------------------------------
+
+.       lincom 0 - _b[/gbp] - _b[/gpp] - _b[/gcp]       //gtp
+
+ ( 1)  - [gbp]_cons - [gpp]_cons - [gcp]_cons = 0
+
+------------------------------------------------------------------------------
+             |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+         (1) |   .0094423   .0096364     0.98   0.327    -.0094448    .0283293
+------------------------------------------------------------------------------
+
+.       lincom 0 - _b[/gbc] - _b[/gpc] - _b[/gcc]       //gtc
+
+ ( 1)  - [gbc]_cons - [gpc]_cons - [gcc]_cons = 0
+
+------------------------------------------------------------------------------
+             |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+         (1) |  -.0308108   .0117457    -2.62   0.009     -.053832   -.0077895
+------------------------------------------------------------------------------
+
+.           lincom _b[/gbb]+_b[/gbp]+_b[/gbc]+_b[/gpb]+_b[/gpp]+_b[/gpc]+_b[/gcb]+_b[/gcp]+_b[/
+> gcc]    //gtt
+
+ ( 1)  [gbb]_cons + [gbp]_cons + [gbc]_cons + [gpb]_cons + [gpp]_cons + [gpc]_cons + [gcb]_cons
+       + [gcp]_cons + [gcc]_cons = 0
+
+------------------------------------------------------------------------------
+             |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+         (1) |   .0050321   .0136034     0.37   0.711    -.0216302    .0316943
+------------------------------------------------------------------------------
+
+.         
+.     * Test symmetry restrictions
+.       test _b[/gbp]=_b[/gpb]
+
+ ( 1)  [gbp]_cons - [gpb]_cons = 0
+
+           chi2(  1) =    7.89
+         Prob > chi2 =    0.0050
+
+.       test _b[/gbc]=_b[/gcb]
+
+ ( 1)  [gbc]_cons - [gcb]_cons = 0
+
+           chi2(  1) =    0.18
+         Prob > chi2 =    0.6740
+
+.       test _b[/gpc]=_b[/gcp]    
+
+ ( 1)  [gpc]_cons - [gcp]_cons = 0
+
+           chi2(  1) =    1.20
+         Prob > chi2 =    0.2737
+
+.           test _b[/gbt]=0 - _b[/gbb] - _b[/gpb] - _b[/gcb] // gbt=gtb
+
+ ( 1)  [gbb]_cons + [gbt]_cons + [gpb]_cons + [gcb]_cons = 0
+
+           chi2(  1) =    5.95
+         Prob > chi2 =    0.0147
+
+.           test _b[/gpt]=0 - _b[/gbp] - _b[/gpp] - _b[/gcp] // gpt=gtp
+
+ ( 1)  [gbp]_cons + [gpp]_cons + [gpt]_cons + [gcp]_cons = 0
+
+           chi2(  1) =   14.34
+         Prob > chi2 =    0.0002
+
+.           test _b[/gct]=0 - _b[/gbc] - _b[/gpc] - _b[/gcc] // gct=gtc   
+
+ ( 1)  [gbc]_cons + [gpc]_cons + [gcc]_cons + [gct]_cons = 0
+
+           chi2(  1) =    4.80
+         Prob > chi2 =    0.0285
+
+.         
+.         * Saving estimated coefficients as matrixs
+.     * alpha = [ab, ap, ac, at]
+.           scalar at = 1 - [ab]_cons - [ap]_cons - [ac]_cons
+
+.           matrix alpha_S = [[ab]_cons\ [ap]_cons\ [ac]_cons\ at]
+
+.           matrix rownames alpha_S = beef, pork, chick, turkey
+
+.           matrix colnames alpha_S = alphaSeasonality
+
+.           matrix list alpha_S
+
+alpha_S[4,1]
+        alphaSeaso~y
+ beef,     1.1466463
+ pork,     .05354201
+chick,     .18788232
+turkey     -.3880706
+
+.           
+.         * beta = [bb, bp, bc, bt]
+.           scalar bt = 0 - _b[/bb]  - _b[/bp]  - _b[/bc]
+
+.           matrix beta_S = [_b[/bb]\ _b[/bp]\ _b[/bc]\ bt]
+
+.           matrix rownames beta_S = beef, pork, chick, turkey
+
+.           matrix colnames beta_S = betaSeasonality
+
+.           matrix list beta_S     
+
+beta_S[4,1]
+        betaSeason~y
+ beef,    -.13908739
+ pork,      .0483862
+chick,    -.01415882
+turkey     .10486001
+
+.           
+.         * gamma = [gbb, gbp, gbc, gbt;
+.         *          gpb, gpp, gpc, gpt;
+.         *          gcb, gcp, gcc, gct;
+.         *          gtb, gtp, gtc, gtt]
+.           scalar gtb = 0 - _b[/gbb] - _b[/gpb] - _b[/gcb]
+
+.           scalar gtp = 0 - _b[/gbp] - _b[/gpp] - _b[/gcp]
+
+.           scalar gtc = 0 - _b[/gbc] - _b[/gpc] - _b[/gcc] 
+
+.           scalar gtt = _b[/gbb]+_b[/gbp]+_b[/gbc]+_b[/gpb]+_b[/gpp]+_b[/gpc]+_b[/gcb]+_b[/gcp
+> ]+_b[/gcc]
+
+.           matrix gamma_b = [_b[/gbb], _b[/gbp], _b[/gbc], _b[/gbt]]
+
+.           matrix gamma_p = [_b[/gpb], _b[/gpp], _b[/gpc], _b[/gpt]]
+
+.           matrix gamma_c = [_b[/gcb], _b[/gcp], _b[/gcc], _b[/gct]]
+
+.           matrix gamma_t = [gtb, gtp, gtc, gtt]  
+
+.           matrix gamma_S = [gamma_b\ gamma_p\ gamma_c\ gamma_t]
+
+.           matrix rownames gamma_S = beef, pork, chick, turkey
+
+.           matrix colnames gamma_S = gamma_beef, gamma_pork, gamma_chick, gamma_turkey
+
+.           matrix list gamma_S
+
+gamma_S[4,4]
+         gamma_beef,   gamma_pork,  gamma_chick,  gamma_turkey
+ beef,     .00173486    -.04723268     -.0311703     .07455675
+ pork,     .00571563     .05752073     -.0339316    -.06128574
+chick,    -.02378688    -.01973034     .09591267     .00079114
+turkey      .0163364     .00944229    -.03081077     .00503208
+
+.         
+.   * Create matrixs A B & C in Green & Alston (1990):
+.         matrix A = J(4,4,.)
+
+.         forvalues i = 1/4 {
+  2.                   forvalues j = 1/4 {
+  3.                                     matrix A[`i',`j'] = - delta[`i',`j'] + /// 
+>                                                 gamma_S[`i',`j']/w[`i',1] - beta_S[`i',1]*w[`
+> j',1]/w[`i',1]
+  4.                 }
+  5.         }
+
+.     matrix list A
+
+A[4,4]
+            c1          c2          c3          c4
+r1  -.85767483  -.01412128  -.02172982    .1491655
+r2  -.07086697  -.84669319  -.14279891  -.22144364
+r3  -.11539168   -.1117736  -.30267543   .00952784
+r4  -1.0323904  -.53013331  -1.1796258  -.97449231
+
+.         
+.         matrix B = J(4,1,.)
+
+.         forvalues i = 1/4 {
+  2.                           matrix B[`i',1] = beta_S[`i',1]/w[`i',1]
+  3.         }
+
+.     matrix list B
+
+B[4,1]
+            c1
+r1  -.25958005
+r2   .16966332
+r3  -.10085029
+r4   2.7166418
+
+.         
+.         matrix C = J(1,4,.)
+
+.         forvalues j = 1/4 {
+  2.                           matrix C[1,`j'] = w[`j',1]*lnP[`j',1]
+  3.         }       
+
+.         matrix list C
+
+C[1,4]
+            c1          c2          c3          c4
+r1   .42329432   .15672922  -.04096808  -.00481718
+
+.   
+.   * Calculating compensated (Hicksian) price elasticities:
+.     matrix E_AIDS_S = inv(B*C+delta)*(A+delta)-delta // Equation 11 in Green & Alston (1990)
+
+.         matrix rownames E_AIDS_S = beef, pork, chick, turkey
+
+.         matrix colnames E_AIDS_S = beef, pork, chick, turkey    
+
+.         matrix list E_AIDS_S
+
+E_AIDS_S[4,4]
+             beef,       pork,      chick,      turkey
+ beef,  -.84084935  -.00691998  -.03730434   .15714972
+ pork,  -.08186422  -.85140001  -.13261929  -.22666218
+chick,  -.10885475   -.1089758  -.30872634   .01262982
+turkey  -1.2084779  -.60549866  -1.0166303  -1.0580514
+
+.         
+.   * Calculating expenditure (income) elasticities:
+.     matrix One = J(4,1,1)
+
+.         matrix IncE_AIDS_S = inv(delta+B*C)*B + One
+
+.         matrix rownames IncE_AIDS_S = beef, pork, chick, turkey
+
+.         matrix colnames IncE_AIDS_S = IncomeElasticities        
+
+.         matrix list IncE_AIDS_S
+
+IncE_AIDS_S[4,1]
+        IncomeElas~s
+ beef,     .71404252
+ pork,     1.1869038
+chick,     .88890173
+turkey     3.9926954
+
+.         
+.   * Calculating uncompenstated (Marshallian) price elasticities:
+.         matrix E_AIDS_MS = J(4,4,.)
+
+.         forvalues i = 1/4 {
+  2.                   forvalues j = 1/4 {
+  3.                                     matrix E_AIDS_MS[`i',`j'] = E_AIDS_S[`i',`j'] + /// 
+>                                                 (1 + beta_S[`i',1]*w[`j',1]) * w[`j',1]
+  4.                 }
+  5.         }
+
+.         matrix rownames E_AIDS_MS = beef, pork, chick, turkey
+
+.         matrix colnames E_AIDS_MS = beef, pork, chick, turkey   
+
+.     matrix list E_AIDS_MS
+
+E_AIDS_MS[4,4]
+             beef,       pork,      chick,      turkey
+ beef,  -.34496438   .26695713   .10034859   .19554162
+ pork,   .46784438  -.56227509   .00872886  -.18799096
+chick,   .42289718   .17506213  -.16861098   .05120785
+turkey  -.64255567  -.31178056    -.874169   -1.019296
+
+.         
+.   * OLS-Seasonality
+.     reg lnqb lnpb lnpp lnpc lnpt t cos sin
+
+      Source |       SS       df       MS              Number of obs =      99
+-------------+------------------------------           F(  7,    91) =  216.88
+       Model |   1.1268671     7  .160981014           Prob > F      =  0.0000
+    Residual |  .067545409    91  .000742257           R-squared     =  0.9434
+-------------+------------------------------           Adj R-squared =  0.9391
+       Total |  1.19441251    98  .012187883           Root MSE      =  .02724
+
+------------------------------------------------------------------------------
+        lnqb |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+        lnpb |  -.5473536    .043788   -12.50   0.000    -.6343331   -.4603742
+        lnpp |   .1186361   .0409163     2.90   0.005     .0373609    .1999112
+        lnpc |   .0696728   .0487214     1.43   0.156    -.0271063    .1664519
+        lnpt |   .2908577   .0652906     4.45   0.000     .1611661    .4205494
+           t |  -.0025758   .0005748    -4.48   0.000    -.0037175    -.001434
+         cos |  -.0126336   .0039268    -3.22   0.002    -.0204337   -.0048334
+         sin |  -.0195843   .0039177    -5.00   0.000    -.0273662   -.0118023
+       _cons |   3.478053   .0635254    54.75   0.000     3.351868    3.604239
+------------------------------------------------------------------------------
+
+.     matrix E_OLS_S_b=e(b)
+
+.     reg lnqp lnpb lnpp lnpc lnpt t cos sin
+
+      Source |       SS       df       MS              Number of obs =      99
+-------------+------------------------------           F(  7,    91) =   51.67
+       Model |  .480672051     7  .068667436           Prob > F      =  0.0000
+    Residual |  .120937254    91  .001328981           R-squared     =  0.7990
+-------------+------------------------------           Adj R-squared =  0.7835
+       Total |  .601609305    98   .00613887           Root MSE      =  .03646
+
+------------------------------------------------------------------------------
+        lnqp |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+        lnpb |   .3907005   .0585918     6.67   0.000      .274315     .507086
+        lnpp |  -.6303108   .0547493   -11.51   0.000    -.7390635   -.5215581
+        lnpc |   .0836968   .0651931     1.28   0.202    -.0458014    .2131949
+        lnpt |  -.0233071    .087364    -0.27   0.790    -.1968449    .1502308
+           t |   -.000284   .0007691    -0.37   0.713    -.0018118    .0012437
+         cos |   .0506056   .0052544     9.63   0.000     .0401685    .0610428
+         sin |   .0066103   .0052422     1.26   0.211    -.0038026    .0170232
+       _cons |   2.611632   .0850021    30.72   0.000     2.442786    2.780478
+------------------------------------------------------------------------------
+
+.     matrix E_OLS_S_p=e(b)  
+
+.     reg lnqc lnpb lnpp lnpc lnpt t cos sin
+
+      Source |       SS       df       MS              Number of obs =      99
+-------------+------------------------------           F(  7,    91) =  710.18
+       Model |  3.74359781     7  .534799687           Prob > F      =  0.0000
+    Residual |  .068527293    91  .000753047           R-squared     =  0.9820
+-------------+------------------------------           Adj R-squared =  0.9806
+       Total |   3.8121251    98  .038899236           Root MSE      =  .02744
+
+------------------------------------------------------------------------------
+        lnqc |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+        lnpb |   .2465664   .0441051     5.59   0.000     .1589571    .3341758
+        lnpp |    .018552   .0412126     0.45   0.654    -.0633118    .1004157
+        lnpc |  -.1616591   .0490742    -3.29   0.001    -.2591391   -.0641792
+        lnpt |   .1007573   .0657634     1.53   0.129    -.0298736    .2313882
+           t |   .0080183   .0005789    13.85   0.000     .0068683    .0091683
+         cos |  -.0316033   .0039552    -7.99   0.000    -.0394599   -.0237467
+         sin |  -.0155651    .003946    -3.94   0.000    -.0234034   -.0077268
+       _cons |   2.011596   .0639855    31.44   0.000     1.884497    2.138696
+------------------------------------------------------------------------------
+
+.     matrix E_OLS_S_c=e(b)  
+
+.     reg lnqt lnpb lnpp lnpc lnpt t cos sin
+
+      Source |       SS       df       MS              Number of obs =      99
+-------------+------------------------------           F(  7,    91) =   62.19
+       Model |  16.3542211     7   2.3363173           Prob > F      =  0.0000
+    Residual |  3.41839116    91  .037564738           R-squared     =  0.8271
+-------------+------------------------------           Adj R-squared =  0.8138
+       Total |  19.7726123    98   .20176135           Root MSE      =  .19382
+
+------------------------------------------------------------------------------
+        lnqt |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+        lnpb |   .3847309   .3115071     1.24   0.220    -.2340396    1.003501
+        lnpp |   .1342925   .2910778     0.46   0.646    -.4438978    .7124827
+        lnpc |   -.465195   .3466033    -1.34   0.183     -1.15368    .2232899
+        lnpt |  -.7471316   .4644761    -1.61   0.111    -1.669756    .1754931
+           t |   .0041865    .004089     1.02   0.309    -.0039358    .0123088
+         cos |   .3280717   .0279352    11.74   0.000     .2725818    .3835617
+         sin |  -.1474827   .0278703    -5.29   0.000    -.2028436   -.0921218
+       _cons |   .3335106   .4519188     0.74   0.462    -.5641705    1.231192
+------------------------------------------------------------------------------
+
+.     matrix E_OLS_S_t=e(b) 
+
+.     matrix E_OLS_S = [E_OLS_S_b\ E_OLS_S_p\ E_OLS_S_c\ E_OLS_S_t]
+
+.     matrix E_OLS_S = E_OLS_S[1..4,1..4]
+
+.     matrix rownames E_OLS_S = beef, pork, chick, turkey
+
+.     matrix colnames E_OLS_S = beef, pork, chick, turkey 
+
+.     matrix list E_OLS_S
+
+E_OLS_S[4,4]
+             beef,       pork,      chick,      turkey
+ beef,  -.54735363   .11863609   .06967281   .29085774
+ pork,   .39070047  -.63031079   .08369679  -.02330708
+chick,   .24656644   .01855198   -.1616591   .10075727
+turkey   .38473091   .13429246  -.46519498  -.74713162
+
+.   
+.   * Rotterdam-Seasonality
+.     nlsur (Dep_beef  = {bb}*(D.lnX-w_bar_b*D.lnnpb-w_bar_p*D.lnnpp-w_bar_c*D.lnnpc-w_bar_t*D.
+> lnnpt+{btrend}*t+{bcos}*cos+{bsin}*sin) ///
+>                      + {cbb}*D.lnnpb+{cbp}*D.lnnpp+{cbc}*D.lnnpc+{cbt}*D.lnnpt) ///
+>           (Dep_pork  = {bp}*(D.lnX-w_bar_b*D.lnnpb-w_bar_p*D.lnnpp-w_bar_c*D.lnnpc-w_bar_t*D.
+> lnnpt+{ptrend}*t+{pcos}*cos+{psin}*si) ///
+>                      + {cpb}*D.lnnpb+{cpp}*D.lnnpp+{cpc}*D.lnnpc+{cpt}*D.lnnpt) ///
+>           (Dep_chick = {bc}*(D.lnX-w_bar_b*D.lnnpb-w_bar_p*D.lnnpp-w_bar_c*D.lnnpc-w_bar_t*D.
+> lnnpt+{ctrend}*t+{ccos}*cos+{csin}*si) ///
+>                      + {ccb}*D.lnnpb+{ccp}*D.lnnpp+{ccc}*D.lnnpc+{cct}*D.lnnpt), ///
+>         ifgnls  
+(obs = 98)
+
+Calculating NLS estimates...
+Iteration 0:  Residual SS =  .0469214
+Iteration 1:  Residual SS =   .033829
+Iteration 2:  Residual SS =  .0190521
+Iteration 3:  Residual SS =  .0190521
+Iteration 4:  Residual SS =  .0190521
+Calculating FGNLS estimates...
+Iteration 0:  Scaled RSS =       294
+FGNLS iteration 2...
+Iteration 0:  Scaled RSS =       294
+Parameter change         =  1.454e-09
+Covariance matrix change =  2.033e-20
+
+FGNLS regression 
+---------------------------------------------------------------------
+       Equation |       Obs  Parms       RMSE      R-sq     Constant
+----------------+----------------------------------------------------
+ 1     Dep_beef |        98      8   .0113838    0.7166*      (none)
+ 2     Dep_pork |        98      8   .0073365    0.8485*      (none)
+ 3    Dep_chick |        98      8   .0033161    0.7079*      (none)
+---------------------------------------------------------------------
+* Uncentered R-sq
+
+------------------------------------------------------------------------------
+             |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+         /bb |   .2891651   .0494169     5.85   0.000     .1923098    .3860203
+     /btrend |   .0000812   .0000693     1.17   0.241    -.0000547    .0002172
+       /bcos |   -.058978   .0117632    -5.01   0.000    -.0820334   -.0359227
+       /bsin |   .0280966   .0064884     4.33   0.000     .0153796    .0408136
+        /cbb |  -.3075913   .0426869    -7.21   0.000    -.3912561   -.2239265
+        /cbp |   .1751312   .0342675     5.11   0.000      .107968    .2422943
+        /cbc |   .0442379   .0313548     1.41   0.158    -.0172165    .1056923
+        /cbt |   .1516239   .0345876     4.38   0.000     .0838335    .2194143
+         /bp |   .2344897   .0318476     7.36   0.000     .1720696    .2969098
+     /ptrend |   .0001733   .0000562     3.08   0.002     .0000632    .0002835
+       /pcos |    .065864   .0101282     6.50   0.000     .0460132    .0857148
+       /psin |  -.0328669   .0106423    -3.09   0.002    -.0537254   -.0120083
+        /cpb |   .2020499   .0275103     7.34   0.000     .1481306    .2559692
+        /cpp |  -.1964589   .0220843    -8.90   0.000    -.2397433   -.1531744
+        /cpc |   -.021998   .0202072    -1.09   0.276    -.0616034    .0176074
+        /cpt |  -.0511542   .0222906    -2.29   0.022     -.094843   -.0074655
+         /bc |   .0176666    .014395     1.23   0.220     -.010547    .0458802
+     /ctrend |   .0009193   .0007512     1.22   0.221    -.0005531    .0023917
+       /ccos |  -.3767199   .3084157    -1.22   0.222    -.9812037    .2277638
+       /csin |   .1796737   .1207895     1.49   0.137    -.0570693    .4164167
+        /ccb |   .0134574   .0124346     1.08   0.279    -.0109139    .0378287
+        /ccp |   .0129703    .009982     1.30   0.194    -.0065941    .0325347
+        /ccc |  -.0190142   .0091336    -2.08   0.037    -.0369157   -.0011128
+        /cct |   .0073992   .0100752     0.73   0.463     -.012348    .0271463
+------------------------------------------------------------------------------
+
+.                 
+.     * Calculate parameters of the fourth equation
+.           lincom 1 - _b[/bb]  - _b[/bp]  - _b[/bc]        //bt HOD0  
+
+ ( 1)  - [bb]_cons - [bp]_cons - [bc]_cons = -1
+
+------------------------------------------------------------------------------
+             |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+         (1) |   .4586787   .0468473     9.79   0.000     .3668597    .5504976
+------------------------------------------------------------------------------
+
+.           lincom 0 - _b[/cbb] - _b[/cpb] - _b[/ccb]       //ctb
+
+ ( 1)  - [cbb]_cons - [cpb]_cons - [ccb]_cons = 0
+
+------------------------------------------------------------------------------
+             |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+         (1) |    .092084   .0404673     2.28   0.023     .0127696    .1713983
+------------------------------------------------------------------------------
+
+.       lincom 0 - _b[/cbp] - _b[/cpp] - _b[/ccp]       //ctp
+
+ ( 1)  - [cbp]_cons - [cpp]_cons - [ccp]_cons = 0
+
+------------------------------------------------------------------------------
+             |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+         (1) |   .0083574   .0324857     0.26   0.797    -.0553134    .0720281
+------------------------------------------------------------------------------
+
+.       lincom 0 - _b[/cbc] - _b[/cpc] - _b[/ccc]       //ctc
+
+ ( 1)  - [cbc]_cons - [cpc]_cons - [ccc]_cons = 0
+
+------------------------------------------------------------------------------
+             |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+         (1) |  -.0032257   .0297244    -0.11   0.914    -.0614845    .0550332
+------------------------------------------------------------------------------
+
+.           lincom _b[/cbb]+_b[/cbp]+_b[/cbc]+_b[/cpb]+_b[/cpp]+_b[/cpc]+_b[/ccb]+_b[/ccp]+_b[/
+> ccc]    //ctt
+
+ ( 1)  [cbb]_cons + [cbp]_cons + [cbc]_cons + [cpb]_cons + [cpp]_cons + [cpc]_cons + [ccb]_cons
+       + [ccp]_cons + [ccc]_cons = 0
+
+------------------------------------------------------------------------------
+             |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+         (1) |  -.0972157   .0430126    -2.26   0.024    -.1815189   -.0129124
+------------------------------------------------------------------------------
+
+.         
+.     * Test symmetry restrictions
+.       test _b[/cbp]=_b[/cpb]
+
+ ( 1)  [cbp]_cons - [cpb]_cons = 0
+
+           chi2(  1) =    0.43
+         Prob > chi2 =    0.5140
+
+.       test _b[/cbc]=_b[/ccb]
+
+ ( 1)  [cbc]_cons - [ccb]_cons = 0
+
+           chi2(  1) =    0.83
+         Prob > chi2 =    0.3626
+
+.       test _b[/cpc]=_b[/ccp]    
+
+ ( 1)  [cpc]_cons - [ccp]_cons = 0
+
+           chi2(  1) =    2.36
+         Prob > chi2 =    0.1248
+
+.           test _b[/cbt]=0 - _b[/cbb] - _b[/cpb] - _b[/ccb] // cbt=ctb
+
+ ( 1)  [cbb]_cons + [cbt]_cons + [cpb]_cons + [ccb]_cons = 0
+
+           chi2(  1) =    1.22
+         Prob > chi2 =    0.2697
+
+.           test _b[/cpt]=0 - _b[/cbp] - _b[/cpp] - _b[/ccp] // cpt=ctp
+
+ ( 1)  [cbp]_cons + [cpp]_cons + [cpt]_cons + [ccp]_cons = 0
+
+           chi2(  1) =    2.32
+         Prob > chi2 =    0.1280
+
+.           test _b[/cct]=0 - _b[/cbc] - _b[/cpc] - _b[/ccc] // cct=ctc   
+
+ ( 1)  [cbc]_cons + [cpc]_cons + [ccc]_cons + [cct]_cons = 0
+
+           chi2(  1) =    0.12
+         Prob > chi2 =    0.7306
+
+.         
+.       scalar bt = 1 - _b[/bb]  - _b[/bp]  - _b[/bc]
+
+.       scalar ctb = 0 - _b[/cbb] - _b[/cpb] - _b[/ccb]
+
+.       scalar ctp = 0 - _b[/cbp] - _b[/cpp] - _b[/ccp]
+
+.       scalar ctc = 0 - _b[/cbc] - _b[/cpc] - _b[/ccc] 
+
+.       scalar ctt = _b[/cbb]+_b[/cbp]+_b[/cbc]+_b[/cpb]+_b[/cpp]+_b[/cpc]+_b[/ccb]+_b[/ccp]+_b
+> [/ccc]
+
+.   
+.   
+.     * Calculating income/expenditure elasticities
+.       matrix b_S = [_b[/bb]\ _b[/bp]\ _b[/bc]\ bt] 
+
+.       matrix list b_S
+
+b_S[4,1]
+           c1
+r1  .28916506
+r2  .23448967
+r3  .01766659
+r4  .45867867
+
+.       matrix IncE_Rdam_S = J(4,1,.)
+
+.       forvalues i = 1/4 {
+  2.                         matrix IncE_Rdam_S[`i',1] = b_S[`i',1] / w[`i',1]
+  3.       }
+
+.       matrix rownames IncE_Rdam_S = beef, pork, chick, turkey 
+
+.       matrix colnames IncE_Rdam_S = IncomeElasticityRotterdam
+
+.       matrix list IncE_Rdam_S
+
+IncE_Rdam_S[4,1]
+        IncomeElas~m
+ beef,     .53967138
+ pork,     .82222404
+chick,     .12583542
+turkey     11.883135
+
+.   
+.     * Calculating uncompensated/Marshallian elasticities
+.     matrix c_S = [_b[/cbb], _b[/cbp], _b[/cbc], _b[/cbt]\ ///
+>                   _b[/cpb], _b[/cpp], _b[/cpc], _b[/cpt]\ ///
+>                           _b[/ccb], _b[/ccp], _b[/ccc], _b[/cct]\ ///
+>                                   ctb,      ctp,      ctc,      ctt]
+
+.       matrix E_Rdam_MS = J(4,4,.)
+
+.       forvalues i = 1/4 {
+  2.                   forvalues j = 1/4 {
+  3.                                     matrix E_Rdam_MS[`i',`j'] = c_S[`i',`j']/w[`i',1] 
+  4.                 }
+  5.       }
+
+.       matrix rownames E_Rdam_MS = beef, pork, chick, turkey
+
+.       matrix colnames E_Rdam_MS = beef, pork, chick, turkey  
+
+.       matrix list E_Rdam_MS     
+
+E_Rdam_MS[4,4]
+             beef,       pork,      chick,      turkey
+ beef,  -.57406041   .32684887   .08256156   .28297712
+ pork,   .70847602  -.68887131  -.07713468  -.17936929
+chick,    .0958542   .09238501   -.1354343   .05270269
+turkey   2.3856485   .21651727  -.08356823  -2.5185976
+
+.         
+. * Comparing OLS, AIDS and Rotterdam Elasticities:  
+.   dis "The OLS Price Elasticities (Without Seasonality) are:"
+The OLS Price Elasticities (Without Seasonality) are:
+
+.   matrix list E_OLS 
+
+E_OLS[4,4]
+             beef,       pork,      chick,      turkey
+ beef,  -.45056785   .13361123   .03447218   .53006756
+ pork,   .36763003  -.57015437   .03274977   .01827463
+chick,  -.03149053   -.0948244    .0265026  -.66826652
+turkey  -.05376055   .50268705  -.63485049  -1.0590066
+
+.   dis "The Rotterdam Elasticities (Marshallian & Without Seasonality) are:"
+The Rotterdam Elasticities (Marshallian & Without Seasonality) are:
+
+.   matrix list E_Rdam_Mar 
+
+E_Rdam_Mar[4,4]
+             beef,       pork,      chick,      turkey
+ beef,  -.40285676    .1535185    .1195498   .36700822
+ pork,   .41560807  -.36702997  -.13267876  -.32126286
+chick,   .35046999  -.16092618  -.07917492    .1772059
+turkey   1.2468253   1.1660477  -.39126519  -2.0216079
+
+.   dis "The AIDS Elasticities (Marshallian & Without Seasonality) are:"
+The AIDS Elasticities (Marshallian & Without Seasonality) are:
+
+.   matrix list E_AIDS_Mar
+
+E_AIDS_Mar[4,4]
+             beef,       pork,      chick,      turkey
+ beef,  -.14124201   .33861926   .14283576   .49187522
+ pork,   .40529403  -.56746074  -.05963202  -.19275188
+chick,   .21991402    .0944785   .09815852  -.76142932
+turkey   -2.773429   -1.117739  -1.9637357  -2.9149886
+
+.   dis "The OLS Price Elasticities (With Seasonality) are:"
+The OLS Price Elasticities (With Seasonality) are:
+
+.   matrix list E_OLS_S 
+
+E_OLS_S[4,4]
+             beef,       pork,      chick,      turkey
+ beef,  -.54735363   .11863609   .06967281   .29085774
+ pork,   .39070047  -.63031079   .08369679  -.02330708
+chick,   .24656644   .01855198   -.1616591   .10075727
+turkey   .38473091   .13429246  -.46519498  -.74713162
+
+.   dis "The Rotterdam Elasticities (Marshallian & With Seasonality) are:"
+The Rotterdam Elasticities (Marshallian & With Seasonality) are:
+
+.   matrix list E_Rdam_MS 
+
+E_Rdam_MS[4,4]
+             beef,       pork,      chick,      turkey
+ beef,  -.57406041   .32684887   .08256156   .28297712
+ pork,   .70847602  -.68887131  -.07713468  -.17936929
+chick,    .0958542   .09238501   -.1354343   .05270269
+turkey   2.3856485   .21651727  -.08356823  -2.5185976
+
+.   dis "The AIDS Elasticities (Marshallian & With Seasonality) are:"
+The AIDS Elasticities (Marshallian & With Seasonality) are:
+
+.   matrix list E_AIDS_MS
+
+E_AIDS_MS[4,4]
+             beef,       pork,      chick,      turkey
+ beef,  -.34496438   .26695713   .10034859   .19554162
+ pork,   .46784438  -.56227509   .00872886  -.18799096
+chick,   .42289718   .17506213  -.16861098   .05120785
+turkey  -.64255567  -.31178056    -.874169   -1.019296
+
+. 
+end of do-file
+
